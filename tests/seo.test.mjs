@@ -67,6 +67,7 @@ const HEROES = [
   "/sounds/binaural-beats",
   "/pomodoro/25-5",
   "/timer",
+  "/sounds-for/coding",
 ];
 
 test("every hero page is in the sitemap and llms.txt", () => {
