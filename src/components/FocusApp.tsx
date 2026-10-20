@@ -3,6 +3,7 @@
 import { Check, Disc3,Download, Expand, Info, LibraryBig, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
+import type { PageIntent } from "@/lib/pages";
 import { startPwa, useInstallPrompt } from "@/lib/pwa";
 import { actions, matchPreset, mixName, shareUrl, useFocus, type Tab } from "@/lib/store";
 import { AboutSheet } from "./AboutSheet";
@@ -48,11 +49,13 @@ interface FocusAppProps {
   /** The page's H1 and one-line intro, shown above the player. */
   heading: string;
   intro: string;
+  /** What a landing page loads on arrival (mix, tab, timer lengths). */
+  intent?: PageIntent;
   /** Page copy rendered below the active view, inside the scroll area. */
   children?: ReactNode;
 }
 
-export function FocusApp({ heading, intro, children }: FocusAppProps) {
+export function FocusApp({ heading, intro, intent, children }: FocusAppProps) {
   const tab = useFocus((s) => s.tab);
   const [focusOpen, setFocusOpen] = useState(false);
   const [fullscreenRequest, setFullscreenRequest] = useState(0);
@@ -64,9 +67,9 @@ export function FocusApp({ heading, intro, children }: FocusAppProps) {
   const { canPrompt } = useInstallPrompt();
 
   useEffect(() => {
-    actions.hydrate();
+    actions.hydrate(intent);
     startPwa();
-  }, []);
+  }, [intent]);
 
   useEffect(() => {
     if (!notice) return;

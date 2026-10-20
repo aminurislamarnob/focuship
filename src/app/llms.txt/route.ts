@@ -1,3 +1,4 @@
+import { liveHubs, pagePath, pagesInHub, isIndexable } from "@/lib/pages";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -19,6 +20,18 @@ ${SITE_NAME} is a free web app (installable as a PWA) that mixes ambient sounds 
 ## App
 
 - [${SITE_NAME}](${absoluteUrl("/")}): the sound mixer and focus timer
+${liveHubs()
+  .map(
+    (hub) => `
+## ${hub.label}
+
+- [${hub.title}](${absoluteUrl(hub.path)}): ${hub.intro}
+${pagesInHub(hub.id)
+  .filter(isIndexable)
+  .map((page) => `- [${page.heading}](${absoluteUrl(pagePath(page))}): ${page.description}`)
+  .join("\n")}`,
+  )
+  .join("\n")}
 `;
   return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }

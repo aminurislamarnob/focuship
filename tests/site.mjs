@@ -14,7 +14,7 @@ const TEXT = /\.(html|txt|js|json|webmanifest|xml|css|md)$/;
 function walk(dir) {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) return entry.name === "sounds" ? [] : walk(path);
+    if (entry.isDirectory()) return walk(path);
     return [path];
   });
 }

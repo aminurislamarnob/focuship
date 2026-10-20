@@ -9,6 +9,7 @@ import {
   type Layers,
   type Preset,
 } from "@/lib/catalog";
+import type { PageIntent } from "@/lib/pages";
 
 export type TimerMode = "focus" | "short" | "long";
 
@@ -266,12 +267,19 @@ function setTimer(patch: Partial<TimerState>) {
 export const timerRemaining = (timer: TimerState, now: number) =>
   timer.status === "running" && timer.endsAt ? Math.max(0, timer.endsAt - now) : timer.remaining;
 
+function readyNotice(label: string | undefined, layers: Layers, timerOnly = false) {
+  if (!label) return null;
+  if (timerOnly) return `${label} is set. Press start when you’re ready.`;
+  return Object.keys(layers).length ? `${label} is ready. Tap play to listen.` : null;
+}
+
 // Actions --------------------------------------------------------------------
 
 const haptic = () => navigator.vibrate?.(8);
 
 export const actions = {
-  hydrate() {
+  /** Restores saved state. URL params win, then the landing page's intent, then saved state. */
+  hydrate(intent?: PageIntent) {
     if (state.hydrated) return;
     let saved: Partial<FocusState> = {};
     try {
@@ -282,10 +290,11 @@ export const actions = {
     const shared = url.searchParams.get("mix");
     const preset = PRESETS.find((p) => p.id === url.searchParams.get("preset"));
     const wantedTab = url.searchParams.get("tab");
-    const tab: Tab = wantedTab === "sounds" || wantedTab === "timer" ? wantedTab : "mix";
+    const tab: Tab = wantedTab === "sounds" || wantedTab === "timer" ? wantedTab : (intent?.tab ?? "mix");
     let layers: Layers = saved.layers ?? {};
     if (shared) layers = decodeMix(shared);
     else if (preset) layers = { ...preset.layers };
+    else if (intent?.layers) layers = { ...intent.layers };
     if (url.search) {
       ["mix", "preset", "tab", "source"].forEach((key) => url.searchParams.delete(key));
       history.replaceState(history.state, "", url);
@@ -298,6 +307,11 @@ export const actions = {
     if (timer.status === "running" && timer.endsAt && timer.endsAt <= Date.now()) {
       timer = { ...timer, status: "idle", endsAt: null, remaining: minutes(timer.settings, timer.mode) };
     }
+    // A timer page sets its lengths, but never interrupts a session that's already running.
+    if (intent?.timer && timer.status !== "running") {
+      const settings = { ...timer.settings, ...intent.timer };
+      timer = { ...timer, settings, mode: "focus", status: "idle", endsAt: null, remaining: minutes(settings, "focus") };
+    }
 
     state = {
       ...state,
@@ -308,9 +322,9 @@ export const actions = {
       hydrated: true,
       tab,
       notice:
-        (shared || preset) && Object.keys(layers).length
-          ? `${shared ? "Shared mix" : preset!.label} is ready. Tap play to listen.`
-          : null,
+        shared || preset
+          ? readyNotice(shared ? "Shared mix" : preset!.label, layers)
+          : readyNotice(intent?.label, layers, Boolean(intent?.timer && !intent.layers)),
     };
     set({}, false);
     watchTimer();

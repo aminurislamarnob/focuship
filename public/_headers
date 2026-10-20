@@ -12,8 +12,8 @@
 /icons/*
   Cache-Control: public, max-age=86400
 
-# Audio lives one level down (/sounds/<category>/<id>.mp3); /sounds/<slug> pages are HTML.
-/sounds/:category/:file
+# Only the audio is immutable; /sounds/<slug> pages and their images share the prefix.
+/sounds/*.mp3
   Cache-Control: public, max-age=31536000, immutable
 
 # Generated Open Graph images are exported without a file extension.
