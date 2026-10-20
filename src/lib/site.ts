@@ -13,4 +13,10 @@ export const AUTHOR = { name: "Md. Aminur Islam", url: "https://github.com/aminu
 // The repo is renamed from let-me-focus to focuship before the first focuship.app deploy.
 export const REPO_URL = "https://github.com/aminurislamarnob/focuship";
 
+/**
+ * Cloudflare Web Analytics site token (cookie-free). Create the site in the Cloudflare dashboard
+ * (Analytics & Logs → Web Analytics) and paste its token here; the beacon is omitted while empty.
+ */
+export const CF_ANALYTICS_TOKEN = "";
+
 export const absoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
