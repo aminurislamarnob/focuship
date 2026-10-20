@@ -9,7 +9,12 @@ const GROUPS = [
   },
   {
     heading: "Explore",
-    links: [...HUBS, GUIDES_HUB].map((hub) => ({ href: hub.path, label: hub.label, title: hub.title })),
+    // Sounds and Timers already have main tabs; Explore holds only the rest.
+    links: [...HUBS.filter((hub) => hub.id !== "sounds" && hub.id !== "timers"), GUIDES_HUB].map((hub) => ({
+      href: hub.path,
+      label: hub.label,
+      title: hub.title,
+    })),
   },
 ];
 
