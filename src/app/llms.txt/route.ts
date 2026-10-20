@@ -12,7 +12,7 @@ export function GET() {
 
 > ${SITE_DESCRIPTION}
 
-${SITE_NAME} is a free web app (installable as a PWA) that mixes ambient sounds with a focus timer. It runs entirely in the browser: no account, no tracking cookies, and it works offline once sounds have been played.
+${SITE_NAME} is a free web app (installable as a PWA) that mixes ambient sounds with a focus timer. It runs entirely in the browser: no account needed, no tracking cookies, and it works offline once sounds have been played. An optional account adds favorites, saved presets and settings sync.
 
 - ${SOUNDS.length} sounds: ${recordings} field recordings (rain, nature, animals, places, transport, household things, city) plus generated brown, pink and white noise, theta, alpha, beta and gamma binaural tones and a synthesised starship engine hum.
 - Every sound has its own volume; start from ${PRESETS.length} curated presets or shuffle.
