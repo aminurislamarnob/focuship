@@ -467,9 +467,11 @@ interface SheetProps {
   children: ReactNode;
 }
 
-/** A bottom sheet on phones that becomes a centred panel on wider screens. */
+/** A bottom sheet on phones (swipe its header down to dismiss) that becomes a centred panel on wider screens. */
 export function Sheet({ open, onClose, title, children }: SheetProps) {
   const panel = useRef<HTMLDivElement>(null);
+  const [dragY, setDragY] = useState(0);
+  const drag = useRef<{ y: number; t: number } | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -483,6 +485,25 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
     };
   }, [open, onClose]);
 
+  // Native-style swipe-to-dismiss: the sheet follows the finger from the header,
+  // closes past a distance or on a quick flick, and springs back otherwise.
+  const dragStart = (e: React.PointerEvent) => {
+    if (!matchMedia("(max-width: 767px)").matches) return;
+    drag.current = { y: e.clientY, t: e.timeStamp };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const dragMove = (e: React.PointerEvent) => {
+    if (drag.current) setDragY(Math.max(0, e.clientY - drag.current.y));
+  };
+  const dragEnd = (e: React.PointerEvent) => {
+    if (!drag.current) return;
+    const dy = Math.max(0, e.clientY - drag.current.y);
+    const flick = dy / Math.max(1, e.timeStamp - drag.current.t) > 0.5;
+    drag.current = null;
+    setDragY(0);
+    if (dy > 120 || (dy > 24 && flick)) onClose();
+  };
+
   return (
     <>
       <div hidden={!open} className="fade fixed inset-0 z-40 bg-black/60 backdrop-blur-[2px]" onClick={onClose} />
@@ -493,14 +514,26 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
+        style={dragY > 0 ? { translate: `0 ${dragY}px`, transition: "none" } : undefined}
         className="sheet fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[88dvh] w-full max-w-lg flex-col rounded-t-[10px] border border-b-0 border-line-strong bg-surface outline-none md:bottom-auto md:top-[12dvh] md:max-h-[76dvh] md:rounded-[8px] md:border-b"
       >
-        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-line-strong md:hidden" aria-hidden />
-        <div className="flex items-center justify-between px-4 pt-2 pb-1 md:pt-3">
-          <h2 className="label-mono">{title}</h2>
-          <IconButton label="Close" variant="ghost" size="sm" onClick={onClose}>
-            <X className="size-4" />
-          </IconButton>
+        <div
+          className="touch-none"
+          onPointerDown={dragStart}
+          onPointerMove={dragMove}
+          onPointerUp={dragEnd}
+          onPointerCancel={() => {
+            drag.current = null;
+            setDragY(0);
+          }}
+        >
+          <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-line-strong md:hidden" aria-hidden />
+          <div className="flex items-center justify-between px-4 pt-2 pb-1 md:pt-3">
+            <h2 className="label-mono">{title}</h2>
+            <IconButton label="Close" variant="ghost" size="sm" onClick={onClose}>
+              <X className="size-4" />
+            </IconButton>
+          </div>
         </div>
         <div className="no-scrollbar overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {children}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Disc3, Download, Expand, Info, LibraryBig, Menu, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
@@ -27,10 +28,10 @@ import {
   type ShareResult,
 } from "./ui";
 
-const TABS: { id: Tab; label: string; icon: typeof Disc3 }[] = [
-  { id: "mix", label: "Mix", icon: Disc3 },
-  { id: "sounds", label: "Sounds", icon: LibraryBig },
-  { id: "timer", label: "Timer", icon: Timer },
+const TABS: { id: Tab; label: string; icon: typeof Disc3; href: string }[] = [
+  { id: "mix", label: "Mix", icon: Disc3, href: "/" },
+  { id: "sounds", label: "Sounds", icon: LibraryBig, href: "/sounds" },
+  { id: "timer", label: "Timer", icon: Timer, href: "/timer" },
 ];
 
 interface FocusShellProps {
@@ -130,15 +131,22 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
     <div className="flex h-dvh overflow-hidden">
       <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-raised md:flex">
         <div className="flex h-16 items-center px-5">
-          <Logo />
+          <Link href="/" aria-label="Focuship home">
+            <Logo />
+          </Link>
         </div>
         <nav aria-label="Main" className="flex flex-col gap-1 px-3 pt-2">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button
+          {TABS.map(({ id, label, icon: Icon, href }) => (
+            <Link
               key={id}
-              type="button"
+              href={href}
               aria-current={tab === id ? "page" : undefined}
-              onClick={() => go(id)}
+              onClick={(e) => {
+                // A plain click switches the view in place; modified clicks open the real page.
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                e.preventDefault();
+                go(id);
+              }}
               className={cx(
                 "flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm transition-colors",
                 tab === id ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
@@ -147,7 +155,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
               <Icon className="size-4" aria-hidden />
               {label}
               {tab === id && <span className="ml-auto h-4 w-0.5 bg-brand" aria-hidden />}
-            </button>
+            </Link>
           ))}
         </nav>
         {nav && (
@@ -175,7 +183,9 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="pt-safe shrink-0 border-b border-line bg-bg md:hidden">
           <div className="flex h-14 items-center justify-between px-4">
-            <Logo />
+            <Link href="/" aria-label="Focuship home">
+              <Logo />
+            </Link>
             <div className="flex items-center gap-1">
               {canPrompt && (
                 <IconButton label="Install app" variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
@@ -196,17 +206,18 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
 
         <main ref={main} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="mx-auto w-full max-w-5xl px-4 max-md:pt-3 md:px-8 md:pt-6">
-            <header className="pb-3 max-md:hidden">
-              <h1 className="text-sm font-medium text-fg">{heading}</h1>
-              <p className="mt-0.5 text-sm text-muted">{intro}</p>
+            {/* Visually hidden, but kept for SEO and screen readers: every landing page's H1 lives here. */}
+            <header className="sr-only">
+              <h1>{heading}</h1>
+              <p>{intro}</p>
             </header>
-            <div hidden={tab !== "mix"}>
+            <div hidden={tab !== "mix"} className="view-in">
               <MixView onOpenFocus={() => setFocusOpen(true)} onShare={share} onBrowse={() => go("sounds")} />
             </div>
-            <div hidden={tab !== "sounds"}>
+            <div hidden={tab !== "sounds"} className="view-in">
               <SoundsView />
             </div>
-            <div hidden={tab !== "timer"}>
+            <div hidden={tab !== "timer"} className="view-in">
               <TimerView />
             </div>
             {children}

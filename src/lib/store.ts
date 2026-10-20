@@ -404,6 +404,7 @@ export const actions = {
   },
 
   setTab(tab: Tab) {
+    if (tab !== state.tab) haptic();
     set({ tab }, false);
   },
 

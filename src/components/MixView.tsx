@@ -173,7 +173,7 @@ export function MixView({ onOpenFocus, onShare, onBrowse }: MixViewProps) {
                 aria-pressed={on}
                 onClick={() => (on ? actions.toggle() : actions.applyPreset(preset.layers))}
                 className={cx(
-                  "group relative isolate flex min-h-28 cursor-pointer flex-col overflow-hidden rounded-[6px] border p-3 text-left transition-colors",
+                  "group relative isolate flex min-h-28 cursor-pointer flex-col overflow-hidden rounded-[6px] border p-3 text-left transition-all duration-200 active:scale-[0.98]",
                   on ? "border-brand bg-brand/10" : "border-line bg-raised hover:border-line-strong hover:bg-surface",
                 )}
               >
