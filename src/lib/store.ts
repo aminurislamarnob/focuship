@@ -282,8 +282,11 @@ export const actions = {
   hydrate(intent?: PageIntent) {
     if (state.hydrated) return;
     let saved: Partial<FocusState> = {};
+    let firstVisit = false;
     try {
-      saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+      const raw = localStorage.getItem(STORAGE_KEY);
+      firstVisit = raw === null;
+      saved = JSON.parse(raw ?? "{}");
     } catch {}
 
     const url = new URL(location.href);
@@ -295,6 +298,8 @@ export const actions = {
     if (shared) layers = decodeMix(shared);
     else if (preset) layers = { ...preset.layers };
     else if (intent?.layers) layers = { ...intent.layers };
+    // A first-time visitor on a page with nothing to load gets a random preset, not a blank mixer.
+    else if (firstVisit && !intent) layers = { ...PRESETS[Math.floor(Math.random() * PRESETS.length)].layers };
     if (url.search) {
       ["mix", "preset", "tab", "source"].forEach((key) => url.searchParams.delete(key));
       history.replaceState(history.state, "", url);
