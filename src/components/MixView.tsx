@@ -53,14 +53,14 @@ export function MixView({ onOpenFocus, onShare, onBrowse }: MixViewProps) {
             <SwapText className="text-faint" text={`· ${ids.length} sound${ids.length === 1 ? "" : "s"}`} />
           )}
         </p>
-        <h1
+        <h2
           className={cx(
             "mt-3 text-[2.5rem] leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl",
             active && "pr-20 sm:pr-24",
           )}
         >
           <SwapText text={name} />
-        </h1>
+        </h2>
         <p className="mt-3 max-w-md text-[0.9375rem] text-muted">
           <SwapText
             text={

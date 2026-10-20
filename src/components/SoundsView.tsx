@@ -6,6 +6,8 @@ import { CATEGORIES, SOUNDS, type Sound } from "@/lib/catalog";
 import { NEW_LAYER_VOLUME as DEFAULT_VOLUME, actions, useFocus } from "@/lib/store";
 import { CATEGORY_ICONS, Eq, Slider, SoundIcon, cx } from "./ui";
 
+const COUNTS = new Map(CATEGORIES.map((c) => [c.id, SOUNDS.filter((s) => s.category === c.id).length]));
+
 const matches = (sound: Sound, query: string) => {
   const haystack = `${sound.label} ${sound.note ?? ""} ${sound.category}`.toLowerCase();
   return query.split(/\s+/).every((word) => haystack.includes(word));
@@ -65,6 +67,7 @@ export function SoundsView() {
                 >
                   <Icon className="size-3.5" aria-hidden />
                   {c.label}
+                  <span className="text-faint">{COUNTS.get(c.id)}</span>
                 </button>
               );
             })}

@@ -47,7 +47,7 @@ export function AboutSheet({ open, onClose }: { open: boolean; onClose(): void }
   const allCached = cached === FILE_PATHS.length;
 
   return (
-    <Sheet open={open} onClose={onClose} title="About Let Me Focus">
+    <Sheet open={open} onClose={onClose} title="About Focuship">
       <div className="flex flex-col gap-6 pt-2 pb-2">
         <p className="text-sm text-muted">
           Layer recorded ambience, noise and binaural tones into a soundscape that helps you settle into work. Pair it with

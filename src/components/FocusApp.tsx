@@ -1,12 +1,14 @@
 "use client";
 
 import { Check, Disc3,Download, Expand, Info, LibraryBig, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
+import type { PageIntent } from "@/lib/pages";
 import { startPwa, useInstallPrompt } from "@/lib/pwa";
 import { actions, matchPreset, mixName, shareUrl, useFocus, type Tab } from "@/lib/store";
 import { AboutSheet } from "./AboutSheet";
 import { FocusMode } from "./FocusMode";
+import { Logo } from "./Logo";
 import { MixView } from "./MixView";
 import { SoundsView } from "./SoundsView";
 import { TimerView, formatClock, useTimerClock } from "./TimerView";
@@ -30,21 +32,17 @@ const TABS: { id: Tab; label: string; icon: typeof Disc3 }[] = [
   { id: "timer", label: "Timer", icon: Timer },
 ];
 
-function Logo() {
-  return (
-    <span className="flex items-center gap-2">
-      <svg viewBox="0 0 100 100" className="size-6" aria-hidden>
-        <path d="M22 36V22h14 M64 22h14v14 M78 64v14H64 M36 78H22V64" fill="none" stroke="var(--brand)" strokeWidth="8" />
-        <rect x="35" y="44" width="7" height="22" fill="var(--fg)" />
-        <rect x="46.5" y="34" width="7" height="32" fill="var(--fg)" />
-        <rect x="58" y="50" width="7" height="16" fill="var(--fg)" />
-      </svg>
-      <span className="font-mono text-[0.8125rem] font-semibold tracking-[0.18em] uppercase">Let me focus</span>
-    </span>
-  );
+interface FocusAppProps {
+  /** The page's H1 and one-line intro, shown above the player. */
+  heading: string;
+  intro: string;
+  /** What a landing page loads on arrival (mix, tab, timer lengths). */
+  intent?: PageIntent;
+  /** Page copy rendered below the active view, inside the scroll area. */
+  children?: ReactNode;
 }
 
-export function FocusApp() {
+export function FocusApp({ heading, intro, intent, children }: FocusAppProps) {
   const tab = useFocus((s) => s.tab);
   const [focusOpen, setFocusOpen] = useState(false);
   const [fullscreenRequest, setFullscreenRequest] = useState(0);
@@ -56,9 +54,9 @@ export function FocusApp() {
   const { canPrompt } = useInstallPrompt();
 
   useEffect(() => {
-    actions.hydrate();
+    actions.hydrate(intent);
     startPwa();
-  }, []);
+  }, [intent]);
 
   useEffect(() => {
     if (!notice) return;
@@ -179,6 +177,10 @@ export function FocusApp() {
 
         <main ref={main} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="mx-auto w-full max-w-5xl px-4 md:px-8 md:pt-6">
+            <header className="pt-4 pb-3 md:pt-0">
+              <h1 className="text-sm font-medium text-fg">{heading}</h1>
+              <p className="mt-0.5 text-sm text-muted">{intro}</p>
+            </header>
             <div hidden={tab !== "mix"}>
               <MixView onOpenFocus={() => setFocusOpen(true)} onShare={share} onBrowse={() => go("sounds")} />
             </div>
@@ -188,6 +190,7 @@ export function FocusApp() {
             <div hidden={tab !== "timer"}>
               <TimerView />
             </div>
+            {children}
           </div>
         </main>
 

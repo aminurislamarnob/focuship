@@ -1,5 +1,5 @@
 {
-  "name": "let-me-focus",
+  "name": "focuship",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,8 +7,10 @@
     "build": "next build",
     "start": "npx -y serve@14.2.4 out",
     "lint": "eslint",
+    "test": "next build && node --test 'tests/*.test.mjs'",
     "icons": "node scripts/generate-icons.mjs",
-    "deploy": "next build && wrangler deploy"
+    "deploy": "next build && wrangler deploy",
+    "deploy:redirect": "wrangler deploy --config workers/redirect/wrangler.jsonc"
   },
   "dependencies": {
     "lucide-react": "1.49.0",

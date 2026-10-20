@@ -1,9 +1,9 @@
-// Let Me Focus service worker. Bump VERSION to roll the app shell cache.
-const VERSION = "v3";
-const SHELL = `lmf-shell-${VERSION}`;
-const ASSETS = `lmf-assets-${VERSION}`;
+// Focuship service worker. Bump VERSION to roll the app shell cache.
+const VERSION = "v4";
+const SHELL = `focuship-shell-${VERSION}`;
+const ASSETS = `focuship-assets-${VERSION}`;
 // Sounds are large and versioned by path, so this cache survives app updates.
-const SOUNDS = "lmf-sounds-v1";
+const SOUNDS = "focuship-sounds-v1";
 
 const SHELL_URLS = [
   "/",
@@ -58,17 +58,20 @@ async function cacheFirst(request, cacheName) {
   return res;
 }
 
+// Each page is cached under its own path (query strings such as share links
+// map to the same page). Offline, a page falls back to its cached copy, then to "/".
 async function networkFirstPage(request) {
   const cache = await caches.open(SHELL);
+  const key = new URL(request.url).pathname;
   try {
     const res = await Promise.race([
       fetch(request),
       new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 4000)),
     ]);
-    if (res.ok) cache.put("/", res.clone());
+    if (res.ok) cache.put(key, res.clone());
     return res;
   } catch {
-    return (await cache.match("/")) || Response.error();
+    return (await cache.match(key)) || (await cache.match("/")) || Response.error();
   }
 }
 
@@ -92,7 +95,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.mode === "navigate") {
     event.respondWith(networkFirstPage(request));
-  } else if (url.pathname.startsWith("/sounds/")) {
+  } else if (url.pathname.startsWith("/sounds/") && url.pathname.endsWith(".mp3")) {
     if (request.headers.has("range")) return;
     event.respondWith(cacheFirst(request, SOUNDS));
   } else if (["/_next/static/", "/icons/"].some((p) => url.pathname.startsWith(p))) {

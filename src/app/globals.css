@@ -117,6 +117,56 @@ label {
   color: var(--muted);
 }
 
+/* Long-form copy below the player on landing pages and guides. */
+.page-copy h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+.page-copy h2:first-child {
+  margin-top: 0;
+}
+.page-copy h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.page-copy p,
+.page-copy ul,
+.page-copy ol,
+.page-copy dl {
+  margin-bottom: 1rem;
+}
+.page-copy ul {
+  list-style: square;
+  padding-left: 1.25rem;
+}
+.page-copy ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.page-copy li {
+  margin-bottom: 0.375rem;
+}
+.page-copy li::marker {
+  color: var(--brand);
+}
+.page-copy a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--line-strong);
+}
+.page-copy a:hover {
+  text-decoration-color: var(--brand);
+}
+.page-copy strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }
