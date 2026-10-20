@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { SITE_HOST } from "./site";
 
 const size = { width: 1200, height: 630 };
 
@@ -43,7 +44,7 @@ export function SocialImage({ eyebrow, title, detail }: SocialImageProps) {
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#6b6b6b" }}>
           <span>Free · No sign-up · Works offline</span>
-          <span style={{ color: "#ededed" }}>focuship.app</span>
+          <span style={{ color: "#ededed" }}>{SITE_HOST}</span>
         </div>
       </div>
     ),

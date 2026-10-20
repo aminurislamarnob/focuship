@@ -1,5 +1,12 @@
-/** The one canonical origin. Canonicals, the sitemap, robots, llms.txt and JSON-LD all derive from it. */
-export const SITE_URL = "https://focuship.app";
+/**
+ * The one canonical origin. Canonicals, the sitemap, robots, llms.txt and JSON-LD all derive from it.
+ * Overridable at build time (`NEXT_PUBLIC_SITE_URL`) for deploys served from another hostname while
+ * focuship.app isn't live; tests and the focuship.app deploy use the default.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://focuship.app").replace(/\/+$/, "");
+
+/** The canonical hostname, for places that show the address (social images). */
+export const SITE_HOST = new URL(SITE_URL).host;
 
 export const SITE_NAME = "Focuship";
 

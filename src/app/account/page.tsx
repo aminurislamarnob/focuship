@@ -3,7 +3,7 @@ import { AccountView } from "@/components/AccountView";
 import { JsonLd, organization } from "@/components/JsonLd";
 import { Logo } from "@/components/Logo";
 import { pageMetadata } from "@/lib/seo";
-import { absoluteUrl } from "@/lib/site";
+import { SITE_URL, absoluteUrl } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Account",
@@ -43,7 +43,7 @@ export default function AccountPage() {
       <JsonLd
         nodes={[
           organization(),
-          { "@type": "WebPage", name: "Account", url: absoluteUrl("/account"), isPartOf: { "@id": "https://focuship.app/#website" } },
+          { "@type": "WebPage", name: "Account", url: absoluteUrl("/account"), isPartOf: { "@id": `${SITE_URL}/#website` } },
         ]}
       />
     </div>
