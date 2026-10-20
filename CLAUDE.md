@@ -14,6 +14,7 @@ npm run lint       # eslint (includes react-hooks/set-state-in-effect)
 npm test           # next build, then node --test tests/*.test.mjs against out/
 npx tsc --noEmit   # typecheck
 npm run deploy     # next build && wrangler deploy → https://focuship.app
+npm run deploy:focus  # TEMPORARY until focuship.app is live: build with NEXT_PUBLIC_SITE_URL=https://focus.aminurislam.me, deploy to the let-me-focus Worker (wrangler.focus.jsonc)
 npm run deploy:redirect  # 301 Worker (workers/redirect) for focus.aminurislam.me, focusship.app, www hosts
 npm run icons      # regenerate app icons (public/icons, src/app/icon.png) from scripts/generate-icons.mjs
 ```

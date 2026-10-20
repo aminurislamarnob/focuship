@@ -10,6 +10,7 @@
     "test": "next build && node --test 'tests/*.test.mjs'",
     "icons": "node scripts/generate-icons.mjs",
     "deploy": "next build && wrangler deploy",
+    "deploy:focus": "NEXT_PUBLIC_SITE_URL=https://focus.aminurislam.me next build && wrangler deploy --config wrangler.focus.jsonc",
     "deploy:redirect": "wrangler deploy --config workers/redirect/wrangler.jsonc"
   },
   "dependencies": {
