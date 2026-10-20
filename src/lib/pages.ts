@@ -1,9 +1,13 @@
 import { CATEGORIES, SOUND_BY_ID, type Layers } from "./catalog";
 import type { Tab } from "./store";
 import { SOUND_PAGES } from "@/content/sounds";
+import { NATURE_SOUND_PAGES } from "@/content/sounds-nature";
+import { PLACE_SOUND_PAGES, STARSHIP_PAGE } from "@/content/sounds-places";
 import { GUIDES, guidePath } from "./guides";
 import { ACTIVITY_PAGES } from "@/content/activities";
+import { MORE_ACTIVITY_PAGES } from "@/content/activities-more";
 import { MIX_PAGES } from "@/content/mixes";
+import { PRESET_MIX_PAGES } from "@/content/mixes-presets";
 import { TIMER_HUB, TIMER_PAGES } from "@/content/timers";
 
 /**
@@ -150,7 +154,17 @@ export const isIndexable = (page: LandingPage) =>
   page.faq.length >= MIN_FAQ &&
   page.related.length >= MIN_RELATED;
 
-export const PAGES: LandingPage[] = [...SOUND_PAGES, ...TIMER_PAGES, ...MIX_PAGES, ...ACTIVITY_PAGES];
+export const PAGES: LandingPage[] = [
+  ...SOUND_PAGES,
+  ...NATURE_SOUND_PAGES,
+  ...PLACE_SOUND_PAGES,
+  STARSHIP_PAGE,
+  ...TIMER_PAGES,
+  ...MIX_PAGES,
+  ...PRESET_MIX_PAGES,
+  ...ACTIVITY_PAGES,
+  ...MORE_ACTIVITY_PAGES,
+];
 
 export const pagesOfType = (type: PageType) => PAGES.filter((page) => page.type === type);
 

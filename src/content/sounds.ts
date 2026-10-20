@@ -420,23 +420,4 @@ export const SOUND_PAGES: LandingPage[] = [
     ],
     related: ["/guides/do-binaural-beats-help-focus", "/sounds/brown-noise", "/timer/25-minutes", "/pomodoro/50-10", "/sounds"],
   },
-  {
-    type: "sound",
-    slug: "heavy-rain",
-    wave: 2,
-    title: "Heavy rain sounds for focus and sleep",
-    description:
-      "Play a steady heavy rain recording in your browser, free and without ads. Layer it with thunder, wind or brown noise and pair it with a focus timer.",
-    heading: "Heavy rain",
-    intro: "A downpour that drowns out the room. Tap play.",
-    intent: { label: "Heavy rain", layers: { "heavy-rain": 0.65 } },
-    copy: [
-      {
-        heading: "A steady downpour",
-        body: ["A dense, even rain that covers sudden noises. Add thunder for a storm, or brown noise for a deeper bed."],
-      },
-    ],
-    faq: [],
-    related: ["/sounds"],
-  },
 ];

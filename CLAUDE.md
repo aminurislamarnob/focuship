@@ -72,6 +72,7 @@ Goal: real traffic from traditional search and AI assistants. Decisions settled 
   - Hero pages get hand-written copy layered over the template: brown/white/pink noise, rain, thunderstorm, ocean waves, fireplace, coffee shop, binaural beats, pomodoro timer, focus timer, coding.
   - Gates: no pure cross-products; a page is generated only with real demand and unique value (own sound/mix/timer setting, specific copy, FAQ, related links). Pages that fail the gate get `noindex` and stay out of the sitemap.
   - Publish in waves: wave 1 = hero pages + timer pages (~27); later waves once Search Console shows indexing. Prune or merge zero-impression pages after 2–3 months.
+  - Status: wave 2 (37 pages: high-demand sounds, the presets as mixes, rain and fireplace, six activities) passes the gate and goes live by setting `RELEASED_WAVE = 2`. Wave 3 (33 lower-demand sounds) is built but still under the word gate — expand its copy before releasing it.
 
 - **Landing-page behaviour:** the real player first (H1 names the page, its mix preloaded — no autoplay), then the guide content below: what it is, why it helps, mixes to try, FAQ, related links. Each page is prerendered with its own title, description, canonical and JSON-LD (FAQPage + SoftwareApplication). Timer pages open on the timer. PWA `start_url` stays `/`.
 
