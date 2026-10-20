@@ -197,6 +197,82 @@ function createBinauralVoice(ctx: AudioContext, carrier: number, beat: number, o
   };
 }
 
+/**
+ * An original engine-room hum: detuned low tones breathing through a slowly
+ * swept low-pass filter, over band-passed rumble and a faint vent hiss. Every
+ * node runs continuously (the noise buffer loops seamlessly), so it never repeats.
+ */
+function createDroneVoice(ctx: AudioContext, output: GainNode): Voice {
+  const sources: AudioScheduledSourceNode[] = [];
+  const start = <T extends AudioScheduledSourceNode>(node: T) => {
+    node.start();
+    sources.push(node);
+    return node;
+  };
+  const lfo = (hz: number, depth: number, target: AudioParam) => {
+    const osc = ctx.createOscillator();
+    osc.frequency.value = hz;
+    const amount = ctx.createGain();
+    amount.gain.value = depth;
+    osc.connect(amount).connect(target);
+    start(osc);
+  };
+
+  const body = ctx.createGain();
+  body.connect(output);
+  lfo(0.11, 0.12, body.gain);
+
+  const tones = ctx.createBiquadFilter();
+  tones.type = "lowpass";
+  tones.frequency.value = 300;
+  tones.Q.value = 0.8;
+  tones.connect(body);
+  lfo(0.045, 140, tones.frequency);
+
+  const tone = (hz: number, type: OscillatorType, level: number, pan: number) => {
+    const osc = ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.value = hz;
+    const gain = ctx.createGain();
+    gain.gain.value = level;
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = pan;
+    osc.connect(gain).connect(panner).connect(tones);
+    start(osc);
+  };
+  tone(27.5, "sine", 0.22, 0);
+  tone(55, "sawtooth", 0.1, -0.45);
+  tone(55.37, "sawtooth", 0.1, 0.45);
+  tone(82.6, "triangle", 0.07, -0.2);
+  tone(110.3, "triangle", 0.035, 0.25);
+
+  const noise = (type: BiquadFilterType, hz: number, q: number, level: number) => {
+    const source = ctx.createBufferSource();
+    source.buffer = getNoiseBuffer(ctx, "brown");
+    source.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = type;
+    filter.frequency.value = hz;
+    filter.Q.value = q;
+    const gain = ctx.createGain();
+    gain.gain.value = level;
+    source.connect(filter).connect(gain).connect(body);
+    start(source);
+  };
+  noise("bandpass", 90, 0.9, 1.1);
+  noise("highpass", 2200, 0.5, 0.35);
+
+  return {
+    output,
+    pause() {},
+    resume() {},
+    dispose() {
+      sources.forEach((source) => source.stop());
+      output.disconnect();
+    },
+  };
+}
+
 export class AudioEngine {
   private ctx?: AudioContext;
   private master?: GainNode;
@@ -254,10 +330,13 @@ export class AudioEngine {
         },
       });
     } else {
+      const { source } = sound;
       entry.voice =
-        sound.source.type === "noise"
-          ? createNoiseVoice(ctx, sound.source.color, output)
-          : createBinauralVoice(ctx, sound.source.carrier, sound.source.beat, output);
+        source.type === "noise"
+          ? createNoiseVoice(ctx, source.color, output)
+          : source.type === "binaural"
+            ? createBinauralVoice(ctx, source.carrier, source.beat, output)
+            : createDroneVoice(ctx, output);
       ramp(output.gain, ctx, target, FADE_IN);
     }
     this.voices.set(id, entry);

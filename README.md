@@ -2,7 +2,7 @@
 
 A mobile-first ambient sound mixer and focus timer, built with Next.js and installable as a PWA.
 
-- **Mix:** layer up to 63 sounds (56 recordings plus generated noise and binaural tones), each with its own volume. Start from 10 presets or shuffle.
+- **Mix:** layer up to 64 sounds (56 recordings plus generated noise, binaural tones and a synthesised starship hum), each with its own volume. Start from 11 presets or shuffle.
 - **Timer:** focus and break sessions with a chime, optional auto-start and notifications.
 - **Focus mode:** full-screen clock or timer. Controls hide after 3 seconds and the screen stays awake.
 - **App-like:** installs to the Home Screen, works offline, keeps playing with the screen locked, and shows up in OS media controls. Mixes can be shared as links (`/?mix=light-rain:55,cafe:45`).

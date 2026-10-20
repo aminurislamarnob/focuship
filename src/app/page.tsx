@@ -1,6 +1,7 @@
 import { FocusApp } from "@/components/FocusApp";
 import { JsonLd, organization, webApplication, website } from "@/components/JsonLd";
 import { PageCopy } from "@/components/PageCopy";
+import { SOUNDS } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
@@ -16,8 +17,8 @@ export default function Page() {
       <PageCopy>
         <h2>What Focuship does</h2>
         <p>
-          Focuship layers up to 63 sounds into one soundscape: rain on a window, a busy café, a train at night, brown,
-          pink and white noise, and binaural tones. Each sound has its own volume, so you can keep the rain soft and the
+          Focuship layers up to {SOUNDS.length} sounds into one soundscape: rain on a window, a busy café, a train at
+          night, brown, pink and white noise, binaural tones and a deep starship hum. Each sound has its own volume, so you can keep the rain soft and the
           café murmur just loud enough to mask the room.
         </p>
         <p>

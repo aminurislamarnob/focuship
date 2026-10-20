@@ -11,7 +11,8 @@ export type CategoryId =
 export type SoundSource =
   | { type: "file"; path: string }
   | { type: "noise"; color: "white" | "pink" | "brown" }
-  | { type: "binaural"; carrier: number; beat: number };
+  | { type: "binaural"; carrier: number; beat: number }
+  | { type: "drone" };
 
 export interface Sound {
   id: string;
@@ -145,6 +146,14 @@ export const SOUNDS: Sound[] = [
     note: "Bright, masks voices",
   },
   {
+    id: "starship-hum",
+    label: "Starship hum",
+    category: "generated",
+    source: { type: "drone" },
+    gain: 0.6,
+    note: "Engine-room drone",
+  },
+  {
     id: "theta",
     label: "Theta 6 Hz",
     category: "generated",
@@ -251,6 +260,12 @@ export const PRESETS: Preset[] = [
     label: "Deep dive",
     blurb: "Submerged and far from everything",
     layers: { submarine: 0.45, underwater: 0.4, "brown-noise": 0.2 },
+  },
+  {
+    id: "deep-space",
+    label: "Deep space",
+    blurb: "The engine hum of a ship between stars",
+    layers: { "starship-hum": 0.6, "brown-noise": 0.15 },
   },
 ];
 

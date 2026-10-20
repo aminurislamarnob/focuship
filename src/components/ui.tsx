@@ -41,10 +41,12 @@ import {
   LibraryBig,
   Moon,
   Mountain,
+  Orbit,
   PawPrint,
   Plane,
   PlaneTakeoff,
   Radar,
+  Rocket,
   Route,
   Sailboat,
   Shell,
@@ -97,6 +99,7 @@ const PRESET_ICONS: Record<string, LucideIcon> = {
   "sleeper-car": TrainFront,
   "morning-trail": Sunrise,
   "deep-dive": Fish,
+  "deep-space": Rocket,
 };
 
 const SOUND_ICONS: Record<string, LucideIcon> = {
@@ -159,6 +162,7 @@ const SOUND_ICONS: Record<string, LucideIcon> = {
   "brown-noise": AudioWaveform,
   "pink-noise": AudioLines,
   "white-noise": Activity,
+  "starship-hum": Orbit,
   theta: Moon,
   alpha: Headphones,
   beta: Zap,
