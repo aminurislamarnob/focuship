@@ -1,0 +1,15 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  // Answers every old or alternative hostname with a 301 to https://focuship.app.
+  "name": "focuship-redirect",
+  "main": "index.mjs",
+  "compatibility_date": "2026-10-01",
+  "routes": [
+    { "pattern": "focus.aminurislam.me", "custom_domain": true },
+    { "pattern": "focusship.app", "custom_domain": true },
+    { "pattern": "www.focusship.app", "custom_domain": true },
+    { "pattern": "www.focuship.app", "custom_domain": true }
+  ],
+  "workers_dev": false,
+  "preview_urls": false
+}

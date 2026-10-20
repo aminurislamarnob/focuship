@@ -13,7 +13,8 @@ npm start          # serve out/ locally (npx serve) — `next start` does not wo
 npm run lint       # eslint (includes react-hooks/set-state-in-effect)
 npm test           # next build, then node --test tests/*.test.mjs against out/
 npx tsc --noEmit   # typecheck
-npm run deploy     # next build && wrangler deploy → https://focus.aminurislam.me
+npm run deploy     # next build && wrangler deploy → https://focuship.app
+npm run deploy:redirect  # 301 Worker (workers/redirect) for focus.aminurislam.me, focusship.app, www hosts
 npm run icons      # regenerate app icons (public/icons, src/app/icon.png) from scripts/generate-icons.mjs
 ```
 
@@ -39,7 +40,7 @@ A single-route (`/`), fully client-driven ambient sound mixer + focus timer, pre
 
 - No server features: no `headers()`/redirects/rewrites in `next.config.ts`, no Server Actions, no default `next/image` loader. Response headers (caching, the service worker's no-cache rule, security headers) live in `public/_headers`.
 - Don't read `Date.now()`, `Math.random()`, `window`, `localStorage` etc. during render — the page is prerendered at build time. Read them in effects or event handlers (the build fails on `Date.now()` in render).
-- Deployment is an assets-only Cloudflare Worker (`wrangler.jsonc`) serving `out/` on the custom domain `focus.aminurislam.me`; `workers_dev` and preview URLs are off so the PWA has a single origin. Sounds are shipped as static assets (no R2).
+- Deployment is an assets-only Cloudflare Worker (`wrangler.jsonc`) serving `out/` on the custom domain `focuship.app`; `workers_dev` and preview URLs are off so the PWA has a single origin. A separate redirect Worker (`workers/redirect/`) 301s the old and typo hostnames to it; the one-time cutover steps are in the README. Sounds are shipped as static assets (no R2).
 
 ## Conventions
 

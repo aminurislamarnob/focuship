@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "next build && node --test 'tests/*.test.mjs'",
     "icons": "node scripts/generate-icons.mjs",
-    "deploy": "next build && wrangler deploy"
+    "deploy": "next build && wrangler deploy",
+    "deploy:redirect": "wrangler deploy --config workers/redirect/wrangler.jsonc"
   },
   "dependencies": {
     "lucide-react": "1.49.0",

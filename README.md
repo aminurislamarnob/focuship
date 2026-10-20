@@ -35,12 +35,25 @@ npm run build && npm start                # serves out/ locally, service worker 
 
 ## Deploy
 
-The site runs on Cloudflare as a static-assets Worker at **https://focus.aminurislam.me**. The custom domain is declared in `wrangler.jsonc`; on deploy Cloudflare creates its DNS record and certificate. The `workers.dev` URL is turned off so the app has one origin, since installs and offline caches are per-origin.
+The site runs on Cloudflare as a static-assets Worker on **https://focuship.app**. The custom domain is declared in `wrangler.jsonc`; on deploy Cloudflare creates its DNS record and certificate. The `workers.dev` URL is turned off so the app has one origin, since installs and offline caches are per-origin.
 
 ```bash
-npx wrangler login   # once
-npm run deploy       # next build && wrangler deploy
+npx wrangler login        # once
+npm run deploy            # next build && wrangler deploy → focuship.app
+npm run deploy:redirect   # the 301 Worker for focus.aminurislam.me, focusship.app and www hosts
 ```
+
+A second, tiny Worker (`workers/redirect/`) answers every old or alternative hostname with a 301 to the same path and query on `https://focuship.app`.
+
+### Moving from focus.aminurislam.me (one-time)
+
+1. Buy `focuship.app` and `focusship.app` (Cloudflare Registrar puts them in the same account).
+2. On the `focuship.app` zone, turn off **Block AI bots**, **AI Labyrinth** and **Managed robots.txt**; the site ships its own `robots.txt` and `llms.txt`.
+3. Rename the GitHub repo to `focuship` (the site links to it).
+4. `npm run deploy`, then check `https://focuship.app` loads and `curl -A GPTBot -I https://focuship.app` returns 200.
+5. Delete the old `let-me-focus` Worker (`npx wrangler delete --name let-me-focus`) to free `focus.aminurislam.me`.
+6. `npm run deploy:redirect`, then check `curl -I https://focus.aminurislam.me/timer?x=1` returns a 301 to `https://focuship.app/timer?x=1`.
+7. Verify the site in Google Search Console and Bing Webmaster Tools (DNS TXT records) and submit `https://focuship.app/sitemap.xml`.
 
 `wrangler.jsonc` points Cloudflare at `out/`. Response headers (caching, the service worker's no-cache rule, security headers) live in `public/_headers`, since `headers()` in `next.config.ts` doesn't apply to static exports. Sounds are served from the same CDN with a one-year immutable cache, and only changed files are re-uploaded on each deploy.
 

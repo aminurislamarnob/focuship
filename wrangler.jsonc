@@ -4,7 +4,7 @@
   "name": "focuship",
   "compatibility_date": "2026-10-01",
   // Cloudflare creates the DNS record and certificate for this hostname on deploy.
-  "routes": [{ "pattern": "focus.aminurislam.me", "custom_domain": true }],
+  "routes": [{ "pattern": "focuship.app", "custom_domain": true }],
   // One canonical origin: the PWA's install and offline caches are per-origin.
   "workers_dev": false,
   "preview_urls": false,
