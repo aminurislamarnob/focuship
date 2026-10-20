@@ -1,4 +1,7 @@
 import type { Faq, Section } from "./pages";
+import { ADHD } from "@/content/guides/adhd";
+import { BINAURAL_BEATS } from "@/content/guides/binaural-beats";
+import { CAFE_NOISE } from "@/content/guides/cafe-noise";
 import { CODING } from "@/content/guides/coding";
 import { NOISE_COLOURS } from "@/content/guides/noise-colours";
 import { POMODORO } from "@/content/guides/pomodoro";
@@ -36,7 +39,7 @@ export interface Guide {
   related: string[];
 }
 
-export const GUIDES: Guide[] = [NOISE_COLOURS, POMODORO, CODING];
+export const GUIDES: Guide[] = [NOISE_COLOURS, POMODORO, CODING, BINAURAL_BEATS, CAFE_NOISE, ADHD];
 
 export const guidePath = (guide: Pick<Guide, "slug">) => `/guides/${guide.slug}`;
 

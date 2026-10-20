@@ -350,7 +350,7 @@ export const SOUND_PAGES: LandingPage[] = [
         a: "Yes. The Corner café preset already pairs café chatter with light rain, and you can add any other sound from the Sounds tab.",
       },
     ],
-    related: ["/mix/rain-sounds", "/sounds/brown-noise", "/pomodoro/25-5", "/sounds"],
+    related: ["/guides/why-cafe-noise-helps-creativity", "/mix/rain-sounds", "/sounds/brown-noise", "/pomodoro/25-5", "/sounds"],
   },
   {
     type: "sound",
@@ -418,7 +418,7 @@ export const SOUND_PAGES: LandingPage[] = [
         a: "Yes. Add rain, noise or a café from the Sounds tab, and keep the beat a little quieter than the other layers.",
       },
     ],
-    related: ["/sounds/brown-noise", "/timer/25-minutes", "/pomodoro/50-10", "/sounds"],
+    related: ["/guides/do-binaural-beats-help-focus", "/sounds/brown-noise", "/timer/25-minutes", "/pomodoro/50-10", "/sounds"],
   },
   {
     type: "sound",
