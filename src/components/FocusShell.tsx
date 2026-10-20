@@ -1,7 +1,8 @@
 "use client";
 
 import { Check, Disc3, Download, Expand, Info, LibraryBig, Menu, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
-import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
 import type { PageIntent } from "@/lib/pages";
@@ -27,10 +28,10 @@ import {
   type ShareResult,
 } from "./ui";
 
-const TABS: { id: Tab; label: string; icon: typeof Disc3 }[] = [
-  { id: "mix", label: "Mix", icon: Disc3 },
-  { id: "sounds", label: "Sounds", icon: LibraryBig },
-  { id: "timer", label: "Timer", icon: Timer },
+const TABS: { id: Tab; label: string; icon: typeof Disc3; href: string }[] = [
+  { id: "mix", label: "Mix", icon: Disc3, href: "/" },
+  { id: "sounds", label: "Sounds", icon: LibraryBig, href: "/sounds" },
+  { id: "timer", label: "Timer", icon: Timer, href: "/timer" },
 ];
 
 interface FocusShellProps {
@@ -65,7 +66,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
   const { canPrompt } = useInstallPrompt();
 
   useEffect(() => {
-    actions.hydrate(intent);
+    actions.visit(intent);
     startPwa();
   }, [intent]);
 
@@ -75,10 +76,8 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
     return () => clearTimeout(id);
   }, [notice]);
 
-  const go = useCallback((next: Tab) => {
-    actions.setTab(next);
-    main.current?.scrollTo({ top: 0 });
-  }, []);
+  const router = useRouter();
+  const go = useCallback((next: Tab) => router.push(TABS.find((t) => t.id === next)!.href), [router]);
 
   const share = useCallback(async (): Promise<ShareResult> => {
     const url = shareUrl();
@@ -100,7 +99,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
       const target = e.target as HTMLElement;
-      if (target.closest("input, textarea, select, [contenteditable]")) return;
+      if (target.closest?.("input, textarea, select, [contenteditable]")) return;
       if (e.key === " " && !target.closest("button, a, [role=tab]")) {
         e.preventDefault();
         actions.toggle();
@@ -130,15 +129,16 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
     <div className="flex h-dvh overflow-hidden">
       <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-raised md:flex">
         <div className="flex h-16 items-center px-5">
-          <Logo />
+          <Link href="/" aria-label="Focuship home">
+            <Logo />
+          </Link>
         </div>
         <nav aria-label="Main" className="flex flex-col gap-1 px-3 pt-2">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button
+          {TABS.map(({ id, label, icon: Icon, href }) => (
+            <Link
               key={id}
-              type="button"
+              href={href}
               aria-current={tab === id ? "page" : undefined}
-              onClick={() => go(id)}
               className={cx(
                 "flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm transition-colors",
                 tab === id ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
@@ -147,7 +147,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
               <Icon className="size-4" aria-hidden />
               {label}
               {tab === id && <span className="ml-auto h-4 w-0.5 bg-brand" aria-hidden />}
-            </button>
+            </Link>
           ))}
         </nav>
         {nav && (
@@ -175,7 +175,9 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="pt-safe shrink-0 border-b border-line bg-bg md:hidden">
           <div className="flex h-14 items-center justify-between px-4">
-            <Logo />
+            <Link href="/" aria-label="Focuship home">
+              <Logo />
+            </Link>
             <div className="flex items-center gap-1">
               {canPrompt && (
                 <IconButton label="Install app" variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
@@ -195,18 +197,19 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
         </header>
 
         <main ref={main} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto w-full max-w-5xl px-4 md:px-8 md:pt-6">
-            <header className="pt-4 pb-3 md:pt-0">
-              <h1 className="text-sm font-medium text-fg">{heading}</h1>
-              <p className="mt-0.5 text-sm text-muted">{intro}</p>
+          <div className="mx-auto w-full max-w-5xl px-4 max-md:pt-3 md:px-8 md:pt-6">
+            {/* Visually hidden, but kept for SEO and screen readers: every landing page's H1 lives here. */}
+            <header className="sr-only">
+              <h1>{heading}</h1>
+              <p>{intro}</p>
             </header>
-            <div hidden={tab !== "mix"}>
+            <div hidden={tab !== "mix"} className="view-in">
               <MixView onOpenFocus={() => setFocusOpen(true)} onShare={share} onBrowse={() => go("sounds")} />
             </div>
-            <div hidden={tab !== "sounds"}>
+            <div hidden={tab !== "sounds"} className="view-in">
               <SoundsView />
             </div>
-            <div hidden={tab !== "timer"}>
+            <div hidden={tab !== "timer"} className="view-in">
               <TimerView />
             </div>
             {children}
@@ -222,27 +225,10 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
               {notice}
             </div>
           )}
-          {hasMix && <PlayerBar onOpenMixer={() => setMixerOpen(true)} onOpenFocus={() => setFocusOpen(true)} />}
-          <nav aria-label="Tabs" className="pb-safe border-t border-line bg-raised md:hidden">
-            <div className="grid grid-cols-3">
-              {TABS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-current={tab === id ? "page" : undefined}
-                  onClick={() => go(id)}
-                  className={cx(
-                    "relative flex h-14 cursor-pointer flex-col items-center justify-center gap-1 transition-colors",
-                    tab === id ? "text-fg" : "text-faint",
-                  )}
-                >
-                  {tab === id && <span className="absolute top-0 h-0.5 w-8 bg-brand" aria-hidden />}
-                  <Icon className="size-5" aria-hidden />
-                  <span className="font-mono text-[0.625rem] tracking-wider uppercase">{label}</span>
-                </button>
-              ))}
-            </div>
-          </nav>
+          <div className="max-md:hidden">
+            {hasMix && <PlayerBar onOpenMixer={() => setMixerOpen(true)} onOpenFocus={() => setFocusOpen(true)} />}
+          </div>
+          <MobileNav tab={tab} onOpenFocus={() => setFocusOpen(true)} />
         </div>
       </div>
 
@@ -304,6 +290,80 @@ function PlayerBar({ onOpenMixer, onOpenFocus }: { onOpenMixer(): void; onOpenFo
         </IconButton>
       </div>
     </div>
+  );
+}
+
+/**
+ * The phone bottom bar: the two outer pairs switch views, the raised centre button plays
+ * and pauses the mix (loading the default soundscape when the mix is empty), and Focus
+ * opens focus mode. Replaces the floating player bar on small screens.
+ */
+function MobileNav({ tab, onOpenFocus }: { tab: Tab; onOpenFocus(): void }) {
+  const playing = useFocus((s) => s.playing);
+
+  const inner = (active: boolean, label: string, Icon: typeof Disc3) => (
+    <>
+      <span
+        className={cx(
+          "grid h-7 w-12 place-items-center rounded-full transition-all duration-200 group-active:scale-90",
+          active ? "bg-brand/15 text-brand-light" : "text-faint",
+        )}
+      >
+        <Icon className="size-5" aria-hidden />
+      </span>
+      <span
+        className={cx(
+          "font-mono text-[0.625rem] tracking-wider uppercase transition-colors duration-200",
+          active ? "text-fg" : "text-faint",
+        )}
+      >
+        {label}
+      </span>
+    </>
+  );
+
+  const tabItem = ({ id, label, icon, href }: (typeof TABS)[number]) => (
+    <Link
+      key={id}
+      href={href}
+      aria-current={tab === id ? "page" : undefined}
+      className="group flex h-16 flex-col items-center justify-center gap-1"
+    >
+      {inner(tab === id, label, icon)}
+    </Link>
+  );
+
+  return (
+    <nav aria-label="Tabs" className="pb-safe border-t border-line bg-raised/95 backdrop-blur-md md:hidden">
+      <div className="grid grid-cols-5 px-1">
+        {TABS.slice(0, 2).map(tabItem)}
+        <div className="flex items-start justify-center">
+          <button
+            type="button"
+            aria-label={playing ? "Pause" : "Play"}
+            onClick={actions.toggle}
+            className={cx(
+              "-mt-5 grid size-14 cursor-pointer place-items-center rounded-full border border-brand-dark bg-brand text-white transition-all duration-200 active:scale-90",
+              playing ? "shadow-[0_6px_28px_rgba(210,86,17,0.55)]" : "shadow-[0_6px_18px_rgba(0,0,0,0.5)]",
+            )}
+          >
+            {playing ? (
+              <Pause className="size-6 animate-pop-in" fill="currentColor" aria-hidden />
+            ) : (
+              <Play className="size-6 translate-x-0.5 animate-pop-in" fill="currentColor" aria-hidden />
+            )}
+          </button>
+        </div>
+        {TABS.slice(2).map(tabItem)}
+        <button
+          type="button"
+          onClick={onOpenFocus}
+          className="group flex h-16 cursor-pointer flex-col items-center justify-center gap-1"
+        >
+          {inner(false, "Focus", Expand)}
+        </button>
+      </div>
+    </nav>
   );
 }
 

@@ -32,8 +32,8 @@ export interface Faq {
 
 /** What the app loads when a visitor lands on the page. Applied during hydration; never autoplays. */
 export interface PageIntent {
-  /** Short name used in the "ready" notice, e.g. "Brown noise". */
-  label: string;
+  /** Short name used in the "ready" notice, e.g. "Brown noise". No label, no notice. */
+  label?: string;
   layers?: Layers;
   tab?: Tab;
   timer?: { focus: number; short?: number; long?: number };
@@ -93,6 +93,7 @@ export const HUBS: Hub[] = [
     description:
       "Free ambient sounds for focus, study and sleep: rain, thunder, ocean waves, fireplace, café, brown, pink and white noise and binaural beats. Mix them in your browser.",
     intro: "Every sound plays in the mixer, alone or layered with others.",
+    intent: { tab: "sounds" },
   },
   { ...TIMER_HUB, id: "timers", path: "/timer", label: "Timers" },
   {

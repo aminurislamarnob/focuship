@@ -111,7 +111,7 @@ function SoundTile({ sound }: { sound: Sound }) {
   return (
     <div
       className={cx(
-        "group relative isolate flex flex-col overflow-hidden rounded-[6px] border transition-colors",
+        "group relative isolate flex flex-col overflow-hidden rounded-[6px] border transition-all duration-200 has-[button:active]:scale-[0.98]",
         on ? "border-brand/70 bg-brand/[0.07]" : "border-line bg-raised",
       )}
     >

@@ -335,6 +335,24 @@ export const actions = {
     watchTimer();
   },
 
+  /** Applies a page's intent on client-side navigation; falls back to hydrate on the first visit. */
+  visit(intent?: PageIntent) {
+    if (!state.hydrated) return actions.hydrate(intent);
+    const tab: Tab = intent?.tab ?? "mix";
+    if (tab !== state.tab) actions.setTab(tab);
+    if (intent?.layers) {
+      const layers = Object.fromEntries(Object.entries(intent.layers).filter(([id]) => SOUND_BY_ID.has(id)));
+      set({ layers, notice: readyNotice(intent.label, layers) });
+    }
+    if (intent?.timer && state.timer.status !== "running") {
+      const settings = { ...state.timer.settings, ...intent.timer };
+      set({
+        timer: { ...state.timer, settings, mode: "focus", status: "idle", endsAt: null, remaining: minutes(settings, "focus") },
+        ...(intent.layers ? {} : { notice: readyNotice(intent.label, state.layers, true) }),
+      });
+    }
+  },
+
   play() {
     if (!Object.keys(state.layers).length) state = { ...state, layers: { ...DEFAULT_PRESET.layers } };
     set({ playing: true });
@@ -404,6 +422,7 @@ export const actions = {
   },
 
   setTab(tab: Tab) {
+    if (tab !== state.tab) haptic();
     set({ tab }, false);
   },
 

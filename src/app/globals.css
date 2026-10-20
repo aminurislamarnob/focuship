@@ -93,8 +93,24 @@ body {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
+  /* App chrome reads as UI, not as a document: no text selection or long-press
+     callouts. Long-form copy and form fields opt back in below. */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
+.page-copy,
+.page-copy *,
+article,
+article *,
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+a,
 button,
 [role="tab"],
 label {
@@ -197,6 +213,22 @@ label {
   .sheet:not([hidden]) {
     translate: 0 1.5rem;
     opacity: 0;
+  }
+}
+
+/* A view sliding in when tabs switch, replayed each time [hidden] is removed. */
+@keyframes view-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+.view-in {
+  animation: view-in 0.28s var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .view-in {
+    animation: none;
   }
 }
 
