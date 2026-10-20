@@ -287,7 +287,7 @@ export const TIMER_PAGES: LandingPage[] = [
     ],
     more: "Short timers work best with a clear finish line. Decide what “done” looks like before you press start, whether that is an empty sink, a sent reply or three slow breaths, and stop when the chime sounds even if you could keep going. That habit makes the next five-minute promise to yourself believable, which is the whole trick. If you are using it as a break, step away from the screen; a break spent on another screen rarely feels like rest.",
     pairing:
-      "For a break, choose something restful and open such as ocean waves or birdsong. For a quick task, keep the same background you work with so the switch back is seamless.",
+      "For a break, choose something restful and open such as [ocean waves](/sounds/ocean-waves) or birdsong. For a quick task, keep the same background you work with so the switch back is seamless.",
     faq: [
       { q: "Why use a timer for only five minutes?", a: "It keeps short breaks short and makes reluctant tasks feel small enough to start." },
     ],

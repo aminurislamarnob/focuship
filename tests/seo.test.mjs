@@ -53,3 +53,23 @@ test("llms.txt links only to indexable pages and includes the home page", () => 
   const known = new Set(indexable.map((p) => url(p.path)));
   assert.deepEqual(llmsUrls.map(normalize).filter((href) => !known.has(href)), []);
 });
+
+// The launch plan's hero pages: each must be live in search and listed for language models.
+const HEROES = [
+  "/sounds/brown-noise",
+  "/sounds/white-noise",
+  "/sounds/pink-noise",
+  "/mix/rain-sounds",
+  "/mix/thunderstorm",
+  "/sounds/ocean-waves",
+  "/sounds/fireplace",
+  "/sounds/coffee-shop",
+  "/sounds/binaural-beats",
+  "/pomodoro/25-5",
+  "/timer",
+];
+
+test("every hero page is in the sitemap and llms.txt", () => {
+  const missing = HEROES.filter((path) => !sitemapUrls.includes(url(path)) || !llmsUrls.includes(url(path)));
+  assert.deepEqual(missing, []);
+});

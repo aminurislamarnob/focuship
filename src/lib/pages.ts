@@ -1,6 +1,7 @@
 import { CATEGORIES, SOUND_BY_ID, type Layers } from "./catalog";
 import type { Tab } from "./store";
 import { SOUND_PAGES } from "@/content/sounds";
+import { MIX_PAGES } from "@/content/mixes";
 import { TIMER_HUB, TIMER_PAGES } from "@/content/timers";
 
 /**
@@ -147,7 +148,7 @@ export const isIndexable = (page: LandingPage) =>
   page.faq.length >= MIN_FAQ &&
   page.related.length >= MIN_RELATED;
 
-export const PAGES: LandingPage[] = [...SOUND_PAGES, ...TIMER_PAGES];
+export const PAGES: LandingPage[] = [...SOUND_PAGES, ...TIMER_PAGES, ...MIX_PAGES];
 
 export const pagesOfType = (type: PageType) => PAGES.filter((page) => page.type === type);
 
