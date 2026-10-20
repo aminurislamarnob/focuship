@@ -1,6 +1,7 @@
 "use client";
 
 import { LogOut, Star, Trash2, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Provider } from "@/lib/cloud";
 import { actions, useFocus } from "@/lib/store";
@@ -107,7 +108,11 @@ function SignedOut({ reason }: { reason: string | null }) {
       </div>
       <p className="text-xs text-faint">
         One account per email: sign in with Google today and GitHub tomorrow and you land in the same account. No
-        passwords, nothing posted on your behalf.
+        passwords, nothing posted on your behalf. See the{" "}
+        <Link href="/privacy" className="underline underline-offset-4 hover:text-fg">
+          privacy policy
+        </Link>
+        .
       </p>
     </section>
   );

@@ -33,6 +33,13 @@ export default function AccountPage() {
       <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
         <AccountView />
       </main>
+      <footer className="border-t border-line">
+        <div className="label-mono mx-auto flex w-full max-w-lg gap-5 px-4 py-5">
+          <Link href="/privacy" className="hover:text-fg">
+            Privacy policy
+          </Link>
+        </div>
+      </footer>
       <JsonLd
         nodes={[
           organization(),

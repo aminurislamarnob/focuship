@@ -21,3 +21,11 @@ test("the account page stays out of the sitemap and llms.txt", () => {
   assert.ok(!read("sitemap.xml").includes("/account"), "sitemap");
   assert.ok(!/\/account\b/.test(read("llms.txt")), "llms.txt");
 });
+
+// The OAuth consent screens link here, so it must be built and reachable from the account page.
+test("the privacy policy is built and linked from the account page", () => {
+  const privacy = inspect(read("privacy.html"));
+  assert.match(privacy.title, /^Privacy policy/);
+  assert.equal(privacy.canonical, "https://focuship.app/privacy");
+  assert.ok(page.hrefs.includes("/privacy"), "linked from /account");
+});
