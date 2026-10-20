@@ -2,7 +2,7 @@
 
 import { Check, Expand, Pause, Play, Share2, Shuffle, Trash2, X } from "lucide-react";
 import { PRESETS, SOUND_BY_ID } from "@/lib/catalog";
-import { actions, matchPreset, mixHue, mixName, useFocus } from "@/lib/store";
+import { actions, matchPreset, mixMood, mixName, useFocus } from "@/lib/store";
 import {
   Ambient,
   CATEGORY_ICONS,
@@ -36,7 +36,7 @@ export function MixView({ onOpenFocus, onShare, onBrowse }: MixViewProps) {
   return (
     <div className="flex flex-col gap-8 pb-6">
       <section className="relative isolate -mx-4 overflow-hidden border-b border-line px-4 pt-8 pb-6 md:mx-0 md:rounded-[8px] md:border">
-        <Ambient hue={mixHue(layers)} active={playing} className="-z-10" />
+        <Ambient mood={mixMood(layers)} layers={layers} active={playing} className="-z-10" />
         {active && (
           <div key={active.id} className="absolute top-5 right-4 animate-pop-in md:top-6 md:right-6" aria-hidden>
             <PresetIcon
