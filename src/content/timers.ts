@@ -136,7 +136,7 @@ export const TIMER_PAGES: LandingPage[] = [
         a: "Something that rests your attention: stand up, stretch, refill your drink or look into the distance. Checking messages tends to pull you into another task.",
       },
     ],
-    related: ["/timer", "/timer/25-minutes", "/pomodoro/50-10", "/pomodoro/52-17", "/sounds/brown-noise"],
+    related: ["/guides/pomodoro-technique", "/timer", "/timer/25-minutes", "/pomodoro/50-10", "/pomodoro/52-17", "/sounds/brown-noise"],
   }),
   pomodoroPage({
     work: 50,

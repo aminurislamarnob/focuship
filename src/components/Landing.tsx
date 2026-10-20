@@ -3,6 +3,7 @@ import { FocusApp } from "./FocusApp";
 import { JsonLd, webApplication } from "./JsonLd";
 import { PageCopy } from "./PageCopy";
 import { Rich } from "./Rich";
+import { GUIDES, guidePath } from "@/lib/guides";
 import { HUBS, PAGES, hubOf, pagePath, type Block, type Faq, type Hub, type LandingPage, type Section } from "@/lib/pages";
 import { absoluteUrl } from "@/lib/site";
 
@@ -10,6 +11,8 @@ import { absoluteUrl } from "@/lib/site";
 function linkLabel(path: string) {
   const page = PAGES.find((p) => pagePath(p) === path);
   if (page) return page.heading;
+  const guide = GUIDES.find((g) => guidePath(g) === path);
+  if (guide) return `Guide: ${guide.heading}`;
   return HUBS.find((hub) => hub.path === path)?.title ?? path;
 }
 

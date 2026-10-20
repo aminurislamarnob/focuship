@@ -60,6 +60,6 @@ export const ACTIVITY_PAGES: LandingPage[] = [
         a: "Yes. Focuship is MIT-licensed and the code is on GitHub.",
       },
     ],
-    related: ["/sounds/brown-noise", "/pomodoro/50-10", "/pomodoro/90-20", "/sounds/binaural-beats", "/sounds-for"],
+    related: ["/guides/background-sounds-for-coding", "/sounds/brown-noise", "/pomodoro/50-10", "/pomodoro/90-20", "/sounds/binaural-beats", "/sounds-for"],
   },
 ];

@@ -1,5 +1,7 @@
 import type { Faq, Section } from "./pages";
+import { CODING } from "@/content/guides/coding";
 import { NOISE_COLOURS } from "@/content/guides/noise-colours";
+import { POMODORO } from "@/content/guides/pomodoro";
 
 /** Evergreen, sourced articles. Each stays noindex until the owner marks it reviewed. */
 
@@ -34,7 +36,7 @@ export interface Guide {
   related: string[];
 }
 
-export const GUIDES: Guide[] = [NOISE_COLOURS];
+export const GUIDES: Guide[] = [NOISE_COLOURS, POMODORO, CODING];
 
 export const guidePath = (guide: Pick<Guide, "slug">) => `/guides/${guide.slug}`;
 

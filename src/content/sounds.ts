@@ -65,7 +65,7 @@ export const SOUND_PAGES: LandingPage[] = [
         a: "Yes. There are no ads, no account and no tracking cookies.",
       },
     ],
-    related: ["/sounds/pink-noise", "/sounds/white-noise", "/sounds/binaural-beats", "/timer/25-minutes", "/sounds"],
+    related: ["/guides/brown-vs-white-vs-pink-noise", "/sounds/pink-noise", "/sounds/white-noise", "/sounds/binaural-beats", "/timer/25-minutes", "/sounds"],
   },
   {
     type: "sound",
