@@ -62,7 +62,7 @@ export const SOUND_PAGES: LandingPage[] = [
       },
       {
         q: "Is Focuship free?",
-        a: "Yes. There are no ads, no account and no tracking cookies.",
+        a: "Yes. There are no ads and no tracking cookies, and no account is needed.",
       },
     ],
     related: ["/guides/brown-vs-white-vs-pink-noise", "/sounds/pink-noise", "/sounds/white-noise", "/sounds/binaural-beats", "/timer/25-minutes", "/sounds"],

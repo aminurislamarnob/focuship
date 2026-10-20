@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Disc3, Download, Expand, Info, LibraryBig, Menu, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
+import { Check, Disc3, Download, Expand, Info, LibraryBig, Menu, Pause, Play, Share2, Timer, Trash2, UserRound, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -8,6 +8,7 @@ import { SOUND_BY_ID } from "@/lib/catalog";
 import type { PageIntent } from "@/lib/pages";
 import { startPwa, useInstallPrompt } from "@/lib/pwa";
 import { actions, matchPreset, mixName, shareUrl, useFocus, type Tab } from "@/lib/store";
+import { CLOUD_ENABLED } from "@/lib/supabase";
 import { AboutSheet } from "./AboutSheet";
 import { FocusMode } from "./FocusMode";
 import { Logo } from "./Logo";
@@ -162,6 +163,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
             <Expand className="size-4" aria-hidden /> Focus mode
             <kbd className="ml-auto font-mono text-[0.6875rem] text-faint">V</kbd>
           </button>
+          {CLOUD_ENABLED && <AccountLink variant="sidebar" />}
           <button
             type="button"
             onClick={() => setAboutOpen(true)}
@@ -184,6 +186,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
                   <Download className="size-4" />
                 </IconButton>
               )}
+              {CLOUD_ENABLED && <AccountLink variant="header" />}
               <IconButton label="About and offline" variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
                 <Info className="size-4" />
               </IconButton>
@@ -364,6 +367,35 @@ function MobileNav({ tab, onOpenFocus }: { tab: Tab; onOpenFocus(): void }) {
         </button>
       </div>
     </nav>
+  );
+}
+
+/** The way into /account: a sidebar row on desktop, an icon in the phone header. */
+function AccountLink({ variant }: { variant: "sidebar" | "header" }) {
+  const user = useFocus((s) => s.account.user);
+  const label = user ? `Account — ${user.name}` : "Sign in";
+  if (variant === "header") {
+    return (
+      <Link
+        href="/account"
+        aria-label={label}
+        title={label}
+        className="relative inline-grid size-9 shrink-0 place-items-center rounded-[4px] text-muted transition-colors hover:text-fg"
+      >
+        <UserRound className="size-4" aria-hidden />
+        {user && <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-ok" aria-hidden />}
+      </Link>
+    );
+  }
+  return (
+    <Link
+      href="/account"
+      className="flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm text-muted hover:bg-surface hover:text-fg"
+    >
+      <UserRound className="size-4" aria-hidden />
+      <span className="truncate">{user ? user.name : "Sign in"}</span>
+      {user && <span className="ml-auto size-1.5 shrink-0 rounded-full bg-ok" aria-hidden />}
+    </Link>
   );
 }
 

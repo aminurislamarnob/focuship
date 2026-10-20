@@ -13,6 +13,7 @@
     "deploy:redirect": "wrangler deploy --config workers/redirect/wrangler.jsonc"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "lucide-react": "1.49.0",
     "next": "16.4.2",
     "react": "19.3.0",

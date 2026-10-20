@@ -65,8 +65,8 @@ export function AboutSheet({ open, onClose }: { open: boolean; onClose(): void }
         <section className="flex flex-col gap-2 text-sm text-muted">
           <h3 className="label-mono text-fg">Free, private and offline</h3>
           <p>
-            There is no account and no tracking cookies. Install it to your home screen and the sounds you have played keep
-            working offline, with lock-screen controls on your phone. Mixes can be shared as a link.
+            No account is needed and there are no tracking cookies. Install it to your home screen and the sounds you have
+            played keep working offline, with lock-screen controls on your phone. Mixes can be shared as a link.
           </p>
         </section>
 

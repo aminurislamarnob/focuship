@@ -64,7 +64,7 @@ export const CODING: Guide = {
     {
       heading: "Why Focuship suits developers",
       body: [
-        "Focuship is keyboard-first: Space plays and pauses, M mutes, V opens focus mode, F goes full screen and 1 to 3 switch tabs. It installs as an app, keeps playing in the background with media-key controls, and generates its noises and tones on your device so they loop seamlessly and work offline. There is no account and no tracking, and the code is MIT-licensed on GitHub, so you can read exactly how the gapless loops and generated noise work.",
+        "Focuship is keyboard-first: Space plays and pauses, M mutes, V opens focus mode, F goes full screen and 1 to 3 switch tabs. It installs as an app, keeps playing in the background with media-key controls, and generates its noises and tones on your device so they loop seamlessly and work offline. No account is needed and there is no tracking, and the code is MIT-licensed on GitHub, so you can read exactly how the gapless loops and generated noise work.",
       ],
     },
   ],

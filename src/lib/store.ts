@@ -9,7 +9,16 @@ import {
   type Layers,
   type Preset,
 } from "@/lib/catalog";
+import {
+  newerSettings,
+  PRESET_LIMIT,
+  type CloudSettings,
+  type CloudUser,
+  type CustomPreset,
+  type Provider,
+} from "@/lib/cloud";
 import type { PageIntent } from "@/lib/pages";
+import { getCloud } from "@/lib/supabase";
 
 export type TimerMode = "focus" | "short" | "long";
 
@@ -35,6 +44,23 @@ export interface TimerState {
   settings: TimerSettings;
 }
 
+/** The signed-in slice: who you are plus your cloud-backed favorites and presets. */
+export interface AccountState {
+  user: CloudUser | null;
+  /** Auth has resolved at least once this session (cached data shows before then). */
+  ready: boolean;
+  /** Favorite refs: a built-in preset id or a custom preset uuid. */
+  favorites: string[];
+  presets: CustomPreset[];
+}
+
+/** A preset opened from a `?p=<uuid>` share link, offered for copying. */
+export interface SharedPreset {
+  id: string;
+  label: string;
+  layers: Layers;
+}
+
 export interface FocusState {
   layers: Layers;
   playing: boolean;
@@ -46,6 +72,12 @@ export interface FocusState {
   timer: TimerState;
   hydrated: boolean;
   tab: Tab;
+  account: AccountState;
+  /** Recently applied preset refs, newest first. Local-only, works signed out. */
+  recents: string[];
+  shared: SharedPreset | null;
+  /** Epoch ms of the last local settings change: the LWW clock for settings sync. */
+  settingsUpdatedAt: number;
 }
 
 export type Tab = "mix" | "sounds" | "timer";
@@ -53,6 +85,9 @@ export type Tab = "mix" | "sounds" | "timer";
 const STORAGE_KEY = "focuship:v1";
 export const NEW_LAYER_VOLUME = 0.5;
 const MAX_SHUFFLE_LAYERS = 3;
+const MAX_RECENTS = 8;
+/** How long settings changes settle before one write goes to the cloud. */
+const SETTINGS_PUSH_MS = 1200;
 
 const DEFAULT_TIMER: TimerSettings = {
   focus: 25,
@@ -76,6 +111,10 @@ const initialState: FocusState = {
   notice: null,
   hydrated: false,
   tab: "mix",
+  account: { user: null, ready: false, favorites: [], presets: [] },
+  recents: [],
+  shared: null,
+  settingsUpdatedAt: 0,
   timer: {
     mode: "focus",
     status: "idle",
@@ -114,8 +153,20 @@ function set(patch: Partial<FocusState>, syncAudio = true) {
 function persist() {
   if (!state.hydrated) return;
   try {
-    const { layers, volume, lastVolume, timer } = state;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ layers, volume, lastVolume, timer }));
+    const { layers, volume, lastVolume, timer, recents, settingsUpdatedAt, account } = state;
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        layers,
+        volume,
+        lastVolume,
+        timer,
+        recents,
+        settingsUpdatedAt,
+        // Cached so favorites and custom presets still render offline; auth re-verifies on load.
+        account: { user: account.user, favorites: account.favorites, presets: account.presets },
+      }),
+    );
   } catch {}
 }
 
@@ -126,8 +177,24 @@ const sameKeys = (a: Layers, b: Layers) => {
   return ak !== "" && ak === Object.keys(b).sort().join();
 };
 
+const asPreset = (preset: CustomPreset): Preset => ({
+  id: preset.id,
+  label: preset.label,
+  blurb: "Your preset",
+  layers: preset.layers,
+});
+
 export const matchPreset = (layers: Layers): Preset | undefined =>
-  PRESETS.find((preset) => sameKeys(preset.layers, layers));
+  PRESETS.find((preset) => sameKeys(preset.layers, layers)) ??
+  state.account.presets.filter((preset) => sameKeys(preset.layers, layers)).map(asPreset)[0];
+
+/** A preset by ref — catalog id or custom uuid — for favorites and recents. */
+export const presetByRef = (ref: string, presets: CustomPreset[]): Preset | undefined => {
+  const builtIn = PRESETS.find((preset) => preset.id === ref);
+  if (builtIn) return builtIn;
+  const custom = presets.find((preset) => preset.id === ref);
+  return custom && asPreset(custom);
+};
 
 export function mixName(layers: Layers): string {
   const preset = matchPreset(layers);
@@ -290,6 +357,130 @@ function readyNotice(label: string | undefined, layers: Layers, timerOnly = fals
   return Object.keys(layers).length ? `${label} is ready. Tap play to listen.` : null;
 }
 
+// Cloud ------------------------------------------------------------------------
+// All Supabase traffic goes through the gateway (lib/cloud via lib/supabase).
+// Local state updates first; cloud writes follow and roll back on failure.
+
+let watchingAuth = false;
+let settingsPush: ReturnType<typeof setTimeout> | undefined;
+
+const errorNotice = (e: unknown, fallback: string) => (e instanceof Error ? e.message : fallback);
+
+const setAccount = (patch: Partial<AccountState>) => set({ account: { ...state.account, ...patch } }, false);
+
+function connectCloud() {
+  if (watchingAuth) return;
+  watchingAuth = true;
+  const cloud = getCloud();
+  if (!cloud) {
+    setAccount({ ready: true });
+    return;
+  }
+  cloud.onAuthChange((user) => {
+    if (!user) {
+      // No session (signed out, expired, or deleted): drop the cloud slices.
+      setAccount({ user: null, ready: true, favorites: [], presets: [] });
+      return;
+    }
+    setAccount({ user, ready: true });
+    refreshCloud(user.id);
+  });
+}
+
+/** Pulls favorites, presets and settings after sign-in; keeps the cache when offline. */
+async function refreshCloud(userId: string) {
+  const cloud = getCloud();
+  if (!cloud) return;
+  try {
+    const [favorites, presets, cloudSettings] = await Promise.all([
+      cloud.listFavorites(),
+      cloud.listPresets(),
+      cloud.getSettings(userId),
+    ]);
+    if (state.account.user?.id !== userId) return;
+    setAccount({ favorites, presets });
+    applySettingsSync(cloudSettings);
+  } catch {
+    // Offline or flaky network: the cached copy stays on screen.
+  }
+}
+
+/** Last write wins across devices: the newer of (local, cloud) settings applies everywhere. */
+function applySettingsSync(cloudSettings: CloudSettings | null) {
+  const local: CloudSettings = { timer: state.timer.settings, volume: state.volume, updatedAt: state.settingsUpdatedAt };
+  if (newerSettings(local, cloudSettings) === "cloud" && cloudSettings) {
+    const settings = { ...DEFAULT_TIMER, ...(cloudSettings.timer as Partial<TimerSettings>) };
+    const volume = clamp(cloudSettings.volume);
+    const idle = state.timer.status === "idle";
+    set({
+      volume,
+      lastVolume: volume > 0 ? volume : state.lastVolume,
+      settingsUpdatedAt: cloudSettings.updatedAt,
+      timer: {
+        ...state.timer,
+        settings,
+        remaining: idle ? minutes(settings, state.timer.mode) : state.timer.remaining,
+      },
+    });
+  } else if (local.updatedAt > (cloudSettings?.updatedAt ?? 0)) {
+    pushSettingsSoon();
+  }
+}
+
+/** Debounced upsert so slider drags cost one write, not hundreds. */
+function pushSettingsSoon() {
+  const cloud = getCloud();
+  if (!cloud || !state.account.user) return;
+  clearTimeout(settingsPush);
+  settingsPush = setTimeout(() => {
+    const user = state.account.user;
+    if (!user) return;
+    cloud
+      .pushSettings(user.id, { timer: state.timer.settings, volume: state.volume, updatedAt: state.settingsUpdatedAt })
+      .catch(() => {});
+  }, SETTINGS_PUSH_MS);
+}
+
+/** Applies a `?p=<uuid>` share link once hydration has stripped it from the URL. */
+async function loadShared(id: string) {
+  const cloud = getCloud();
+  if (!cloud) return;
+  try {
+    const preset = await cloud.fetchSharedPreset(id);
+    if (!preset) {
+      set({ notice: "That shared preset is no longer available." }, false);
+      return;
+    }
+    const layers = Object.fromEntries(Object.entries(preset.layers).filter(([sid]) => SOUND_BY_ID.has(sid)));
+    set({ layers, shared: { ...preset, layers }, notice: readyNotice(preset.label, layers) });
+  } catch {
+    set({ notice: "Couldn’t load that shared preset." }, false);
+  }
+}
+
+/** Optimistically saves a preset; rolls back and explains if the cloud write fails. */
+function savePreset(label: string, layers: Layers): boolean {
+  const cloud = getCloud();
+  const user = state.account.user;
+  if (!cloud || !user) return false;
+  const trimmed = label.trim();
+  if (!trimmed || !Object.keys(layers).length) return true;
+  if (state.account.presets.length >= PRESET_LIMIT) {
+    actions.showNotice(`You've reached ${PRESET_LIMIT} saved presets. Delete one to save another.`);
+    return true;
+  }
+  const preset: CustomPreset = { id: crypto.randomUUID(), label: trimmed, layers: { ...layers }, isPublic: false };
+  setAccount({ presets: [preset, ...state.account.presets] });
+  set({ notice: "Saved to your presets." }, false);
+  cloud.createPreset(user.id, preset).catch((e) => {
+    setAccount({ presets: state.account.presets.filter((p) => p.id !== preset.id) });
+    actions.showNotice(errorNotice(e, "Couldn’t save your preset."));
+  });
+  return true;
+}
+
+const bumpRecents = (ref: string) => [ref, ...state.recents.filter((r) => r !== ref)].slice(0, MAX_RECENTS);
+
 // Actions --------------------------------------------------------------------
 
 const haptic = () => navigator.vibrate?.(8);
@@ -309,6 +500,7 @@ export const actions = {
     const url = new URL(location.href);
     const shared = url.searchParams.get("mix");
     const preset = PRESETS.find((p) => p.id === url.searchParams.get("preset"));
+    const sharedPresetId = url.searchParams.get("p");
     const wantedTab = url.searchParams.get("tab");
     const tab: Tab = wantedTab === "sounds" || wantedTab === "timer" ? wantedTab : (intent?.tab ?? "mix");
     let layers: Layers = saved.layers ?? {};
@@ -316,9 +508,9 @@ export const actions = {
     else if (preset) layers = { ...preset.layers };
     else if (intent?.layers) layers = { ...intent.layers };
     // A first-time visitor on a page with nothing to load gets a random preset, not a blank mixer.
-    else if (firstVisit && !intent) layers = { ...PRESETS[Math.floor(Math.random() * PRESETS.length)].layers };
+    else if (firstVisit && !intent && !sharedPresetId) layers = { ...PRESETS[Math.floor(Math.random() * PRESETS.length)].layers };
     if (url.search) {
-      ["mix", "preset", "tab", "source"].forEach((key) => url.searchParams.delete(key));
+      ["mix", "preset", "tab", "source", "p"].forEach((key) => url.searchParams.delete(key));
       history.replaceState(history.state, "", url);
     }
     layers = Object.fromEntries(Object.entries(layers).filter(([id]) => SOUND_BY_ID.has(id)));
@@ -335,6 +527,9 @@ export const actions = {
       timer = { ...timer, settings, mode: "focus", status: "idle", endsAt: null, remaining: minutes(settings, "focus") };
     }
 
+    const cached = (saved as { account?: Partial<AccountState> }).account;
+    const recents = Array.isArray(saved.recents) ? saved.recents.filter((r): r is string => typeof r === "string") : [];
+
     state = {
       ...state,
       layers,
@@ -343,6 +538,14 @@ export const actions = {
       timer,
       hydrated: true,
       tab,
+      recents: recents.slice(0, MAX_RECENTS),
+      settingsUpdatedAt: typeof saved.settingsUpdatedAt === "number" ? saved.settingsUpdatedAt : 0,
+      account: {
+        user: cached?.user ?? null,
+        ready: false,
+        favorites: Array.isArray(cached?.favorites) ? cached.favorites : [],
+        presets: Array.isArray(cached?.presets) ? cached.presets : [],
+      },
       notice:
         shared || preset
           ? readyNotice(shared ? "Shared mix" : preset!.label, layers)
@@ -350,6 +553,8 @@ export const actions = {
     };
     set({}, false);
     watchTimer();
+    connectCloud();
+    if (sharedPresetId) loadShared(sharedPresetId);
   },
 
   /** Applies a page's intent on client-side navigation; falls back to hydrate on the first visit. */
@@ -407,9 +612,9 @@ export const actions = {
     set({ layers: { ...state.layers, [id]: clamp(volume) } });
   },
 
-  applyPreset(layers: Layers) {
+  applyPreset(layers: Layers, ref?: string) {
     haptic();
-    set({ layers: { ...layers }, playing: true });
+    set({ layers: { ...layers }, playing: true, ...(ref ? { recents: bumpRecents(ref) } : {}) });
   },
 
   shuffle() {
@@ -430,7 +635,8 @@ export const actions = {
 
   setVolume(volume: number) {
     const v = clamp(volume);
-    set({ volume: v, lastVolume: v > 0 ? v : state.lastVolume });
+    set({ volume: v, lastVolume: v > 0 ? v : state.lastVolume, settingsUpdatedAt: Date.now() });
+    pushSettingsSoon();
   },
 
   toggleMute() {
@@ -484,9 +690,162 @@ export const actions = {
   updateTimerSettings(patch: Partial<TimerSettings>) {
     const settings = { ...state.timer.settings, ...patch };
     const idle = state.timer.status === "idle";
+    set({ settingsUpdatedAt: Date.now() }, false);
     setTimer({ settings, remaining: idle ? minutes(settings, state.timer.mode) : state.timer.remaining });
+    pushSettingsSoon();
+  },
+
+  // Account ------------------------------------------------------------------
+
+  async signIn(provider: Provider) {
+    const cloud = getCloud();
+    if (!cloud) return;
+    try {
+      await cloud.signIn(provider, `${location.origin}/`);
+    } catch (e) {
+      actions.showNotice(errorNotice(e, "Couldn’t start sign-in."));
+    }
+  },
+
+  /** Completes sign-in with an ID token from Google's own button; onAuthChange takes it from there. */
+  async signInWithGoogleToken(token: string, nonce: string) {
+    const cloud = getCloud();
+    if (!cloud) return;
+    try {
+      await cloud.signInWithGoogleToken(token, nonce);
+    } catch (e) {
+      actions.showNotice(errorNotice(e, "Couldn’t sign in with Google."));
+    }
+  },
+
+  /** Emails a sign-in code. Resolves to an error message for the form, or null when sent. */
+  async sendEmailCode(email: string, captchaToken: string): Promise<string | null> {
+    const cloud = getCloud();
+    if (!cloud) return "Accounts are off in this build.";
+    try {
+      await cloud.sendEmailCode(email, captchaToken);
+      return null;
+    } catch (e) {
+      return errorNotice(e, "Couldn’t send the code.");
+    }
+  },
+
+  /** Signs in with the emailed code. Resolves to an error message, or null on success. */
+  async verifyEmailCode(email: string, code: string): Promise<string | null> {
+    const cloud = getCloud();
+    if (!cloud) return "Accounts are off in this build.";
+    try {
+      await cloud.verifyEmailCode(email, code); // onAuthChange fills in the account.
+      return null;
+    } catch (e) {
+      return errorNotice(e, "Couldn’t check the code.");
+    }
+  },
+
+  async signOut() {
+    const cloud = getCloud();
+    if (!cloud) return;
+    try {
+      await cloud.signOut(); // onAuthChange clears the account slices.
+    } catch (e) {
+      actions.showNotice(errorNotice(e, "Couldn’t sign out."));
+    }
+  },
+
+  /** Deletes the auth user and all their rows (presets, favorites, settings). */
+  async deleteAccount(): Promise<boolean> {
+    const cloud = getCloud();
+    if (!cloud || !state.account.user) return false;
+    try {
+      await cloud.deleteAccount();
+      setAccount({ user: null, favorites: [], presets: [] });
+      actions.showNotice("Your account and its data are deleted.");
+      return true;
+    } catch (e) {
+      actions.showNotice(errorNotice(e, "Couldn’t delete your account."));
+      return false;
+    }
+  },
+
+  /** Returns false while signed out so the caller can route to /account instead. */
+  toggleFavorite(ref: string): boolean {
+    const cloud = getCloud();
+    const user = state.account.user;
+    if (!cloud || !user) return false;
+    haptic();
+    const had = state.account.favorites.includes(ref);
+    setAccount({ favorites: had ? state.account.favorites.filter((r) => r !== ref) : [...state.account.favorites, ref] });
+    (had ? cloud.removeFavorite(user.id, ref) : cloud.addFavorite(user.id, ref)).catch((e) => {
+      setAccount({
+        favorites: had ? [...state.account.favorites, ref] : state.account.favorites.filter((r) => r !== ref),
+      });
+      actions.showNotice(errorNotice(e, "Couldn’t update that favorite."));
+    });
+    return true;
+  },
+
+  /** Saves the current mix under a name. Returns false while signed out. */
+  saveCurrentPreset(label: string): boolean {
+    return savePreset(label, state.layers);
+  },
+
+  /** Keeps a copy of the shared preset currently loaded from a `?p=` link. */
+  saveSharedCopy(): boolean {
+    const shared = state.shared;
+    if (!shared) return true;
+    const saved = savePreset(shared.label, shared.layers);
+    if (saved) set({ shared: null }, false);
+    return saved;
+  },
+
+  dismissShared() {
+    set({ shared: null }, false);
+  },
+
+  renamePreset(id: string, label: string) {
+    const cloud = getCloud();
+    const trimmed = label.trim();
+    const before = state.account.presets.find((p) => p.id === id);
+    if (!cloud || !before || !trimmed || before.label === trimmed) return;
+    setAccount({ presets: state.account.presets.map((p) => (p.id === id ? { ...p, label: trimmed } : p)) });
+    cloud.renamePreset(id, trimmed).catch((e) => {
+      setAccount({ presets: state.account.presets.map((p) => (p.id === id ? { ...p, label: before.label } : p)) });
+      actions.showNotice(errorNotice(e, "Couldn’t rename that preset."));
+    });
+  },
+
+  deletePreset(id: string) {
+    const cloud = getCloud();
+    const user = state.account.user;
+    const before = state.account.presets.find((p) => p.id === id);
+    if (!cloud || !user || !before) return;
+    haptic();
+    setAccount({
+      presets: state.account.presets.filter((p) => p.id !== id),
+      favorites: state.account.favorites.filter((r) => r !== id),
+    });
+    set({ recents: state.recents.filter((r) => r !== id) }, false);
+    cloud.deletePreset(user.id, id).catch((e) => {
+      setAccount({ presets: [before, ...state.account.presets] });
+      actions.showNotice(errorNotice(e, "Couldn’t delete that preset."));
+    });
+  },
+
+  /** Flips a preset's share state. Shared presets are readable by anyone with the link. */
+  setPresetShared(id: string, isPublic: boolean) {
+    const cloud = getCloud();
+    const before = state.account.presets.find((p) => p.id === id);
+    if (!cloud || !before || before.isPublic === isPublic) return;
+    setAccount({ presets: state.account.presets.map((p) => (p.id === id ? { ...p, isPublic } : p)) });
+    cloud.setPresetPublic(id, isPublic).catch((e) => {
+      setAccount({ presets: state.account.presets.map((p) => (p.id === id ? { ...p, isPublic: before.isPublic } : p)) });
+      actions.showNotice(errorNotice(e, "Couldn’t change sharing for that preset."));
+    });
   },
 };
+
+/** The share link for a public custom preset. */
+export const presetShareUrl = (id: string) => `${location.origin}/?p=${id}`;
 
 // React binding --------------------------------------------------------------
 

@@ -143,7 +143,7 @@ export const MORE_ACTIVITY_PAGES: LandingPage[] = [
     slug: "sleep",
     wave: 2,
     title: "Sleep sounds: rain, noise and ambience for sleep",
-    description: "Free sleep sounds in your browser: soft rain, brown noise and a night train, with a sleep timer. No ads, no account, works offline and with the screen off.",
+    description: "Free sleep sounds in your browser: soft rain, brown noise and a night train, with a sleep timer. No ads, no account needed, works offline and with the screen off.",
     heading: "Sounds for sleep",
     intro: "Soft rain over brown noise, kept low for sleep. Tap play.",
     intent: { label: "Sleep mix", layers: { "light-rain": 0.4, "brown-noise": 0.35 } },
