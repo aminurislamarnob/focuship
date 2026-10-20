@@ -10,7 +10,8 @@ const noSubscribe = () => () => {};
 const FILE_PATHS =SOUNDS.flatMap((s) => (s.source.type === "file" ? [s.source.path] : []));
 const SHORTCUTS: [string, string][] = [
   ["Space", "Play / pause"],
-  ["F", "Focus mode"],
+  ["V", "Focus mode"],
+  ["F", "Full screen"],
   ["M", "Mute"],
   ["1 2 3", "Switch tabs"],
 ];

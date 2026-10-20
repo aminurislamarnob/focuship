@@ -1,6 +1,6 @@
 "use client";
 
-import { Disc3, Download, Expand, Info, LibraryBig, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
+import { Check, Disc3,Download, Expand, Info, LibraryBig, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
 import { startPwa, useInstallPrompt } from "@/lib/pwa";
@@ -10,7 +10,19 @@ import { FocusMode } from "./FocusMode";
 import { MixView } from "./MixView";
 import { SoundsView } from "./SoundsView";
 import { TimerView, formatClock, useTimerClock } from "./TimerView";
-import { CATEGORY_ICONS, Eq, IconButton, PresetIcon, Sheet, Slider, StatusDot, SwapText, cx } from "./ui";
+import {
+  CATEGORY_ICONS,
+  Eq,
+  IconButton,
+  PresetIcon,
+  Sheet,
+  Slider,
+  StatusDot,
+  SwapText,
+  cx,
+  useCopied,
+  type ShareResult,
+} from "./ui";
 
 const TABS: { id: Tab; label: string; icon: typeof Disc3 }[] = [
   { id: "mix", label: "Mix", icon: Disc3 },
@@ -35,6 +47,7 @@ function Logo() {
 export function FocusApp() {
   const tab = useFocus((s) => s.tab);
   const [focusOpen, setFocusOpen] = useState(false);
+  const [fullscreenRequest, setFullscreenRequest] = useState(0);
   const [mixerOpen, setMixerOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const main = useRef<HTMLElement>(null);
@@ -58,17 +71,19 @@ export function FocusApp() {
     main.current?.scrollTo({ top: 0 });
   }, []);
 
-  const share = useCallback(async () => {
+  const share = useCallback(async (): Promise<ShareResult> => {
     const url = shareUrl();
     try {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) {
         await navigator.share({ title: "A focus mix", text: "Listen to my focus mix", url });
-        return;
+        return "shared";
       }
       await navigator.clipboard.writeText(url);
-      actions.showNotice("Link copied. Anyone with it gets this mix.");
+      return "copied";
     } catch (e) {
-      if ((e as Error).name !== "AbortError") actions.showNotice("Couldn’t share this mix.");
+      if ((e as Error).name === "AbortError") return "cancelled";
+      actions.showNotice("Couldn’t share this mix.");
+      return "failed";
     }
   }, []);
 
@@ -80,8 +95,16 @@ export function FocusApp() {
       if (e.key === " " && !target.closest("button, a, [role=tab]")) {
         e.preventDefault();
         actions.toggle();
-      } else if (e.key === "f" || e.key === "F") {
+      } else if (e.key === "v" || e.key === "V") {
         setFocusOpen((open) => !open);
+      } else if (e.key === "f" || e.key === "F") {
+        if (focusOpen && document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else {
+          // Focus mode must be visible before it can go fullscreen; it handles the request once shown.
+          setFocusOpen(true);
+          setFullscreenRequest((n) => n + 1);
+        }
       } else if (e.key === "m" || e.key === "M") {
         actions.toggleMute();
       } else if (e.key === "Escape") {
@@ -125,7 +148,7 @@ export function FocusApp() {
             className="flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm text-muted hover:bg-surface hover:text-fg"
           >
             <Expand className="size-4" aria-hidden /> Focus mode
-            <kbd className="ml-auto font-mono text-[0.6875rem] text-faint">F</kbd>
+            <kbd className="ml-auto font-mono text-[0.6875rem] text-faint">V</kbd>
           </button>
           <button
             type="button"
@@ -203,7 +226,7 @@ export function FocusApp() {
 
       <MixerSheet open={mixerOpen} onClose={() => setMixerOpen(false)} onShare={share} />
       <AboutSheet open={aboutOpen} onClose={() => setAboutOpen(false)} />
-      <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} />
+      <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} fullscreenRequest={fullscreenRequest} />
     </div>
   );
 }
@@ -267,7 +290,16 @@ function TimerChip() {
   );
 }
 
-function MixerSheet({ open, onClose, onShare }: { open: boolean; onClose(): void; onShare(): void }) {
+function MixerSheet({
+  open,
+  onClose,
+  onShare,
+}: {
+  open: boolean;
+  onClose(): void;
+  onShare(): Promise<ShareResult>;
+}) {
+  const [copied, flagCopied] = useCopied();
   const layers = useFocus((s) => s.layers);
   const volume = useFocus((s) => s.volume);
   const loading = useFocus((s) => s.loading);
@@ -319,11 +351,18 @@ function MixerSheet({ open, onClose, onShare }: { open: boolean; onClose(): void
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={onShare}
-            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[4px] border border-line-strong font-mono text-xs"
+            onClick={() => onShare().then((result) => result === "copied" && flagCopied())}
+            className={cx(
+              "inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[4px] border font-mono text-xs transition-colors",
+              copied ? "border-ok/60 bg-ok/10 text-ok" : "border-line-strong",
+            )}
           >
-            <Share2 className="size-4" /> Share mix
+            {copied ? <Check className="size-4 animate-pop-in" /> : <Share2 className="size-4" />}
+            {copied ? "Link copied" : "Share mix"}
           </button>
+          <span role="status" className="sr-only">
+            {copied ? "Link copied" : ""}
+          </span>
           <button
             type="button"
             onClick={() => {

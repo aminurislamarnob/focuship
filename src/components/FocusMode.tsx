@@ -8,6 +8,7 @@ import { Ambient, IconButton, PresetIcon, Slider, StatusDot, SwapText, cx } from
 
 const IDLE_MS = 3000;
 const LINE_MS = 120_000;
+const FULLSCREEN_FADE_MS = 400;
 
 const LINES = [
   "One thing at a time.",
@@ -56,8 +57,16 @@ function useClock() {
   return now;
 }
 
-export function FocusMode({ open, onClose }: { open: boolean; onClose(): void }) {
+interface FocusModeProps {
+  open: boolean;
+  onClose(): void;
+  /** Bumped by the F shortcut; each new value asks for fullscreen once visible. */
+  fullscreenRequest: number;
+}
+
+export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) {
   const root = useRef<HTMLDivElement>(null);
+  const handledRequest = useRef(fullscreenRequest);
   const layers = useFocus((s) => s.layers);
   const playing = useFocus((s) => s.playing);
   const volume = useFocus((s) => s.volume);
@@ -85,7 +94,14 @@ export function FocusMode({ open, onClose }: { open: boolean; onClose(): void })
 
   useEffect(() => {
     if (!open) return;
-    const onFull = () => setFull(document.fullscreenElement === root.current);
+    const onFull = () => {
+      setFull(document.fullscreenElement === root.current);
+      // The resize is abrupt; fade the contents back in so the switch feels smooth.
+      if (!root.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      for (const child of root.current.children) {
+        child.animate([{ opacity: 0 }, { opacity: 1 }], { duration: FULLSCREEN_FADE_MS, easing: "cubic-bezier(0.22, 1, 0.36, 1)" });
+      }
+    };
     document.addEventListener("fullscreenchange", onFull);
     return () => document.removeEventListener("fullscreenchange", onFull);
   }, [open]);
@@ -93,6 +109,13 @@ export function FocusMode({ open, onClose }: { open: boolean; onClose(): void })
   useEffect(() => {
     if (!open && document.fullscreenElement) document.exitFullscreen().catch(() => {});
   }, [open]);
+
+  useEffect(() => {
+    if (!open || fullscreenRequest === handledRequest.current) return;
+    handledRequest.current = fullscreenRequest;
+    // Still inside the key press's user activation window, so the browser allows it.
+    if (!document.fullscreenElement) root.current?.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
+  }, [open, fullscreenRequest]);
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});

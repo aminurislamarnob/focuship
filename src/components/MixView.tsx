@@ -1,17 +1,30 @@
 "use client";
 
-import { Expand, Pause, Play, Share2, Shuffle, Trash2, X } from "lucide-react";
+import { Check, Expand, Pause, Play, Share2, Shuffle, Trash2, X } from "lucide-react";
 import { PRESETS, SOUND_BY_ID } from "@/lib/catalog";
 import { actions, matchPreset, mixHue, mixName, useFocus } from "@/lib/store";
-import { Ambient, CATEGORY_ICONS, Eq, IconButton, PresetIcon, Slider, StatusDot, SwapText, cx } from "./ui";
+import {
+  Ambient,
+  CATEGORY_ICONS,
+  Eq,
+  IconButton,
+  PresetIcon,
+  Slider,
+  StatusDot,
+  SwapText,
+  cx,
+  useCopied,
+  type ShareResult,
+} from "./ui";
 
 interface MixViewProps {
   onOpenFocus(): void;
-  onShare(): void;
+  onShare(): Promise<ShareResult>;
   onBrowse(): void;
 }
 
 export function MixView({ onOpenFocus, onShare, onBrowse }: MixViewProps) {
+  const [copied, flagCopied] = useCopied();
   const layers = useFocus((s) => s.layers);
   const playing = useFocus((s) => s.playing);
   const loading = useFocus((s) => s.loading);
@@ -74,10 +87,18 @@ export function MixView({ onOpenFocus, onShare, onBrowse }: MixViewProps) {
             <Expand className="size-5" />
           </IconButton>
           {ids.length > 0 && (
-            <IconButton label="Share this mix" size="lg" onClick={onShare} className="max-[360px]:hidden">
-              <Share2 className="size-5" />
+            <IconButton
+              label={copied ? "Link copied" : "Share this mix"}
+              size="lg"
+              onClick={() => onShare().then((result) => result === "copied" && flagCopied())}
+              className={cx("max-[360px]:hidden", copied && "border-ok/60 bg-ok/10 text-ok hover:bg-ok/10")}
+            >
+              {copied ? <Check className="size-5 animate-pop-in" /> : <Share2 className="size-5" />}
             </IconButton>
           )}
+          <span role="status" className={cx("label-mono text-ok", copied ? "animate-pop-in max-sm:sr-only" : "sr-only")}>
+            {copied ? "Copied" : ""}
+          </span>
         </div>
       </section>
 

@@ -7,6 +7,21 @@ const FADE_OUT = 1;
 const PAUSE_FADE = 0.4;
 const LOOP_CROSSFADE = 2.5;
 
+type AudioSessionType = "auto" | "playback" | "transient" | "transient-solo" | "ambient" | "play-and-record";
+
+/**
+ * Safari's Audio Session API (16.4+): a "playback" session behaves like a
+ * music app, so audio keeps going in the background and ignores the iPhone's
+ * silent switch. Other browsers don't expose it, and this does nothing there.
+ */
+function claimPlaybackSession() {
+  const session = (navigator as Navigator & { audioSession?: { type: AudioSessionType } }).audioSession;
+  if (!session || session.type === "playback") return;
+  try {
+    session.type = "playback";
+  } catch {}
+}
+
 /** Perceptual volume curve: sliders feel linear to the ear. */
 export const perceived = (v: number) => v * v;
 
@@ -271,6 +286,7 @@ export class AudioEngine {
 
     if (playing) {
       clearTimeout(this.suspendTimer);
+      claimPlaybackSession();
       ctx.resume().catch(() => {});
       this.startKeepAlive();
     }

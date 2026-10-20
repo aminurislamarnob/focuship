@@ -175,6 +175,24 @@ export function PresetIcon({ id, className, strokeWidth = 1.5 }: { id: string; c
   return <Icon aria-hidden strokeWidth={strokeWidth} className={cx("pointer-events-none shrink-0", className)} />;
 }
 
+export type ShareResult = "shared" | "copied" | "cancelled" | "failed";
+
+const COPIED_MS = 2000;
+
+/** A flag that turns itself off after a moment, for "Copied" feedback. */
+export function useCopied(): [boolean, () => void] {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const flag = () => {
+    clearTimeout(timer.current);
+    setCopied(true);
+    navigator.vibrate?.(10);
+    timer.current = setTimeout(() => setCopied(false), COPIED_MS);
+  };
+  return [copied, flag];
+}
+
 export function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }

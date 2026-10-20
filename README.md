@@ -7,6 +7,22 @@ A mobile-first ambient sound mixer and focus timer, built with Next.js and insta
 - **Focus mode:** full-screen clock or timer. Controls hide after 3 seconds and the screen stays awake.
 - **App-like:** installs to the Home Screen, works offline, keeps playing with the screen locked, and shows up in OS media controls. Mixes can be shared as links (`/?mix=light-rain:55,cafe:45`).
 
+## Keyboard shortcuts
+
+Shortcuts are ignored while you're typing in the search box. With a slider focused, the arrow keys adjust that slider instead.
+
+| Key | Action |
+| --- | --- |
+| <kbd>Space</kbd> | Play / pause |
+| <kbd>V</kbd> | Open or close focus mode |
+| <kbd>F</kbd> | Full screen (opens focus mode if needed); press again to exit |
+| <kbd>M</kbd> | Mute / unmute |
+| <kbd>Esc</kbd> | Close focus mode or the open sheet |
+| <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> | Switch to Mix, Sounds or Timer |
+| <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>↓</kbd> | Focused slider: ±5% |
+| <kbd>Page Up</kbd> / <kbd>Page Down</kbd> | Focused slider: ±10% |
+| <kbd>Home</kbd> / <kbd>End</kbd> | Focused slider: 0% / 100% |
+
 ## Run it
 
 ```bash
