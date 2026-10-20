@@ -2,7 +2,7 @@
 
 import { Maximize2, Minimize2, Pause, Play, Timer, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { actions, matchPreset, mixHue, mixName, useFocus } from "@/lib/store";
+import { actions, matchPreset, mixMood, mixName, useFocus } from "@/lib/store";
 import { formatClock, useTimerClock } from "./TimerView";
 import { Ambient, IconButton, PresetIcon, Slider, StatusDot, SwapText, cx } from "./ui";
 
@@ -136,7 +136,7 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
       onKeyDown={wake}
       className={cx("fade fixed inset-0 z-[60] isolate overflow-hidden bg-bg text-fg", idle && "cursor-none")}
     >
-      {open && <Ambient hue={mixHue(layers)} active={playing} className="-z-10" />}
+      {open && <Ambient mood={mixMood(layers)} layers={layers} active={playing} className="-z-10" />}
 
       <div className="pt-safe absolute inset-x-0 top-0">
         <div

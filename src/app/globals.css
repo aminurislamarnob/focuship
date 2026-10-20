@@ -232,6 +232,53 @@ label {
   }
 }
 
+/* Ambient backdrop motes: the mix's sound icons moving like their category. */
+@keyframes mote-fall {
+  from {
+    top: -18%;
+  }
+  to {
+    top: 112%;
+  }
+}
+@keyframes mote-roll {
+  from {
+    left: -14%;
+  }
+  to {
+    left: 110%;
+  }
+}
+@keyframes mote-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+.mote-fall {
+  animation: mote-fall linear infinite;
+}
+.mote-roll {
+  animation: mote-roll linear infinite;
+}
+.mote-roll-reverse {
+  animation: mote-roll linear infinite reverse;
+}
+.mote-bob {
+  animation: mote-bob ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mote-fall,
+  .mote-roll,
+  .mote-roll-reverse,
+  .mote-bob {
+    animation: none;
+  }
+}
+
 .fade {
   transition:
     opacity 0.3s var(--ease-out),

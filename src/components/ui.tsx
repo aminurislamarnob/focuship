@@ -74,8 +74,8 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import type { CategoryId, Sound } from "@/lib/catalog";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { CATEGORY_BY_ID, SOUND_BY_ID, type CategoryId, type Sound } from "@/lib/catalog";
 
 export const CATEGORY_ICONS: Record<CategoryId, LucideIcon> = {
   rain: CloudRain,
@@ -543,95 +543,114 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
   );
 }
 
-const GLYPHS = "·.:+-=*%#01/\\<>{}";
+export interface AmbientMood {
+  hue: number;
+  category: string;
+  energy: number;
+}
+
+/** How each category's icons move across the backdrop. */
+const MOTE_MOTION: Record<string, "fall" | "roll" | "roll-reverse" | "bob"> = {
+  rain: "fall",
+  nature: "roll",
+  urban: "roll",
+  transport: "roll-reverse",
+};
+
+interface Mote {
+  key: number;
+  id: string;
+  motion: "fall" | "roll" | "roll-reverse" | "bob";
+  hue: number;
+  style: CSSProperties;
+}
+
+const rand = (lo: number, hi: number) => lo + Math.random() * (hi - lo);
+
+/** Faint drifting icons for one layer; louder layers shed more of them. */
+function layerMotes(id: string, volume: number, from: number): Mote[] {
+  const sound = SOUND_BY_ID.get(id);
+  if (!sound) return [];
+  const category = CATEGORY_BY_ID.get(sound.category);
+  const motion = MOTE_MOTION[sound.category] ?? "bob";
+  return Array.from({ length: 1 + Math.round(volume * 3) }, (_, n) => {
+    const duration = motion === "bob" ? rand(5, 9) : rand(16, 34);
+    return {
+      key: from + n,
+      id,
+      motion,
+      hue: category?.hue ?? 22,
+      style: {
+        left: `${rand(2, 92)}%`,
+        // The fall/roll keyframes override this while animating; it only
+        // places the icon when motion is off (prefers-reduced-motion).
+        top: `${rand(4, 86)}%`,
+        width: rand(16, 40),
+        opacity: rand(0.05, 0.14),
+        rotate: motion === "bob" ? undefined : `${rand(-14, 14)}deg`,
+        animationDuration: `${duration}s`,
+        animationDelay: `${-rand(0, duration)}s`,
+      },
+    };
+  });
+}
 
 /**
- * A field of faint monospace glyphs that flicker slowly, washed with the
- * mix's colour. It draws a handful of cells per frame and idles when hidden.
+ * A field of the current mix's own sound icons, washed with its colour.
+ * Each layer sheds faint copies of its icon that move like their category:
+ * rain falls, nature and urban roll across, transport glides the other way,
+ * everything else bobs in place. The whole sky freezes while paused.
  */
-export function Ambient({ hue, active, className }: { hue: number; active: boolean; className?: string }) {
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const activeRef = useRef(active);
+export function Ambient({ mood, layers, active, className }: {
+  mood: AmbientMood;
+  layers: Record<string, number>;
+  active: boolean;
+  className?: string;
+}) {
+  const [motes, setMotes] = useState<Mote[]>([]);
+  const seeded = useRef("");
 
+  // Built client-side (random placement) and only when the set of sounds
+  // changes, so volume tweaks don't reshuffle the sky.
   useEffect(() => {
-    activeRef.current = active;
-  }, [active]);
-
-  useEffect(() => {
-    const el = canvas.current;
-    const ctx = el?.getContext("2d");
-    if (!el || !ctx) return;
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const cell = 18;
-    let cols = 0;
-    let rows = 0;
-    let cells: { ch: string; a: number }[] = [];
-    let frame = 0;
-    let last = 0;
-
-    const draw = (i: number) => {
-      const x = (i % cols) * cell;
-      const y = Math.floor(i / cols) * cell;
-      const c = cells[i];
-      ctx.clearRect(x, y, cell, cell);
-      if (c.a <= 0) return;
-      ctx.fillStyle = `rgba(255,255,255,${c.a})`;
-      ctx.fillText(c.ch, x + cell / 2, y + cell / 2);
-    };
-
-    const resize = () => {
-      const dpr = Math.min(devicePixelRatio || 1, 2);
-      const { width, height } = el.getBoundingClientRect();
-      el.width = Math.round(width * dpr);
-      el.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.font = `11px ui-monospace, monospace`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      cols = Math.ceil(width / cell);
-      rows = Math.ceil(height / cell);
-      cells = Array.from({ length: cols * rows }, () => ({
-        ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-        a: Math.random() < 0.12 ? Math.random() * 0.12 : 0,
-      }));
-      ctx.clearRect(0, 0, width, height);
-      cells.forEach((_, i) => draw(i));
-    };
-
-    const step = (t: number) => {
-      frame = requestAnimationFrame(step);
-      if (document.hidden || t - last < 80) return;
-      last = t;
-      const changes = Math.max(2, Math.floor(cells.length * (activeRef.current ? 0.012 : 0.004)));
-      for (let n = 0; n < changes; n++) {
-        const i = Math.floor(Math.random() * cells.length);
-        cells[i] =
-          Math.random() < 0.55
-            ? { ch: GLYPHS[Math.floor(Math.random() * GLYPHS.length)], a: 0.04 + Math.random() * 0.16 }
-            : { ch: " ", a: 0 };
-        draw(i);
-      }
-    };
-
-    resize();
-    const observer = new ResizeObserver(resize);
-    observer.observe(el);
-    if (!reduced) frame = requestAnimationFrame(step);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-    };
-  }, []);
+    const signature = Object.keys(layers).sort().join();
+    if (seeded.current === signature) return;
+    seeded.current = signature;
+    let key = 0;
+    setMotes(
+      Object.entries(layers).flatMap(([id, volume]) => {
+        const made = layerMotes(id, volume, key);
+        key += made.length;
+        return made;
+      }),
+    );
+  }, [layers]);
 
   return (
     <div aria-hidden className={cx("pointer-events-none absolute inset-0 overflow-hidden", className)}>
       <div
         className="absolute inset-0 transition-[background] duration-[1500ms]"
         style={{
-          background: `radial-gradient(90% 70% at 50% 110%, hsl(${hue} 70% 38% / ${active ? 0.38 : 0.2}), transparent 70%), radial-gradient(60% 50% at 85% 0%, hsl(${(hue + 30) % 360} 60% 30% / 0.14), transparent 70%)`,
+          background: `radial-gradient(90% 70% at 50% 110%, hsl(${mood.hue} 70% 38% / ${active ? 0.38 : 0.2}), transparent 70%), radial-gradient(60% 50% at 85% 0%, hsl(${(mood.hue + 30) % 360} 60% 30% / 0.14), transparent 70%)`,
         }}
       />
-      <canvas ref={canvas} className="absolute inset-0 size-full" />
+      <div className={cx("absolute inset-0 transition-opacity duration-1000", active ? "opacity-100" : "opacity-50")}>
+        {motes.map((mote) => {
+          const Icon = SOUND_ICONS[mote.id] ?? CATEGORY_ICONS[SOUND_BY_ID.get(mote.id)?.category ?? "generated"];
+          return (
+            <Icon
+              key={mote.key}
+              strokeWidth={1}
+              className={cx("absolute h-auto", `mote-${mote.motion}`)}
+              style={{
+                ...mote.style,
+                color: `hsl(${mote.hue} 45% 80%)`,
+                animationPlayState: active ? "running" : "paused",
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }
