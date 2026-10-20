@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Disc3,Download, Expand, Info, LibraryBig, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
 import { startPwa, useInstallPrompt } from "@/lib/pwa";
 import { actions, matchPreset, mixName, shareUrl, useFocus, type Tab } from "@/lib/store";
@@ -44,7 +44,15 @@ function Logo() {
   );
 }
 
-export function FocusApp() {
+interface FocusAppProps {
+  /** The page's H1 and one-line intro, shown above the player. */
+  heading: string;
+  intro: string;
+  /** Page copy rendered below the active view, inside the scroll area. */
+  children?: ReactNode;
+}
+
+export function FocusApp({ heading, intro, children }: FocusAppProps) {
   const tab = useFocus((s) => s.tab);
   const [focusOpen, setFocusOpen] = useState(false);
   const [fullscreenRequest, setFullscreenRequest] = useState(0);
@@ -179,6 +187,10 @@ export function FocusApp() {
 
         <main ref={main} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <div className="mx-auto w-full max-w-5xl px-4 md:px-8 md:pt-6">
+            <header className="pt-4 pb-3 md:pt-0">
+              <h1 className="text-sm font-medium text-fg">{heading}</h1>
+              <p className="mt-0.5 text-sm text-muted">{intro}</p>
+            </header>
             <div hidden={tab !== "mix"}>
               <MixView onOpenFocus={() => setFocusOpen(true)} onShare={share} onBrowse={() => go("sounds")} />
             </div>
@@ -188,6 +200,7 @@ export function FocusApp() {
             <div hidden={tab !== "timer"}>
               <TimerView />
             </div>
+            {children}
           </div>
         </main>
 
