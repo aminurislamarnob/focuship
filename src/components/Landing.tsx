@@ -3,7 +3,7 @@ import { FocusApp } from "./FocusApp";
 import { JsonLd, webApplication } from "./JsonLd";
 import { PageCopy } from "./PageCopy";
 import { Rich } from "./Rich";
-import { HUBS, PAGES, hubOf, pagePath, type Block, type Hub, type LandingPage } from "@/lib/pages";
+import { HUBS, PAGES, hubOf, pagePath, type Block, type Faq, type Hub, type LandingPage, type Section } from "@/lib/pages";
 import { absoluteUrl } from "@/lib/site";
 
 /** Label for an internal link target: a landing page's heading, or a hub's name. */
@@ -41,14 +41,41 @@ export const breadcrumbs = (trail: { name: string; path: string }[]) => ({
   })),
 });
 
-const faqPage = (page: LandingPage) => ({
+export const faqPage = (faq: Faq[]) => ({
   "@type": "FAQPage",
-  mainEntity: page.faq.map(({ q, a }) => ({
+  mainEntity: faq.map(({ q, a }) => ({
     "@type": "Question",
     name: q,
     acceptedAnswer: { "@type": "Answer", text: a.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/\*\*/g, "") },
   })),
 });
+
+export function FaqList({ faq }: { faq: Faq[] }) {
+  return (
+    <>
+      <h2>Questions</h2>
+      <dl>
+        {faq.map(({ q, a }) => (
+          <div key={q} className="mb-4">
+            <dt className="font-medium text-fg">{q}</dt>
+            <dd className="mt-1">
+              <Rich text={a} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </>
+  );
+}
+
+export function Sections({ sections }: { sections: Section[] }) {
+  return sections.map((section) => (
+    <section key={section.heading}>
+      <h2>{section.heading}</h2>
+      <Blocks blocks={section.body} />
+    </section>
+  ));
+}
 
 export function RelatedLinks({ paths }: { paths: string[] }) {
   return (
@@ -81,29 +108,14 @@ export function Landing({ page }: { page: LandingPage }) {
             {hub.label}
           </Link>
         </nav>
-        {page.copy.map((section) => (
-          <section key={section.heading}>
-            <h2>{section.heading}</h2>
-            <Blocks blocks={section.body} />
-          </section>
-        ))}
-        <h2>Questions</h2>
-        <dl>
-          {page.faq.map(({ q, a }) => (
-            <div key={q} className="mb-4">
-              <dt className="font-medium text-fg">{q}</dt>
-              <dd className="mt-1">
-                <Rich text={a} />
-              </dd>
-            </div>
-          ))}
-        </dl>
+        <Sections sections={page.copy} />
+        <FaqList faq={page.faq} />
         <RelatedLinks paths={page.related} />
       </PageCopy>
       <JsonLd
         nodes={[
           webApplication({ name: `${page.heading} · Focuship`, description: page.description, path }),
-          faqPage(page),
+          faqPage(page.faq),
           breadcrumbs([
             { name: hub.label, path: hub.path },
             { name: page.heading, path },

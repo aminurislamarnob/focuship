@@ -1,6 +1,7 @@
 import { CATEGORIES, SOUND_BY_ID, type Layers } from "./catalog";
 import type { Tab } from "./store";
 import { SOUND_PAGES } from "@/content/sounds";
+import { TIMER_HUB, TIMER_PAGES } from "@/content/timers";
 
 /**
  * The page registry: every programmatic landing page, as data. Page routes, hubs,
@@ -66,8 +67,14 @@ export interface Hub {
   path: string;
   label: string;
   title: string;
+  /** H1; defaults to the title. */
+  heading?: string;
   description: string;
   intro: string;
+  /** Optional hand-written copy and FAQ, for hubs that are hero pages themselves. */
+  copy?: Section[];
+  faq?: Faq[];
+  intent?: PageIntent;
 }
 
 export const HUBS: Hub[] = [
@@ -80,15 +87,7 @@ export const HUBS: Hub[] = [
       "Free ambient sounds for focus, study and sleep: rain, thunder, ocean waves, fireplace, café, brown, pink and white noise and binaural beats. Mix them in your browser.",
     intro: "Every sound plays in the mixer, alone or layered with others.",
   },
-  {
-    id: "timers",
-    path: "/timer",
-    label: "Timers",
-    title: "Focus timers with ambient sound",
-    description:
-      "Free online focus timers from 5 minutes to 2 hours, plus Pomodoro splits like 25/5 and 50/10. Pair any timer with rain, café or brown noise.",
-    intro: "Pick a length, press start, and let the sound keep you in the session.",
-  },
+  { ...TIMER_HUB, id: "timers", path: "/timer", label: "Timers" },
   {
     id: "activities",
     path: "/sounds-for",
@@ -148,7 +147,7 @@ export const isIndexable = (page: LandingPage) =>
   page.faq.length >= MIN_FAQ &&
   page.related.length >= MIN_RELATED;
 
-export const PAGES: LandingPage[] = [...SOUND_PAGES];
+export const PAGES: LandingPage[] = [...SOUND_PAGES, ...TIMER_PAGES];
 
 export const pagesOfType = (type: PageType) => PAGES.filter((page) => page.type === type);
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FocusApp } from "./FocusApp";
 import { JsonLd } from "./JsonLd";
-import { breadcrumbs } from "./Landing";
+import { FaqList, Sections, breadcrumbs, faqPage } from "./Landing";
 import { PageCopy } from "./PageCopy";
 import { HUBS, isIndexable, pagePath, pagesInHub, type HubId } from "@/lib/pages";
 import { pageMetadata } from "@/lib/seo";
@@ -16,12 +16,13 @@ export const hubMetadata = (id: HubId) => {
 
 /** A hub: the app, then a list of the hub's indexable landing pages. */
 export function HubPage({ id }: { id: HubId }) {
-  const { title, intro, path, label } = hub(id);
+  const { title, heading, intro, path, label, copy, faq, intent } = hub(id);
   const pages = pagesInHub(id).filter(isIndexable);
   return (
-    <FocusApp heading={title} intro={intro}>
+    <FocusApp heading={heading ?? title} intro={intro} intent={intent}>
       <PageCopy>
-        <h2>{label}</h2>
+        {copy && <Sections sections={copy} />}
+        <h2>All {label.toLowerCase()}</h2>
         <ul className="!list-none !pl-0">
           {pages.map((page) => (
             <li key={page.slug} className="!mb-4">
@@ -32,6 +33,7 @@ export function HubPage({ id }: { id: HubId }) {
             </li>
           ))}
         </ul>
+        {faq && <FaqList faq={faq} />}
       </PageCopy>
       <JsonLd
         nodes={[
@@ -50,6 +52,7 @@ export function HubPage({ id }: { id: HubId }) {
             },
           },
           breadcrumbs([{ name: label, path }]),
+          ...(faq ? [faqPage(faq)] : []),
         ]}
       />
     </FocusApp>
