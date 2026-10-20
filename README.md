@@ -35,7 +35,7 @@ npm run build && npm start                # serves out/ locally, service worker 
 
 ## Deploy
 
-The site runs on Cloudflare as a static-assets Worker: **https://let-me-focus.dev-aiarnob.workers.dev**
+The site runs on Cloudflare as a static-assets Worker at **https://focus.aminurislam.me**. The custom domain is declared in `wrangler.jsonc`; on deploy Cloudflare creates its DNS record and certificate. The `workers.dev` URL is turned off so the app has one origin, since installs and offline caches are per-origin.
 
 ```bash
 npx wrangler login   # once
