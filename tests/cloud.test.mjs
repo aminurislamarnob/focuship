@@ -50,6 +50,9 @@ function fakeDriver(handlers = {}) {
       return { data: { subscription: { unsubscribe: () => (authCallback = undefined) } } };
     },
     signInWithOAuth: async (options) => (ops.push({ oauth: options }), { error: handlers.oauthError ?? null }),
+    signInWithIdToken: async (credentials) => (ops.push({ idToken: credentials }), { error: handlers.idTokenError ?? null }),
+    signInWithOtp: async (credentials) => (ops.push({ otp: credentials }), { error: handlers.otpError ?? null }),
+    verifyOtp: async (params) => (ops.push({ verify: params }), { error: handlers.verifyError ?? null }),
     signOut: async () => (ops.push({ signOut: true }), { error: null }),
   };
   return {
@@ -104,6 +107,64 @@ test("signIn passes provider and redirect through; a failure throws a friendly C
 
   const bad = fakeDriver({ oauthError: { message: "boom" } });
   await assert.rejects(createCloud(bad.driver).signIn("github", "https://focuship.app/"), CloudError);
+});
+
+test("signInWithGoogleToken hands Google's ID token and the raw nonce to Supabase", async () => {
+  const { driver, ops } = fakeDriver();
+  await createCloud(driver).signInWithGoogleToken("id.token.jwt", "raw-nonce");
+  assert.deepEqual(ops[0], { idToken: { provider: "google", token: "id.token.jwt", nonce: "raw-nonce" } });
+});
+
+test("a rejected Google ID token throws a friendly CloudError", async () => {
+  const { driver } = fakeDriver({ idTokenError: { message: "nonces mismatch" } });
+  await assert.rejects(createCloud(driver).signInWithGoogleToken("bad", "n"), (e) => {
+    assert.ok(e instanceof CloudError);
+    assert.match(e.message, /Google/);
+    return true;
+  });
+});
+
+// Email codes ----------------------------------------------------------------------
+
+test("sendEmailCode asks for a code (not a link), creates new users, and passes the bot-check token", async () => {
+  const { driver, ops } = fakeDriver();
+  await createCloud(driver).sendEmailCode("  Ada@Example.com ", "turnstile-token");
+  assert.deepEqual(ops[0], {
+    otp: { email: "ada@example.com", options: { shouldCreateUser: true, captchaToken: "turnstile-token" } },
+  });
+});
+
+test("sendEmailCode maps rate limits, bad addresses and failed bot checks to friendly messages", async () => {
+  const cases = [
+    [{ message: "x", code: "over_email_send_rate_limit" }, /wait/i],
+    [{ message: "x", code: "over_request_rate_limit" }, /wait/i],
+    [{ message: "x", code: "email_address_invalid" }, /valid email/i],
+    [{ message: "x", code: "captcha_failed" }, /check/i],
+    [{ message: "x", code: "email_provider_disabled" }, /isn.t available/i],
+    [{ message: "network down" }, /couldn.t send/i],
+  ];
+  for (const [otpError, pattern] of cases) {
+    const { driver } = fakeDriver({ otpError });
+    await assert.rejects(createCloud(driver).sendEmailCode("a@b.co", "t"), (e) => {
+      assert.ok(e instanceof CloudError, otpError.code);
+      assert.match(e.message, pattern, otpError.code);
+      return true;
+    });
+  }
+});
+
+test("verifyEmailCode verifies the trimmed 6-digit code as an email OTP", async () => {
+  const { driver, ops } = fakeDriver();
+  await createCloud(driver).verifyEmailCode(" Ada@Example.com", " 482 913 ");
+  assert.deepEqual(ops[0], { verify: { email: "ada@example.com", token: "482913", type: "email" } });
+});
+
+test("a wrong or expired code reads as one friendly message", async () => {
+  const { driver } = fakeDriver({ verifyError: { message: "Token has expired or is invalid", code: "otp_expired" } });
+  await assert.rejects(createCloud(driver).verifyEmailCode("a@b.co", "000000"), (e) => {
+    assert.match(e.message, /wrong or has expired/);
+    return true;
+  });
 });
 
 test("deleteAccount calls the RPC, then clears the local session even if sign-out fails", async () => {

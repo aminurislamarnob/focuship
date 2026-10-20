@@ -5,14 +5,27 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Provider } from "@/lib/cloud";
 import { actions, useFocus } from "@/lib/store";
-import { CLOUD_ENABLED, FACEBOOK_ENABLED } from "@/lib/supabase";
+import { CLOUD_ENABLED, FACEBOOK_ENABLED, GOOGLE_CLIENT_ID, TURNSTILE_SITE_KEY } from "@/lib/supabase";
+import { FacebookIcon, GitHubIcon, GoogleIcon } from "./BrandIcons";
+import { EmailSignIn } from "./EmailSignIn";
+import { GoogleButton } from "./GoogleButton";
 import { PresetIcon, StatusDot, cx } from "./ui";
 
-const PROVIDERS: { id: Provider; label: string; enabled: boolean }[] = [
-  { id: "google", label: "Continue with Google", enabled: true },
-  { id: "github", label: "Continue with GitHub", enabled: true },
-  { id: "facebook", label: "Continue with Facebook", enabled: FACEBOOK_ENABLED },
+const PROVIDERS: { id: Provider; label: string; icon: typeof GoogleIcon; enabled: boolean }[] = [
+  { id: "google", label: "Continue with Google", icon: GoogleIcon, enabled: true },
+  { id: "github", label: "Continue with GitHub", icon: GitHubIcon, enabled: true },
+  { id: "facebook", label: "Continue with Facebook", icon: FacebookIcon, enabled: FACEBOOK_ENABLED },
 ];
+
+/**
+ * One look for every provider button. `group-hover`/`group-focus-within` let Google's
+ * face react when the invisible Google iframe laid over it is hovered or focused.
+ */
+const providerFace = cx(
+  "inline-flex h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-[4px] border border-line-strong bg-raised/60 text-sm font-medium transition-colors",
+  "hover:bg-surface-2 group-hover:bg-surface-2 disabled:cursor-default disabled:opacity-40",
+  "group-focus-within:outline-2 group-focus-within:outline-offset-2 group-focus-within:outline-brand-light",
+);
 
 /** Why the app sent someone here; shown above the sign-in buttons. */
 const REASONS: Record<string, string> = {
@@ -88,32 +101,54 @@ function SetupNote() {
 
 function SignedOut({ reason }: { reason: string | null }) {
   const ready = useFocus((s) => s.account.ready);
+  // Google's own button when configured; the Supabase redirect if its script can't load.
+  const [googleFallback, setGoogleFallback] = useState(!GOOGLE_CLIENT_ID);
   return (
     <section className="flex flex-col gap-4">
       {reason && (
         <p className="rounded-[6px] border border-brand/40 bg-brand/10 px-3 py-2.5 text-sm text-brand-light">{reason}</p>
       )}
-      <div className="flex flex-col gap-2">
-        {PROVIDERS.filter((p) => p.enabled).map((provider) => (
-          <button
-            key={provider.id}
-            type="button"
-            disabled={!ready}
-            onClick={() => actions.signIn(provider.id)}
-            className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[4px] border border-line-strong bg-raised/60 text-sm font-medium transition-colors hover:bg-surface-2 disabled:opacity-40"
-          >
-            {provider.label}
-          </button>
-        ))}
+      {/* Capped at 400px: the widest Google renders its own button, so the others match it. */}
+      <div className="flex w-full max-w-[400px] flex-col gap-2">
+        {PROVIDERS.filter((p) => p.enabled).map(({ id, label, icon: Icon }) =>
+          id === "google" && !googleFallback ? (
+            <GoogleButton key={id} clientId={GOOGLE_CLIENT_ID} onUnavailable={() => setGoogleFallback(true)}>
+              {(loaded) => (
+                <span className={cx(providerFace, !(loaded && ready) && "animate-pulse opacity-60")}>
+                  <Icon className="size-5" />
+                  {label}
+                </span>
+              )}
+            </GoogleButton>
+          ) : (
+            <button
+              key={id}
+              type="button"
+              disabled={!ready}
+              onClick={() => actions.signIn(id)}
+              className={providerFace}
+            >
+              <Icon className="size-5" />
+              {label}
+            </button>
+          ),
+        )}
+        {TURNSTILE_SITE_KEY && (
+          <>
+            <p className="label-mono my-2 text-center text-faint" aria-hidden>
+              Or
+            </p>
+            <EmailSignIn siteKey={TURNSTILE_SITE_KEY} />
+          </>
+        )}
+        <p className="mt-3 text-center text-xs text-faint">
+          By continuing, you acknowledge Focuship&rsquo;s{" "}
+          <Link href="/privacy" className="underline underline-offset-4 hover:text-fg">
+            Privacy Policy
+          </Link>
+          . One account per email, whichever way you sign in.
+        </p>
       </div>
-      <p className="text-xs text-faint">
-        One account per email: sign in with Google today and GitHub tomorrow and you land in the same account. No
-        passwords, nothing posted on your behalf. See the{" "}
-        <Link href="/privacy" className="underline underline-offset-4 hover:text-fg">
-          privacy policy
-        </Link>
-        .
-      </p>
     </section>
   );
 }
@@ -143,7 +178,8 @@ function SignedIn() {
         )}
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{user.name}</p>
-          <p className="truncate text-sm text-muted">{user.email}</p>
+          {/* Email-code accounts have no name, so the name already is the address. */}
+          {user.email !== user.name && <p className="truncate text-sm text-muted">{user.email}</p>}
           <p className="label-mono mt-1 text-faint">via {user.provider}</p>
         </div>
       </section>

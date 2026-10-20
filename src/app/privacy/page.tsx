@@ -37,9 +37,11 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="With an account (optional)">
-          <p>When you sign in with Google or GitHub, we receive and store:</p>
+          <p>When you sign in with Google, GitHub or an emailed code, we receive and store:</p>
           <ul className="list-disc pl-5">
-            <li>your name, email address and profile picture from that provider;</li>
+            <li>
+              your email address, and with Google or GitHub also your name and profile picture from that provider;
+            </li>
             <li>the presets you save, the presets you mark as favorites, and whether you share a preset by link;</li>
             <li>your timer settings and master volume, so they sync across your devices.</li>
           </ul>
@@ -60,8 +62,12 @@ export default function PrivacyPage() {
               sign-in itself under their own privacy policies.
             </li>
             <li>
-              <strong className="text-fg">Cloudflare</strong> serves the site and may provide cookie-free, aggregate
-              visit statistics.
+              <strong className="text-fg">Brevo</strong> delivers the sign-in code emails.
+            </li>
+            <li>
+              <strong className="text-fg">Cloudflare</strong> serves the site, runs the Turnstile security check when
+              you request an email code (to stop bots abusing the form), and may provide cookie-free, aggregate visit
+              statistics.
             </li>
           </ul>
         </Section>
@@ -70,8 +76,8 @@ export default function PrivacyPage() {
           <p>
             Sign in and open <Link href="/account" className="text-fg underline underline-offset-4">your account</Link>,
             then choose <em>Delete account</em>. Your account, presets, favorites and synced settings are removed
-            permanently and immediately. You can also revoke {SITE_NAME}&rsquo;s access from your Google or GitHub
-            account settings at any time.
+            permanently and immediately. If you signed in with Google or GitHub, you can also revoke{" "}
+            {SITE_NAME}&rsquo;s access from that account&rsquo;s settings at any time.
           </p>
         </Section>
 

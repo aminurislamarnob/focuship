@@ -23,18 +23,50 @@ is in `supabase/migrations/0001_accounts.sql`.
 1. Authentication → URL Configuration:
    - **Site URL**: `https://focuship.app`
    - **Additional redirect URLs**: `http://localhost:3000/` (dev) and `https://focuship.app/`
-2. Authentication → Sign In / Providers → disable **Email** (the app is OAuth-only).
-3. Leave *"Link accounts with the same verified email"* behaviour on (Supabase links OAuth
-   identities with the same verified email into one user automatically — this is what makes
-   "Google today, GitHub tomorrow" land in the same account).
+2. Leave *"Link accounts with the same verified email"* behaviour on (Supabase links identities
+   with the same verified email into one user automatically — this is what makes "Google today,
+   GitHub tomorrow, an email code next week" land in the same account).
+
+### Email codes (Brevo + Turnstile)
+
+Email sign-in sends a 6-digit code. Supabase's built-in mailer only delivers to project team
+members (2/hour), so a custom SMTP sender is required for real users.
+
+1. **Brevo** ([brevo.com](https://www.brevo.com)): Senders, domains → add and authenticate the
+   sending domain (Brevo code TXT, DKIM, DMARC records in its DNS). Then SMTP & API → generate an
+   SMTP key. Host `smtp-relay.brevo.com`, port 587, user = your Brevo SMTP login.
+   Security → Authorized IPs → **deactivate blocking for SMTP keys**: Supabase sends from
+   changing, unpublished IPs, so with blocking on every code email fails.
+   *Current setup:* sender `no-reply@aminurislam.me` (already authenticated in Brevo). The
+   planned `auth.focuship.app` domain is added in Brevo but pending its DNS records, which go
+   in whichever Cloudflare account holds focuship.app:
+   `TXT auth`, `CNAME brevo1._domainkey.auth`, `CNAME brevo2._domainkey.auth`, `TXT _dmarc.auth`
+   (exact values on Brevo's domain page). Switch the Supabase sender once it verifies.
+2. **Supabase → Authentication → Emails → SMTP settings**: enable custom SMTP with the Brevo
+   values; sender address as above, name `Focuship`.
+3. **Supabase → Sign In / Providers → Email**: enable; email OTP expiry `600` seconds (10 min).
+4. **Supabase → Emails → Templates**: both **Confirm signup** (a new address's first code) and
+   **Magic Link** (returning users) carry sign-in codes. For each: subject
+   `{{ .Token }} is your Focuship code`, body with `{{ .Token }}` and no link.
+5. **Cloudflare → Turnstile**: add a widget for `focuship.app` and `localhost` (Managed mode).
+   Put its site key in `NEXT_PUBLIC_TURNSTILE_SITE_KEY`; paste its secret key into
+   Supabase → Authentication → Attack Protection → CAPTCHA (provider Turnstile).
+   Supabase then requires a Turnstile token only to *send* a code — Google, GitHub and
+   code verification are unaffected.
 
 ### Google
 
 1. [console.cloud.google.com](https://console.cloud.google.com) → create a project → OAuth consent
    screen (External, app name Focuship, your email).
 2. Credentials → Create credentials → OAuth client ID → Web application:
-   - Authorized redirect URI: `https://<ref>.supabase.co/auth/v1/callback`
+   - Authorized JavaScript origins: `https://focuship.app`, `http://localhost:3000`, `http://localhost`
+     (the app uses Google's own sign-in button, which runs on these origins)
+   - Authorized redirect URI: `https://<ref>.supabase.co/auth/v1/callback` (the redirect fallback)
 3. Copy client ID + secret into Supabase → Authentication → Providers → Google → Enable.
+4. Put the client ID in `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (step 4 below). With it set, Google's consent
+   screen names **focuship.app**; without it the app falls back to the redirect flow, whose consent
+   names `<ref>.supabase.co`.
+5. Branding: add `https://focuship.app/privacy` as the privacy policy link, then Audience → Publish app.
 
 ### GitHub
 
@@ -63,6 +95,8 @@ static bundle at build time, which is fine — they are public):
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key>
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=<google web client id>.apps.googleusercontent.com
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<turnstile site key>   # without it the email option is hidden
 # NEXT_PUBLIC_AUTH_FACEBOOK=1   # only once Meta app review has cleared
 ```
 

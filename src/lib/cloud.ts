@@ -77,6 +77,12 @@ export interface CloudDriver {
       data: { subscription: { unsubscribe(): void } };
     };
     signInWithOAuth(options: { provider: string; options: { redirectTo: string } }): Promise<{ error: DriverError | null }>;
+    signInWithIdToken(credentials: { provider: string; token: string; nonce: string }): Promise<{ error: DriverError | null }>;
+    signInWithOtp(credentials: {
+      email: string;
+      options: { shouldCreateUser: boolean; captchaToken: string };
+    }): Promise<{ error: DriverError | null }>;
+    verifyOtp(params: { email: string; token: string; type: "email" }): Promise<{ error: DriverError | null }>;
     signOut(): Promise<{ error: DriverError | null }>;
   };
   from(table: string): DriverQuery;
@@ -109,6 +115,19 @@ export interface Cloud {
   /** Subscribes to auth changes; fires immediately with the current session. Returns unsubscribe. */
   onAuthChange(callback: (user: CloudUser | null) => void): () => void;
   signIn(provider: Provider, redirectTo: string): Promise<void>;
+  /**
+   * Signs in with an ID token from Google's own sign-in button, so Google's consent shows
+   * the site's domain rather than Supabase's. `nonce` is the raw value whose SHA-256 was
+   * given to Google.
+   */
+  signInWithGoogleToken(token: string, nonce: string): Promise<void>;
+  /**
+   * Emails a 6-digit sign-in code (creating the account on first use). `captchaToken` is a
+   * fresh Turnstile token: Supabase requires one for every send.
+   */
+  sendEmailCode(email: string, captchaToken: string): Promise<void>;
+  /** Exchanges the emailed code for a session; onAuthChange then fires. */
+  verifyEmailCode(email: string, code: string): Promise<void>;
   signOut(): Promise<void>;
   /** Removes the auth user and, by cascade, every row they own. */
   deleteAccount(): Promise<void>;
@@ -129,6 +148,18 @@ export interface Cloud {
   getSettings(userId: string): Promise<CloudSettings | null>;
   pushSettings(userId: string, settings: CloudSettings): Promise<void>;
 }
+
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
+/** Supabase error codes from sending a sign-in code, in words people can act on. */
+const SEND_ERRORS: Record<string, string> = {
+  over_email_send_rate_limit: "Too many codes requested. Wait a minute, then try again.",
+  over_request_rate_limit: "Too many codes requested. Wait a minute, then try again.",
+  email_address_invalid: "Enter a valid email address.",
+  validation_failed: "Enter a valid email address.",
+  captcha_failed: "The security check didn’t pass. Try again.",
+  email_provider_disabled: "Email sign-in isn’t available right now. Use Google or GitHub instead.",
+};
 
 function toUser(session: DriverSession | null): CloudUser | null {
   const user = session?.user;
@@ -160,6 +191,36 @@ export function createCloud(driver: CloudDriver): Cloud {
     async signIn(provider, redirectTo) {
       const { error } = await driver.auth.signInWithOAuth({ provider, options: { redirectTo } });
       check(error, "Couldn’t start sign-in. Check your connection.");
+    },
+
+    async signInWithGoogleToken(token, nonce) {
+      const { error } = await driver.auth.signInWithIdToken({ provider: "google", token, nonce });
+      check(error, "Couldn’t sign in with Google. Try again.");
+    },
+
+    async sendEmailCode(email, captchaToken) {
+      const { error } = await driver.auth.signInWithOtp({
+        email: normalizeEmail(email),
+        options: { shouldCreateUser: true, captchaToken },
+      });
+      if (!error) return;
+      throw new CloudError(SEND_ERRORS[error.code ?? ""] ?? "Couldn’t send the code. Check your connection and try again.");
+    },
+
+    async verifyEmailCode(email, code) {
+      const { error } = await driver.auth.verifyOtp({
+        email: normalizeEmail(email),
+        token: code.replace(/\s+/g, ""),
+        type: "email",
+      });
+      if (!error) return;
+      throw new CloudError(
+        error.code === "otp_expired" || error.code === "otp_disabled"
+          ? "That code is wrong or has expired."
+          : error.code === "over_request_rate_limit"
+            ? "Too many attempts. Wait a minute and try again."
+            : "Couldn’t check the code. Try again.",
+      );
     },
 
     async signOut() {

@@ -690,6 +690,41 @@ export const actions = {
     }
   },
 
+  /** Completes sign-in with an ID token from Google's own button; onAuthChange takes it from there. */
+  async signInWithGoogleToken(token: string, nonce: string) {
+    const cloud = getCloud();
+    if (!cloud) return;
+    try {
+      await cloud.signInWithGoogleToken(token, nonce);
+    } catch (e) {
+      actions.showNotice(errorNotice(e, "Couldn’t sign in with Google."));
+    }
+  },
+
+  /** Emails a sign-in code. Resolves to an error message for the form, or null when sent. */
+  async sendEmailCode(email: string, captchaToken: string): Promise<string | null> {
+    const cloud = getCloud();
+    if (!cloud) return "Accounts are off in this build.";
+    try {
+      await cloud.sendEmailCode(email, captchaToken);
+      return null;
+    } catch (e) {
+      return errorNotice(e, "Couldn’t send the code.");
+    }
+  },
+
+  /** Signs in with the emailed code. Resolves to an error message, or null on success. */
+  async verifyEmailCode(email: string, code: string): Promise<string | null> {
+    const cloud = getCloud();
+    if (!cloud) return "Accounts are off in this build.";
+    try {
+      await cloud.verifyEmailCode(email, code); // onAuthChange fills in the account.
+      return null;
+    } catch (e) {
+      return errorNotice(e, "Couldn’t check the code.");
+    }
+  },
+
   async signOut() {
     const cloud = getCloud();
     if (!cloud) return;

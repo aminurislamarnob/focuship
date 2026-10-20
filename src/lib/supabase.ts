@@ -16,6 +16,18 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 /** Accounts exist in this build. Gates every cloud-facing control. */
 export const CLOUD_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
 
+/**
+ * The Google OAuth web client ID. When set, Google sign-in uses Google's own button
+ * (consent names this site's domain); when unset it falls back to the Supabase redirect.
+ */
+export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+
+/**
+ * Cloudflare Turnstile site key (public). Supabase requires a Turnstile token to send an
+ * email sign-in code; without a key the email option is hidden.
+ */
+export const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
+
 /** Facebook ships code-complete but hidden until the Meta app review clears. */
 export const FACEBOOK_ENABLED = process.env.NEXT_PUBLIC_AUTH_FACEBOOK === "1";
 
