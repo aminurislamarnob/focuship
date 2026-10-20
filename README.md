@@ -49,11 +49,10 @@ A second, tiny Worker (`workers/redirect/`) answers every old or alternative hos
 
 1. Buy `focuship.app` and `focusship.app` (Cloudflare Registrar puts them in the same account).
 2. On the `focuship.app` zone, turn off **Block AI bots**, **AI Labyrinth** and **Managed robots.txt**; the site ships its own `robots.txt` and `llms.txt`.
-3. Rename the GitHub repo to `focuship` (the site links to it).
-4. `npm run deploy`, then check `https://focuship.app` loads and `curl -A GPTBot -I https://focuship.app` returns 200.
-5. Delete the old `let-me-focus` Worker (`npx wrangler delete --name let-me-focus`) to free `focus.aminurislam.me`.
-6. `npm run deploy:redirect`, then check `curl -I https://focus.aminurislam.me/timer?x=1` returns a 301 to `https://focuship.app/timer?x=1`.
-7. Verify the site in Google Search Console and Bing Webmaster Tools (DNS TXT records) and submit `https://focuship.app/sitemap.xml`.
+3. `npm run deploy`, then check `https://focuship.app` loads and `curl -A GPTBot -I https://focuship.app` returns 200.
+4. Delete the old `let-me-focus` Worker (`npx wrangler delete --name let-me-focus`) to free `focus.aminurislam.me`.
+5. `npm run deploy:redirect`, then check `curl -I https://focus.aminurislam.me/timer?x=1` returns a 301 to `https://focuship.app/timer?x=1`.
+6. Verify the site in Google Search Console and Bing Webmaster Tools (DNS TXT records) and submit `https://focuship.app/sitemap.xml`.
 
 `wrangler.jsonc` points Cloudflare at `out/`. Response headers (caching, the service worker's no-cache rule, security headers) live in `public/_headers`, since `headers()` in `next.config.ts` doesn't apply to static exports. Sounds are served from the same CDN with a one-year immutable cache, and only changed files are re-uploaded on each deploy.
 

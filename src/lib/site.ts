@@ -10,7 +10,6 @@ export const SITE_DESCRIPTION =
 
 export const AUTHOR = { name: "Md. Aminur Islam", url: "https://github.com/aminurislamarnob" };
 
-// The repo is renamed from let-me-focus to focuship before the first focuship.app deploy.
 export const REPO_URL = "https://github.com/aminurislamarnob/focuship";
 
 /**
