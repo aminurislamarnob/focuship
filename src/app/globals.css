@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a0a0a;
+  --bg-raised: #111111;
+  --surface: #171717;
+  --surface-2: #1f1f1f;
+  --line: rgb(255 255 255 / 0.1);
+  --line-strong: rgb(255 255 255 / 0.18);
+  --fg: #fafafa;
+  --muted: #a1a1a1;
+  --faint: #6b6b6b;
+  --brand: #d25611;
+  --brand-light: #e8804a;
+  --brand-dark: #9e400a;
+  --ok: #00bb7f;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-raised: var(--bg-raised);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
+  --color-brand-dark: var(--brand-dark);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ease-out-strong: var(--ease-out);
+  --animate-eq: eq 0.9s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-pop-in: pop-in 0.5s var(--ease-out) both;
+
+  @keyframes float {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 0 -4px;
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      scale: 0.6;
+      rotate: -12deg;
+    }
+  }
+
+  @keyframes eq {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  /* No rubber-band scroll or pull-to-refresh in the installed app. */
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+button,
+[role="tab"],
+label {
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-light);
+  outline-offset: 2px;
+}
+
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Bottom sheets and overlays fade and rise; `display` animates out too. */
+.sheet {
+  transition:
+    translate 0.32s var(--ease-out),
+    opacity 0.32s var(--ease-out),
+    display 0.32s allow-discrete;
+}
+.sheet[hidden] {
+  display: none;
+  translate: 0 1.5rem;
+  opacity: 0;
+}
+@starting-style {
+  .sheet:not([hidden]) {
+    translate: 0 1.5rem;
+    opacity: 0;
+  }
+}
+
+.fade {
+  transition:
+    opacity 0.3s var(--ease-out),
+    display 0.3s allow-discrete;
+}
+.fade[hidden] {
+  display: none;
+  opacity: 0;
+}
+@starting-style {
+  .fade:not([hidden]) {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
