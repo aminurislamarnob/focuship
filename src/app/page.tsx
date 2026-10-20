@@ -1,7 +1,10 @@
 import { FocusApp } from "@/components/FocusApp";
 import { JsonLd, organization, webApplication, website } from "@/components/JsonLd";
 import { PageCopy } from "@/components/PageCopy";
+import Link from "next/link";
 import { SOUNDS } from "@/lib/catalog";
+import { GUIDES_HUB } from "@/lib/guides";
+import { HUBS, PAGES, pagePath } from "@/lib/pages";
 import { pageMetadata } from "@/lib/seo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
@@ -30,6 +33,22 @@ export default function Page() {
           There is no account and no tracking cookies. Install it to your home screen and the sounds you have played keep
           working offline, with lock-screen controls on your phone. Mixes can be shared as a link.
         </p>
+        <h2>Explore</h2>
+        <ul>
+          {[...HUBS, GUIDES_HUB].map((hub) => (
+            <li key={hub.path}>
+              <Link href={hub.path}>{hub.title}</Link>
+            </li>
+          ))}
+        </ul>
+        <h2>Popular</h2>
+        <ul>
+          {PAGES.filter((page) => page.hero).map((page) => (
+            <li key={page.slug}>
+              <Link href={pagePath(page)}>{page.heading}</Link>
+            </li>
+          ))}
+        </ul>
       </PageCopy>
       <JsonLd nodes={[organization(), website(), webApplication()]} />
     </FocusApp>

@@ -1,4 +1,5 @@
 import { PRESETS, SOUNDS } from "@/lib/catalog";
+import { GUIDES, GUIDES_HUB, guidePath, isGuideIndexable } from "@/lib/guides";
 import { liveHubs, pagePath, pagesInHub, isIndexable } from "@/lib/pages";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/lib/site";
 
@@ -34,6 +35,17 @@ ${pagesInHub(hub.id)
   .join("\n")}`,
   )
   .join("\n")}
-`;
+${
+  GUIDES.some(isGuideIndexable)
+    ? `
+## Guides
+
+- [${GUIDES_HUB.title}](${absoluteUrl(GUIDES_HUB.path)}): ${GUIDES_HUB.intro}
+${GUIDES.filter(isGuideIndexable)
+  .map((guide) => `- [${guide.heading}](${absoluteUrl(guidePath(guide))}): ${guide.description}`)
+  .join("\n")}
+`
+    : ""
+}`;
   return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
 }

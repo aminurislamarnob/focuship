@@ -8,6 +8,7 @@ import { startPwa, useInstallPrompt } from "@/lib/pwa";
 import { actions, matchPreset, mixName, shareUrl, useFocus, type Tab } from "@/lib/store";
 import { AboutSheet } from "./AboutSheet";
 import { FocusMode } from "./FocusMode";
+import { Logo } from "./Logo";
 import { MixView } from "./MixView";
 import { SoundsView } from "./SoundsView";
 import { TimerView, formatClock, useTimerClock } from "./TimerView";
@@ -30,20 +31,6 @@ const TABS: { id: Tab; label: string; icon: typeof Disc3 }[] = [
   { id: "sounds", label: "Sounds", icon: LibraryBig },
   { id: "timer", label: "Timer", icon: Timer },
 ];
-
-function Logo() {
-  return (
-    <span className="flex items-center gap-2">
-      <svg viewBox="0 0 100 100" className="size-6" aria-hidden>
-        <path d="M22 36V22h14 M64 22h14v14 M78 64v14H64 M36 78H22V64" fill="none" stroke="var(--brand)" strokeWidth="8" />
-        <rect x="35" y="44" width="7" height="22" fill="var(--fg)" />
-        <rect x="46.5" y="34" width="7" height="32" fill="var(--fg)" />
-        <rect x="58" y="50" width="7" height="16" fill="var(--fg)" />
-      </svg>
-      <span className="font-mono text-[0.8125rem] font-semibold tracking-[0.18em] uppercase">Focuship</span>
-    </span>
-  );
-}
 
 interface FocusAppProps {
   /** The page's H1 and one-line intro, shown above the player. */

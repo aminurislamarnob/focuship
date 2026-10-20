@@ -1,6 +1,7 @@
 import { CATEGORIES, SOUND_BY_ID, type Layers } from "./catalog";
 import type { Tab } from "./store";
 import { SOUND_PAGES } from "@/content/sounds";
+import { GUIDES, guidePath } from "./guides";
 import { ACTIVITY_PAGES } from "@/content/activities";
 import { MIX_PAGES } from "@/content/mixes";
 import { TIMER_HUB, TIMER_PAGES } from "@/content/timers";
@@ -162,7 +163,8 @@ export const liveHubs = () => HUBS.filter((hub) => pagesInHub(hub.id).some(isInd
 
 // Build-time integrity checks: a broken registry fails the build instead of shipping bad pages.
 const paths = new Set(PAGES.map(pagePath));
-const hubPaths = new Set(HUBS.map((hub) => hub.path));
+const hubPaths = new Set([...HUBS.map((hub) => hub.path), "/guides"]);
+const guidePaths = new Set(GUIDES.map(guidePath));
 const categoryIds = new Set<string>(CATEGORIES.map((category) => category.id));
 for (const page of PAGES) {
   const at = pagePath(page);
@@ -173,7 +175,7 @@ for (const page of PAGES) {
     if (!SOUND_BY_ID.has(id)) throw new Error(`${at} uses unknown sound "${id}"`);
   }
   for (const link of page.related) {
-    if (!paths.has(link) && !hubPaths.has(link) && !link.startsWith("/guides/") && link !== "/") {
+    if (!paths.has(link) && !hubPaths.has(link) && !guidePaths.has(link) && link !== "/") {
       throw new Error(`${at} links to unknown page ${link}`);
     }
   }
