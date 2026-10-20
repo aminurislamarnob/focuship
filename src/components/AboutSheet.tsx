@@ -49,10 +49,26 @@ export function AboutSheet({ open, onClose }: { open: boolean; onClose(): void }
   return (
     <Sheet open={open} onClose={onClose} title="About Focuship">
       <div className="flex flex-col gap-6 pt-2 pb-2">
-        <p className="text-sm text-muted">
-          Layer recorded ambience, noise and binaural tones into a soundscape that helps you settle into work. Pair it with
-          the focus timer, then open focus mode and put the phone down.
-        </p>
+        <section className="flex flex-col gap-2 text-sm text-muted">
+          <h3 className="label-mono text-fg">What Focuship does</h3>
+          <p>
+            Focuship layers up to {SOUNDS.length} sounds into one soundscape: rain on a window, a busy café, a train at
+            night, brown, pink and white noise, binaural tones and a deep starship hum. Each sound has its own volume, so you
+            can keep the rain soft and the café murmur just loud enough to mask the room.
+          </p>
+          <p>
+            A Pomodoro-style focus timer runs alongside the mix, with short and long breaks and a gentle chime. Focus mode
+            turns the screen into a large clock or countdown and keeps it awake while you work.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-2 text-sm text-muted">
+          <h3 className="label-mono text-fg">Free, private and offline</h3>
+          <p>
+            There is no account and no tracking cookies. Install it to your home screen and the sounds you have played keep
+            working offline, with lock-screen controls on your phone. Mixes can be shared as a link.
+          </p>
+        </section>
 
         {!env.standalone && (
           <section className="rounded-[6px] border border-line bg-raised p-3">
