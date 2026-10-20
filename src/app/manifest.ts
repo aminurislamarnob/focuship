@@ -1,5 +1,8 @@
 import type { MetadataRoute } from "next";
 
+// Static export needs the manifest route prerendered at build time.
+export const dynamic = "force-static";
+
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",

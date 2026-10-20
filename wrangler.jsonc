@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // A static-assets-only Worker: Cloudflare serves the `next build` export from its CDN.
+  "name": "let-me-focus",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  },
+  "observability": { "enabled": true }
+}

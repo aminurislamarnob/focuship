@@ -5,9 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "npx -y serve@14.2.4 out",
     "lint": "eslint",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "deploy": "next build && wrangler deploy"
   },
   "dependencies": {
     "lucide-react": "1.49.0",
@@ -24,6 +25,7 @@
     "eslint-config-next": "16.4.2",
     "sharp": "0.35.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "4.147.0"
   }
 }

@@ -27,11 +27,22 @@ Shortcuts are ignored while you're typing in the search box. With a slider focus
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000 (service worker disabled in dev)
-npm run build && npm start   # production build, service worker enabled
+npm run dev                              # http://localhost:3000 (service worker disabled in dev)
+npm run build && npm start                # serves out/ locally, service worker enabled
 ```
 
-Installing and testing offline need a production build, served over HTTPS or on `localhost`. To try it on a phone, deploy it (for example to Vercel) or tunnel the production server.
+`next build` writes a fully static site to `out/` (`output: "export"`). Installing and testing offline need that production build, served over HTTPS or on `localhost`.
+
+## Deploy
+
+The site runs on Cloudflare as a static-assets Worker: **https://let-me-focus.dev-aiarnob.workers.dev**
+
+```bash
+npx wrangler login   # once
+npm run deploy       # next build && wrangler deploy
+```
+
+`wrangler.jsonc` points Cloudflare at `out/`. Response headers (caching, the service worker's no-cache rule, security headers) live in `public/_headers`, since `headers()` in `next.config.ts` doesn't apply to static exports. Sounds are served from the same CDN with a one-year immutable cache, and only changed files are re-uploaded on each deploy.
 
 ## How it fits together
 
@@ -45,6 +56,7 @@ Installing and testing offline need a production build, served over HTTPS or on 
 | `public/sw.js` | Caches the app shell, hashed assets and sounds; offline fallback for the page |
 | `src/app/manifest.ts` | Web app manifest, including shortcuts |
 | `scripts/generate-icons.mjs` | Renders the icon set (`npm run icons`) |
+| `wrangler.jsonc`, `public/_headers` | Cloudflare deployment and response headers |
 
 Sound files are fetched whole and played from memory, so the service worker can cache them. They're saved as you play them, or all at once from **About & offline**.
 
