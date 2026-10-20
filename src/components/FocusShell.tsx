@@ -2,7 +2,7 @@
 
 import { Check, Disc3, Download, Expand, Info, LibraryBig, Menu, Pause, Play, Share2, Timer, Trash2, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
 import type { PageIntent } from "@/lib/pages";
@@ -66,7 +66,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
   const { canPrompt } = useInstallPrompt();
 
   useEffect(() => {
-    actions.hydrate(intent);
+    actions.visit(intent);
     startPwa();
   }, [intent]);
 
@@ -76,10 +76,8 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
     return () => clearTimeout(id);
   }, [notice]);
 
-  const go = useCallback((next: Tab) => {
-    actions.setTab(next);
-    main.current?.scrollTo({ top: 0 });
-  }, []);
+  const router = useRouter();
+  const go = useCallback((next: Tab) => router.push(TABS.find((t) => t.id === next)!.href), [router]);
 
   const share = useCallback(async (): Promise<ShareResult> => {
     const url = shareUrl();
@@ -101,7 +99,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
       const target = e.target as HTMLElement;
-      if (target.closest("input, textarea, select, [contenteditable]")) return;
+      if (target.closest?.("input, textarea, select, [contenteditable]")) return;
       if (e.key === " " && !target.closest("button, a, [role=tab]")) {
         e.preventDefault();
         actions.toggle();
@@ -141,12 +139,6 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
               key={id}
               href={href}
               aria-current={tab === id ? "page" : undefined}
-              onClick={(e) => {
-                // A plain click switches the view in place; modified clicks open the real page.
-                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-                e.preventDefault();
-                go(id);
-              }}
               className={cx(
                 "flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm transition-colors",
                 tab === id ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
@@ -236,7 +228,7 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
           <div className="max-md:hidden">
             {hasMix && <PlayerBar onOpenMixer={() => setMixerOpen(true)} onOpenFocus={() => setFocusOpen(true)} />}
           </div>
-          <MobileNav tab={tab} go={go} onOpenFocus={() => setFocusOpen(true)} />
+          <MobileNav tab={tab} onOpenFocus={() => setFocusOpen(true)} />
         </div>
       </div>
 
@@ -306,17 +298,11 @@ function PlayerBar({ onOpenMixer, onOpenFocus }: { onOpenMixer(): void; onOpenFo
  * and pauses the mix (loading the default soundscape when the mix is empty), and Focus
  * opens focus mode. Replaces the floating player bar on small screens.
  */
-function MobileNav({ tab, go, onOpenFocus }: { tab: Tab; go(next: Tab): void; onOpenFocus(): void }) {
+function MobileNav({ tab, onOpenFocus }: { tab: Tab; onOpenFocus(): void }) {
   const playing = useFocus((s) => s.playing);
 
-  const item = (active: boolean, onClick: () => void, label: string, Icon: typeof Disc3, current?: boolean) => (
-    <button
-      key={label}
-      type="button"
-      aria-current={current ? "page" : undefined}
-      onClick={onClick}
-      className="group flex h-16 cursor-pointer flex-col items-center justify-center gap-1"
-    >
+  const inner = (active: boolean, label: string, Icon: typeof Disc3) => (
+    <>
       <span
         className={cx(
           "grid h-7 w-12 place-items-center rounded-full transition-all duration-200 group-active:scale-90",
@@ -333,13 +319,24 @@ function MobileNav({ tab, go, onOpenFocus }: { tab: Tab; go(next: Tab): void; on
       >
         {label}
       </span>
-    </button>
+    </>
+  );
+
+  const tabItem = ({ id, label, icon, href }: (typeof TABS)[number]) => (
+    <Link
+      key={id}
+      href={href}
+      aria-current={tab === id ? "page" : undefined}
+      className="group flex h-16 flex-col items-center justify-center gap-1"
+    >
+      {inner(tab === id, label, icon)}
+    </Link>
   );
 
   return (
     <nav aria-label="Tabs" className="pb-safe border-t border-line bg-raised/95 backdrop-blur-md md:hidden">
       <div className="grid grid-cols-5 px-1">
-        {TABS.slice(0, 2).map(({ id, label, icon }) => item(tab === id, () => go(id), label, icon, tab === id))}
+        {TABS.slice(0, 2).map(tabItem)}
         <div className="flex items-start justify-center">
           <button
             type="button"
@@ -357,8 +354,14 @@ function MobileNav({ tab, go, onOpenFocus }: { tab: Tab; go(next: Tab): void; on
             )}
           </button>
         </div>
-        {TABS.slice(2).map(({ id, label, icon }) => item(tab === id, () => go(id), label, icon, tab === id))}
-        {item(false, onOpenFocus, "Focus", Expand)}
+        {TABS.slice(2).map(tabItem)}
+        <button
+          type="button"
+          onClick={onOpenFocus}
+          className="group flex h-16 cursor-pointer flex-col items-center justify-center gap-1"
+        >
+          {inner(false, "Focus", Expand)}
+        </button>
       </div>
     </nav>
   );
