@@ -195,8 +195,8 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
         </header>
 
         <main ref={main} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto w-full max-w-5xl px-4 md:px-8 md:pt-6">
-            <header className="pt-4 pb-3 md:pt-0">
+          <div className="mx-auto w-full max-w-5xl px-4 max-md:pt-3 md:px-8 md:pt-6">
+            <header className="pb-3 max-md:hidden">
               <h1 className="text-sm font-medium text-fg">{heading}</h1>
               <p className="mt-0.5 text-sm text-muted">{intro}</p>
             </header>
@@ -222,27 +222,10 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
               {notice}
             </div>
           )}
-          {hasMix && <PlayerBar onOpenMixer={() => setMixerOpen(true)} onOpenFocus={() => setFocusOpen(true)} />}
-          <nav aria-label="Tabs" className="pb-safe border-t border-line bg-raised md:hidden">
-            <div className="grid grid-cols-3">
-              {TABS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-current={tab === id ? "page" : undefined}
-                  onClick={() => go(id)}
-                  className={cx(
-                    "relative flex h-14 cursor-pointer flex-col items-center justify-center gap-1 transition-colors",
-                    tab === id ? "text-fg" : "text-faint",
-                  )}
-                >
-                  {tab === id && <span className="absolute top-0 h-0.5 w-8 bg-brand" aria-hidden />}
-                  <Icon className="size-5" aria-hidden />
-                  <span className="font-mono text-[0.625rem] tracking-wider uppercase">{label}</span>
-                </button>
-              ))}
-            </div>
-          </nav>
+          <div className="max-md:hidden">
+            {hasMix && <PlayerBar onOpenMixer={() => setMixerOpen(true)} onOpenFocus={() => setFocusOpen(true)} />}
+          </div>
+          <MobileNav tab={tab} go={go} onOpenFocus={() => setFocusOpen(true)} />
         </div>
       </div>
 
@@ -304,6 +287,69 @@ function PlayerBar({ onOpenMixer, onOpenFocus }: { onOpenMixer(): void; onOpenFo
         </IconButton>
       </div>
     </div>
+  );
+}
+
+/**
+ * The phone bottom bar: the two outer pairs switch views, the raised centre button plays
+ * and pauses the mix (loading the default soundscape when the mix is empty), and Focus
+ * opens focus mode. Replaces the floating player bar on small screens.
+ */
+function MobileNav({ tab, go, onOpenFocus }: { tab: Tab; go(next: Tab): void; onOpenFocus(): void }) {
+  const playing = useFocus((s) => s.playing);
+
+  const item = (active: boolean, onClick: () => void, label: string, Icon: typeof Disc3, current?: boolean) => (
+    <button
+      key={label}
+      type="button"
+      aria-current={current ? "page" : undefined}
+      onClick={onClick}
+      className="group flex h-16 cursor-pointer flex-col items-center justify-center gap-1"
+    >
+      <span
+        className={cx(
+          "grid h-7 w-12 place-items-center rounded-full transition-all duration-200 group-active:scale-90",
+          active ? "bg-brand/15 text-brand-light" : "text-faint",
+        )}
+      >
+        <Icon className="size-5" aria-hidden />
+      </span>
+      <span
+        className={cx(
+          "font-mono text-[0.625rem] tracking-wider uppercase transition-colors duration-200",
+          active ? "text-fg" : "text-faint",
+        )}
+      >
+        {label}
+      </span>
+    </button>
+  );
+
+  return (
+    <nav aria-label="Tabs" className="pb-safe border-t border-line bg-raised/95 backdrop-blur-md md:hidden">
+      <div className="grid grid-cols-5 px-1">
+        {TABS.slice(0, 2).map(({ id, label, icon }) => item(tab === id, () => go(id), label, icon, tab === id))}
+        <div className="flex items-start justify-center">
+          <button
+            type="button"
+            aria-label={playing ? "Pause" : "Play"}
+            onClick={actions.toggle}
+            className={cx(
+              "-mt-5 grid size-14 cursor-pointer place-items-center rounded-full border border-brand-dark bg-brand text-white transition-all duration-200 active:scale-90",
+              playing ? "shadow-[0_6px_28px_rgba(210,86,17,0.55)]" : "shadow-[0_6px_18px_rgba(0,0,0,0.5)]",
+            )}
+          >
+            {playing ? (
+              <Pause className="size-6 animate-pop-in" fill="currentColor" aria-hidden />
+            ) : (
+              <Play className="size-6 translate-x-0.5 animate-pop-in" fill="currentColor" aria-hidden />
+            )}
+          </button>
+        </div>
+        {TABS.slice(2).map(({ id, label, icon }) => item(tab === id, () => go(id), label, icon, tab === id))}
+        {item(false, onOpenFocus, "Focus", Expand)}
+      </div>
+    </nav>
   );
 }
 
