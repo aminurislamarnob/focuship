@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 
-export const SOUND_CACHE = "lmf-sounds-v1";
+export const SOUND_CACHE = "focuship-sounds-v1";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;

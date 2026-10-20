@@ -39,7 +39,7 @@ function Logo() {
         <rect x="46.5" y="34" width="7" height="32" fill="var(--fg)" />
         <rect x="58" y="50" width="7" height="16" fill="var(--fg)" />
       </svg>
-      <span className="font-mono text-[0.8125rem] font-semibold tracking-[0.18em] uppercase">Let me focus</span>
+      <span className="font-mono text-[0.8125rem] font-semibold tracking-[0.18em] uppercase">Focuship</span>
     </span>
   );
 }

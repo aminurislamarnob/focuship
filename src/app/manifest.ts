@@ -6,8 +6,8 @@ export const dynamic = "force-static";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Let Me Focus",
-    short_name: "Focus",
+    name: "Focuship",
+    short_name: "Focuship",
     description: "Layer ambient sounds into a focus soundscape, with a focus timer. Works offline.",
     start_url: "/?source=pwa",
     scope: "/",

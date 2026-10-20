@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   // A static-assets-only Worker: Cloudflare serves the `next build` export from its CDN.
-  "name": "let-me-focus",
+  "name": "focuship",
   "compatibility_date": "2026-10-01",
   // Cloudflare creates the DNS record and certificate for this hostname on deploy.
   "routes": [{ "pattern": "focus.aminurislam.me", "custom_domain": true }],

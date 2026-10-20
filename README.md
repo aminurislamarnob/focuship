@@ -1,4 +1,4 @@
-# Let Me Focus
+# Focuship
 
 A mobile-first ambient sound mixer and focus timer, built with Next.js and installable as a PWA.
 
@@ -63,3 +63,7 @@ Sound files are fetched whole and played from memory, so the service worker can 
 ## Credits
 
 Recordings come from [Moodist](https://github.com/remvze/moodist) by remvze (MIT). Its sounds are under the [Pixabay Content License](https://pixabay.com/service/license-summary/) or [CC0](https://creativecommons.org/publicdomain/zero/1.0/). The visual style follows the dark, mono-accented look of [superset.sh](https://superset.sh).
+
+## License
+
+[MIT](LICENSE) © Md. Aminur Islam. Sound recordings keep their own licenses (see Credits).

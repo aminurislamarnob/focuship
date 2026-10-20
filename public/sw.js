@@ -1,9 +1,9 @@
-// Let Me Focus service worker. Bump VERSION to roll the app shell cache.
-const VERSION = "v3";
-const SHELL = `lmf-shell-${VERSION}`;
-const ASSETS = `lmf-assets-${VERSION}`;
+// Focuship service worker. Bump VERSION to roll the app shell cache.
+const VERSION = "v4";
+const SHELL = `focuship-shell-${VERSION}`;
+const ASSETS = `focuship-assets-${VERSION}`;
 // Sounds are large and versioned by path, so this cache survives app updates.
-const SOUNDS = "lmf-sounds-v1";
+const SOUNDS = "focuship-sounds-v1";
 
 const SHELL_URLS = [
   "/",

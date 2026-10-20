@@ -14,12 +14,12 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Let Me Focus",
+  title: "Focuship",
   description: "Layer rain, cafés, noise and binaural tones into a focus soundscape. Works offline.",
-  applicationName: "Let Me Focus",
+  applicationName: "Focuship",
   appleWebApp: {
     capable: true,
-    title: "Focus",
+    title: "Focuship",
     statusBarStyle: "black-translucent",
   },
   formatDetection: { telephone: false },

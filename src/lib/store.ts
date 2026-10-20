@@ -49,7 +49,7 @@ export interface FocusState {
 
 export type Tab = "mix" | "sounds" | "timer";
 
-const STORAGE_KEY = "let-me-focus:v1";
+const STORAGE_KEY = "focuship:v1";
 export const NEW_LAYER_VOLUME = 0.5;
 const MAX_SHUFFLE_LAYERS = 3;
 
@@ -186,7 +186,7 @@ function updateMediaSession() {
   session.metadata = hasMix
     ? new MediaMetadata({
         title: mixName(state.layers),
-        artist: "Let Me Focus",
+        artist: "Focuship",
         album: "Ambient mix",
         artwork: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
