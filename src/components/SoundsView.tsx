@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { CATEGORIES, SOUNDS, type Sound } from "@/lib/catalog";
 import { NEW_LAYER_VOLUME as DEFAULT_VOLUME, actions, useFocus } from "@/lib/store";
-import { CATEGORY_ICONS, Eq, Slider, cx } from "./ui";
+import { CATEGORY_ICONS, Eq, Slider, SoundIcon, cx } from "./ui";
 
 const matches = (sound: Sound, query: string) => {
   const haystack = `${sound.label} ${sound.note ?? ""} ${sound.category}`.toLowerCase();
@@ -108,24 +108,36 @@ function SoundTile({ sound }: { sound: Sound }) {
   return (
     <div
       className={cx(
-        "flex flex-col rounded-[6px] border transition-colors",
+        "group relative isolate flex flex-col overflow-hidden rounded-[6px] border transition-colors",
         on ? "border-brand/70 bg-brand/[0.07]" : "border-line bg-raised",
       )}
     >
+      {/* The icon sits behind the content in the top-right corner. */}
+      <SoundIcon
+        sound={sound}
+        className={cx(
+          "absolute top-2 right-2 -z-10 size-9 transition-[color,scale,rotate] duration-300 ease-out-strong",
+          "group-hover:-rotate-6 group-hover:scale-105",
+          on ? "text-brand/25" : "text-white/[0.07] group-hover:text-white/[0.12]",
+        )}
+      />
       <button
         type="button"
         aria-pressed={on}
         data-sound={sound.id}
         onClick={() => actions.toggleSound(sound.id)}
-        className="flex min-h-[4.25rem] cursor-pointer flex-col items-start px-3 pt-3 pb-2 text-left"
+        className="flex min-h-[4.25rem] cursor-pointer flex-col items-start pt-3 pr-11 pb-2 pl-3 text-left"
       >
-        <span className="flex w-full items-center justify-between gap-2">
+        <span className="flex w-full min-w-0 items-center gap-2">
           <span className="truncate text-sm font-medium">{sound.label}</span>
           {on &&
             (loading ? (
-              <span className="size-3 animate-spin rounded-full border-2 border-brand border-t-transparent" aria-label="Loading" />
+              <span
+                className="size-3 shrink-0 animate-spin rounded-full border-2 border-brand border-t-transparent"
+                aria-label="Loading"
+              />
             ) : (
-              <Eq playing={playing} />
+              <Eq playing={playing} className="shrink-0" />
             ))}
         </span>
         <span className="mt-0.5 truncate font-mono text-[0.6875rem] text-faint">
