@@ -9,6 +9,7 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: absoluteUrl("/"), changeFrequency: "weekly", priority: 1 },
+    { url: absoluteUrl("/about"), changeFrequency: "monthly", priority: 0.5 },
     ...liveHubs().map((hub) => ({ url: absoluteUrl(hub.path), changeFrequency: "weekly" as const, priority: 0.8 })),
     ...indexablePages().map((page) => ({
       url: absoluteUrl(pagePath(page)),

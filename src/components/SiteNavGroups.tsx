@@ -1,61 +1,94 @@
 "use client";
 
-import { ChevronRight, Compass, Flame } from "lucide-react";
+import {
+  ArrowDownToLine,
+  AudioLines,
+  AudioWaveform,
+  BookOpen,
+  BriefcaseBusiness,
+  ChevronDown,
+  CloudRain,
+  Code,
+  Coffee,
+  Compass,
+  Flame,
+  Headphones,
+  Layers,
+  Timer,
+  TrendingUp,
+  Waves,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { cx } from "./ui";
 
-interface Group {
-  heading: string;
-  links: { href: string; label: string; title?: string }[];
+export interface SiteLink {
+  href: string;
+  label: string;
+  title?: string;
+  /** A key into LINK_ICONS: the page's slug, "timer", or a hub id. */
+  icon: string;
+  /** Its keyboard shortcut, if it has one. */
+  kbd?: string;
 }
 
-const ICONS: Record<string, typeof Flame> = { Popular: Flame, Explore: Compass };
+export interface SiteGroup {
+  heading: "Popular" | "Explore";
+  links: SiteLink[];
+}
+
+const GROUP_ICONS: Record<SiteGroup["heading"], LucideIcon> = { Popular: TrendingUp, Explore: Compass };
+
+const LINK_ICONS: Record<string, LucideIcon> = {
+  "brown-noise": AudioWaveform,
+  "white-noise": AudioWaveform,
+  "pink-noise": AudioWaveform,
+  "ocean-waves": Waves,
+  fireplace: Flame,
+  "coffee-shop": Coffee,
+  "binaural-beats": Headphones,
+  timer: Timer,
+  "rain-sounds": CloudRain,
+  thunderstorm: Zap,
+  coding: Code,
+  activities: BriefcaseBusiness,
+  mixes: Layers,
+  guides: BookOpen,
+  about: ArrowDownToLine,
+};
 
 /**
- * Collapsible link menus for the sidebar and the mobile menu sheet. An accordion: at most
- * one menu open, and the menu holding the current page opens by itself so there is always
- * a visible "you are here". Closed menus stay in the HTML (hidden), keeping every link
- * crawlable in the static export.
+ * Site link groups for the sidebar and the You tab, each a disclosure with the current page marked.
+ * Groups start closed, except the one holding the page you are on. A page with no link of its own
+ * (a guide article, a mix not in Popular) highlights its section instead: /guides/x lights "Guides".
  */
-export function SiteNavGroups({ groups }: { groups: Group[] }) {
+export function SiteNavGroups({ groups }: { groups: SiteGroup[] }) {
   const pathname = usePathname();
-  const home = groups.find((group) => group.links.some((link) => link.href === pathname))?.heading ?? null;
-
-  // `choice` is the user's manual toggle; navigation clears it so the current page's menu wins.
-  const [choice, setChoice] = useState<string | null>(null);
-  const [choicePath, setChoicePath] = useState(pathname);
-  if (choicePath !== pathname) {
-    setChoicePath(pathname);
-    setChoice(null);
-  }
-  const open = choice ?? home;
-
+  const all = groups.flatMap((group) => group.links);
+  const exact = all.some((link) => link.href === pathname);
+  const isHere = (href: string) => href === pathname || (!exact && pathname.startsWith(`${href}/`));
   return (
-    <nav aria-label="Site" className="flex flex-col gap-1">
-      <p className="label-mono px-3 pb-1 text-faint">Browse</p>
+    <nav aria-label="Site" className="flex flex-col gap-0.5">
       {groups.map(({ heading, links }) => {
-        const Icon = ICONS[heading] ?? Compass;
-        const isOpen = open === heading;
+        const GroupIcon = GROUP_ICONS[heading];
         return (
-          <div key={heading}>
-            <button
-              type="button"
-              aria-expanded={isOpen}
-              onClick={() => setChoice(isOpen ? "" : heading)}
-              className={cx(
-                "flex h-10 w-full cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm transition-colors hover:bg-surface hover:text-fg",
-                isOpen ? "text-fg" : "text-muted",
-              )}
-            >
-              <Icon className="size-4" aria-hidden />
+          <details key={heading} open={links.some((link) => isHere(link.href))} className="group">
+            <summary className="flex h-10 cursor-pointer list-none items-center gap-2.5 rounded-[10px] px-2.5 text-sm text-muted transition-colors hover:text-fg [&::-webkit-details-marker]:hidden">
+              <GroupIcon className="size-[18px]" strokeWidth={1.75} aria-hidden />
               {heading}
-              <ChevronRight className={cx("ml-auto size-3.5 text-faint transition-transform", isOpen && "rotate-90")} aria-hidden />
-            </button>
-            <ul hidden={!isOpen} className="mt-1 mb-2 ml-5 flex flex-col border-l border-line pl-2">
-              {links.map(({ href, label, title }) => {
+              <ChevronDown
+                className="ml-auto size-3.5 text-faint transition-transform duration-200 group-open:rotate-180"
+                strokeWidth={2}
+                aria-hidden
+              />
+            </summary>
+            <ul className="flex flex-col pt-0.5 pb-1">
+              {links.map(({ href, label, title, icon, kbd }) => {
                 const current = href === pathname;
+                const here = isHere(href);
+                const Icon = LINK_ICONS[icon] ?? AudioLines;
                 return (
                   <li key={href}>
                     <Link
@@ -63,18 +96,19 @@ export function SiteNavGroups({ groups }: { groups: Group[] }) {
                       title={title}
                       aria-current={current ? "page" : undefined}
                       className={cx(
-                        "flex h-8 items-center gap-2 rounded-[4px] px-3 text-[0.8125rem] transition-colors",
-                        current ? "bg-surface-2 font-medium text-fg" : "text-muted hover:bg-surface hover:text-fg",
+                        "flex min-h-11 items-center gap-2.5 rounded-[9px] pr-2.5 pl-[22px] text-[0.84rem] transition-colors md:min-h-[34px]",
+                        here ? "bg-[#161616] font-[550] text-fg" : "text-body hover:bg-white/[0.03] hover:text-fg",
                       )}
                     >
+                      <Icon className="size-[15px] shrink-0" strokeWidth={1.75} aria-hidden />
                       {label}
-                      {current && <span className="ml-auto h-3.5 w-0.5 bg-brand" aria-hidden />}
+                      {kbd && <kbd className="label-mono ml-auto text-[0.6875rem]">{kbd}</kbd>}
                     </Link>
                   </li>
                 );
               })}
             </ul>
-          </div>
+          </details>
         );
       })}
     </nav>

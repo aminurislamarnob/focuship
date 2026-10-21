@@ -1,5 +1,5 @@
 // Focuship service worker. Bump VERSION to roll the app shell cache.
-const VERSION = "v4";
+const VERSION = "v5";
 const SHELL = `focuship-shell-${VERSION}`;
 const ASSETS = `focuship-assets-${VERSION}`;
 // Sounds are large and versioned by path, so this cache survives app updates.

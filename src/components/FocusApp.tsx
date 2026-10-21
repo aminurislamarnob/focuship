@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { PageIntent } from "@/lib/pages";
+import { PAGES, isIndexable, pagePath, type PageIntent } from "@/lib/pages";
 import { FocusShell } from "./FocusShell";
 import { SiteNav } from "./SiteNav";
 
@@ -13,7 +13,20 @@ interface FocusAppProps {
   children?: ReactNode;
 }
 
-/** The app shell with the site navigation filled in on the server. */
+/** The hand-written single-sound pages, listed under the sound library. */
+const GUIDES = PAGES.filter((page) => page.type === "sound" && page.hero && isIndexable(page)).map((page) => ({
+  href: pagePath(page),
+  label: page.heading,
+  // The intro's first sentence, without the "Tap play." call to action.
+  description: page.intro.split(/(?<=\.)\s/)[0].replace(/\.$/, ""),
+}));
+
+/** The app shell with the site navigation and sound guides filled in on the server. */
 export function FocusApp(props: FocusAppProps) {
-  return <FocusShell {...props} nav={<SiteNav />} />;
+  return <FocusShell {...props} nav={<SiteNav />} guides={GUIDES} />;
+}
+
+/** A page of its own (guides, privacy) inside the same shell: sidebar, tab bar, mini player and shortcuts. */
+export function SitePage({ children }: { children: ReactNode }) {
+  return <FocusShell heading="" intro="" nav={<SiteNav />} guides={GUIDES} page={children} />;
 }

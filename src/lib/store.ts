@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { AudioEngine } from "@/lib/audio/engine";
 import {
-  CATEGORY_BY_ID,
   DEFAULT_PRESET,
   PRESETS,
   SOUNDS,
@@ -80,7 +79,7 @@ export interface FocusState {
   settingsUpdatedAt: number;
 }
 
-export type Tab = "mix" | "sounds" | "timer";
+export type Tab = "mix" | "sounds" | "timer" | "you";
 
 const STORAGE_KEY = "focuship:v1";
 export const NEW_LAYER_VOLUME = 0.5;
@@ -202,31 +201,6 @@ export function mixName(layers: Layers): string {
   const labels = Object.keys(layers).map((id) => SOUND_BY_ID.get(id)?.label ?? id);
   if (labels.length <= 2) return labels.join(" + ");
   return `${labels.slice(0, 2).join(" + ")} +${labels.length - 2}`;
-}
-
-/** What the ambient backdrop should look like for a mix. */
-export interface MixMood {
-  /** Hue of the loudest layer's category. */
-  hue: number;
-  /** Category id of the loudest layer; picks the glyph weather. */
-  category: string;
-  /** How full the mix sounds (0..1), from layer count and volumes. */
-  energy: number;
-}
-
-export function mixMood(layers: Layers): MixMood {
-  let best: [string, number] | undefined;
-  let loudness = 0;
-  for (const entry of Object.entries(layers)) {
-    loudness += entry[1];
-    if (!best || entry[1] > best[1]) best = entry;
-  }
-  const sound = best && SOUND_BY_ID.get(best[0]);
-  return {
-    hue: sound ? (CATEGORY_BY_ID.get(sound.category)?.hue ?? 22) : 22,
-    category: sound?.category ?? "generated",
-    energy: Math.min(1, loudness / 2),
-  };
 }
 
 // Sharing --------------------------------------------------------------------

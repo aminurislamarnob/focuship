@@ -2,17 +2,30 @@
 
 :root {
   --bg: #0a0a0a;
-  --bg-raised: #111111;
-  --surface: #171717;
-  --surface-2: #1f1f1f;
-  --line: rgb(255 255 255 / 0.1);
-  --line-strong: rgb(255 255 255 / 0.18);
-  --fg: #fafafa;
-  --muted: #a1a1a1;
-  --faint: #6b6b6b;
-  --brand: #d25611;
-  --brand-light: #e8804a;
-  --brand-dark: #9e400a;
+  /* Tiles and cards. */
+  --bg-raised: #121212;
+  /* Controls: inputs, segmented bars, round buttons. */
+  --surface: #141414;
+  /* Secondary buttons, chips, the mini player. */
+  --surface-2: #1c1c1c;
+  /* Hairline dividers and card edges. */
+  --line: #1f1f1f;
+  /* Control borders. */
+  --edge: #262626;
+  /* Secondary-button borders, dashed outlines. */
+  --line-strong: #333333;
+  /* Warm-tinted text, all at least 4.5:1 on the ground. */
+  --fg: #e8e6e3;
+  --soft: #cfccc6;
+  --body: #b8b5b0;
+  --muted: #a29f99;
+  --faint: #8c8983;
+  /* Soft white accent with dark ink on top. */
+  --accent: #d9d6d0;
+  --accent-ink: #0a0a0a;
+  /* The ember glow behind the player. */
+  --ember: #ea580c;
+  --danger: #e58b84;
   --ok: #00bb7f;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: dark;
@@ -24,47 +37,43 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-line: var(--line);
+  --color-edge: var(--edge);
   --color-line-strong: var(--line-strong);
   --color-fg: var(--fg);
+  --color-soft: var(--soft);
+  --color-body: var(--body);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
-  --color-brand: var(--brand);
-  --color-brand-light: var(--brand-light);
-  --color-brand-dark: var(--brand-dark);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-ember: var(--ember);
+  --color-danger: var(--danger);
   --color-ok: var(--ok);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
   --ease-out-strong: var(--ease-out);
-  --animate-eq: eq 0.9s ease-in-out infinite;
-  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
-  --animate-float: float 4s ease-in-out infinite;
+  --animate-eq: eq 3.2s ease-in-out infinite;
+  --animate-eq-fast: eq 2.8s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 3.2s ease-in-out infinite;
+  --animate-glow: glow 6s ease-in-out infinite;
+  --animate-twinkle: twinkle 5s ease-in-out infinite;
+  --animate-breathe: breathe 4s ease-in-out infinite;
   --animate-pop-in: pop-in 0.5s var(--ease-out) both;
-
-  @keyframes float {
-    0%,
-    100% {
-      translate: 0 0;
-    }
-    50% {
-      translate: 0 -4px;
-    }
-  }
 
   @keyframes pop-in {
     from {
       opacity: 0;
       scale: 0.6;
-      rotate: -12deg;
     }
   }
 
   @keyframes eq {
     0%,
     100% {
-      transform: scaleY(0.3);
+      transform: scaleY(1);
     }
     50% {
-      transform: scaleY(1);
+      transform: scaleY(0.62);
     }
   }
 
@@ -74,7 +83,37 @@
       opacity: 1;
     }
     50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes glow {
+    0%,
+    100% {
+      opacity: 0.78;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes twinkle {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
       opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
     }
   }
 }
@@ -113,32 +152,33 @@ textarea {
 a,
 button,
 [role="tab"],
-label {
+label,
+summary {
   -webkit-user-select: none;
   user-select: none;
   touch-action: manipulation;
 }
 
 :focus-visible {
-  outline: 2px solid var(--brand-light);
+  outline: 2px solid var(--fg);
   outline-offset: 2px;
 }
 
+/* Small mono captions: counts, eyebrows, keys. */
 .label-mono {
   font-family: var(--font-mono);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   line-height: 1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+  color: var(--faint);
 }
 
 /* Long-form copy below the player on landing pages and guides. */
 .page-copy h2 {
-  margin: 2rem 0 0.75rem;
-  font-size: 1.125rem;
+  margin: 2.25rem 0 0.625rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
   color: var(--fg);
 }
 .page-copy h2:first-child {
@@ -155,19 +195,29 @@ label {
 .page-copy dl {
   margin-bottom: 1rem;
 }
-.page-copy ul {
-  list-style: square;
-  padding-left: 1.25rem;
-}
+/* Lists read as numbered rows between hairlines. */
+.page-copy ul,
 .page-copy ol {
-  list-style: decimal;
-  padding-left: 1.25rem;
+  counter-reset: row;
+  list-style: none;
+  border-bottom: 1px solid var(--line);
 }
-.page-copy li {
-  margin-bottom: 0.375rem;
+.page-copy ul > li,
+.page-copy ol > li {
+  counter-increment: row;
+  display: flex;
+  gap: 0.875rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--line);
 }
-.page-copy li::marker {
-  color: var(--brand);
+.page-copy ul > li::before,
+.page-copy ol > li::before {
+  content: counter(row, decimal-leading-zero);
+  flex: none;
+  padding-top: 0.2em;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--faint);
 }
 .page-copy a {
   color: var(--fg);
@@ -176,11 +226,61 @@ label {
   text-decoration-color: var(--line-strong);
 }
 .page-copy a:hover {
-  text-decoration-color: var(--brand);
+  text-decoration-color: var(--fg);
 }
 .page-copy strong {
   color: var(--fg);
   font-weight: 600;
+}
+
+/* Landing pages: copy beside a column of related links on wide screens, where lists become cards. */
+.page-copy-split aside h2:first-child {
+  margin-top: 2.25rem;
+}
+@media (min-width: 64rem) {
+  .page-copy-split h2 {
+    font-size: 1.375rem;
+  }
+  .page-copy-split aside h2:first-child {
+    margin: 0 0 0.5rem;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+  }
+  .page-copy-split ul,
+  .page-copy-split ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
+    border-bottom: 0;
+  }
+  .page-copy-split ul > li,
+  .page-copy-split ol > li {
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 0.875rem;
+    border: 1px solid #232120;
+    border-radius: 16px;
+    background: #121110;
+    font-size: 0.90625rem;
+    line-height: 1.5;
+    color: var(--soft);
+  }
+  .page-copy-split ul > li::before,
+  .page-copy-split ol > li::before {
+    padding-top: 0;
+  }
+}
+
+/* FAQ disclosures: a plus that turns into a cross when open. */
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq[open] .faq-chev {
+  rotate: 45deg;
 }
 
 .no-scrollbar {
@@ -226,56 +326,22 @@ label {
 .view-in {
   animation: view-in 0.28s var(--ease-out);
 }
-@media (prefers-reduced-motion: reduce) {
-  .view-in {
-    animation: none;
-  }
-}
 
-/* Ambient backdrop motes: the mix's sound icons moving like their category. */
-@keyframes mote-fall {
-  from {
-    top: -18%;
-  }
+/*
+ * Views that show saved state stay invisible until the store has loaded it, then fade in, so the
+ * prerendered defaults never flash first. Without JavaScript they show at once (see the layout's
+ * <noscript>), and if hydration stalls they appear after three seconds anyway.
+ */
+.await-state {
+  transition: opacity 0.25s var(--ease-out);
+}
+.await-state:not([data-ready]) {
+  opacity: 0;
+  animation: await-state-reveal 0s 3s forwards;
+}
+@keyframes await-state-reveal {
   to {
-    top: 112%;
-  }
-}
-@keyframes mote-roll {
-  from {
-    left: -14%;
-  }
-  to {
-    left: 110%;
-  }
-}
-@keyframes mote-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-.mote-fall {
-  animation: mote-fall linear infinite;
-}
-.mote-roll {
-  animation: mote-roll linear infinite;
-}
-.mote-roll-reverse {
-  animation: mote-roll linear infinite reverse;
-}
-.mote-bob {
-  animation: mote-bob ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) {
-  .mote-fall,
-  .mote-roll,
-  .mote-roll-reverse,
-  .mote-bob {
-    animation: none;
+    opacity: 1;
   }
 }
 

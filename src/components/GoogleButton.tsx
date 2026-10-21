@@ -145,11 +145,11 @@ export function GoogleButton({ clientId, onUnavailable, children }: GoogleButton
     <div className="group relative">
       <div aria-hidden>{children(ready)}</div>
       {/* Google's button (an iframe, 40px tall at size "large") in a 40px slot centred on the
-          48px face, stretched 1.2x so it covers the face exactly and nothing beyond it.
+          52px face, stretched 1.3x so it covers the face exactly and nothing beyond it.
           Fully transparent: opacity does not affect hit-testing, so it still gets the click. */}
       <div
         ref={slot}
-        className="absolute inset-x-0 top-1 flex h-10 scale-y-[1.2] items-center justify-center overflow-hidden opacity-0 [color-scheme:light]"
+        className="absolute inset-x-0 top-1.5 flex h-10 scale-y-[1.3] items-center justify-center overflow-hidden opacity-0 [color-scheme:light]"
       />
     </div>
   );

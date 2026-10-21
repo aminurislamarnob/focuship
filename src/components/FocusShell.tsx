@@ -1,70 +1,61 @@
 "use client";
 
-import { Check, Disc3, Download, Expand, Info, LibraryBig, Menu, Pause, Play, Share2, Timer, Trash2, UserRound, Volume2, VolumeX } from "lucide-react";
+import { Expand, LayoutGrid, LogIn, Pause, Play, Scan, Share, SlidersVertical, Timer, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
 import type { PageIntent } from "@/lib/pages";
-import { startPwa, useInstallPrompt } from "@/lib/pwa";
-import { actions, matchPreset, mixName, shareUrl, useFocus, type Tab } from "@/lib/store";
+import { startPwa } from "@/lib/pwa";
+import { actions, matchPreset, mixName, useFocus, type Tab } from "@/lib/store";
 import { CLOUD_ENABLED } from "@/lib/supabase";
-import { AboutSheet } from "./AboutSheet";
-import { FocusMode } from "./FocusMode";
+import { FocusMode, useClock } from "./FocusMode";
 import { Logo } from "./Logo";
+import { MixSheet } from "./MixSheet";
 import { MixView } from "./MixView";
-import { SoundsView } from "./SoundsView";
+import { SoundSearch, SoundsView, type SoundGuide } from "./SoundsView";
 import { TimerView, formatClock, useTimerClock } from "./TimerView";
-import {
-  CATEGORY_ICONS,
-  Eq,
-  IconButton,
-  PresetIcon,
-  Sheet,
-  Slider,
-  StatusDot,
-  SwapText,
-  cx,
-  useCopied,
-  type ShareResult,
-} from "./ui";
+import { Eq, IconButton, PresetArt, SwapText, cx } from "./ui";
+import { Avatar, YouView } from "./YouView";
 
-const TABS: { id: Tab; label: string; icon: typeof Disc3; href: string }[] = [
-  { id: "mix", label: "Mix", icon: Disc3, href: "/" },
-  { id: "sounds", label: "Sounds", icon: LibraryBig, href: "/sounds" },
-  { id: "timer", label: "Timer", icon: Timer, href: "/timer" },
+const TABS: { id: Tab; label: string; title: string; icon: typeof Timer; href?: string }[] = [
+  { id: "mix", label: "Mix", title: "Focuship", icon: SlidersVertical, href: "/" },
+  { id: "sounds", label: "Sounds", title: "Sounds", icon: LayoutGrid, href: "/sounds" },
+  { id: "timer", label: "Timer", title: "Timer", icon: Timer, href: "/timer" },
+  { id: "you", label: "You", title: "You", icon: UserRound, href: "/about" },
 ];
 
 interface FocusShellProps {
-  /** The page's H1 and one-line intro, shown above the player. */
+  /** The page's H1 and one-line intro. */
   heading: string;
   intro: string;
   /** What a landing page loads on arrival (mix, tab, timer lengths). */
   intent?: PageIntent;
-  /** Site links, shown in the sidebar and in the mobile menu. */
+  /** Site links, shown in the sidebar and in the You tab on phones. */
   nav?: ReactNode;
+  /** Landing pages for single sounds, listed under the sound library. */
+  guides?: SoundGuide[];
   /** Page copy rendered below the active view, inside the scroll area. */
   children?: ReactNode;
+  /**
+   * A page of its own (a guide, the privacy policy) shown in place of the app views, inside the same
+   * sidebar, tab bar and mini player. No tab is current while it shows.
+   */
+  page?: ReactNode;
 }
 
-export function FocusShell({ heading, intro, intent, nav, children }: FocusShellProps) {
-  const tab = useFocus((s) => s.tab);
+export function FocusShell({ heading, intro, intent, nav, guides = [], children, page }: FocusShellProps) {
+  const storeTab = useFocus((s) => s.tab);
+  const hydrated = useFocus((s) => s.hydrated);
+  // Until saved state loads, show the page's own tab, so /timer or /about never prerender as the mixer.
+  const appTab = hydrated ? storeTab : (intent?.tab ?? "mix");
+  const tab: Tab | null = page ? null : appTab;
+  const reading = !!page;
   const [focusOpen, setFocusOpen] = useState(false);
   const [fullscreenRequest, setFullscreenRequest] = useState(0);
-  const [mixerOpen, setMixerOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const [menuPath, setMenuPath] = useState(pathname);
-  if (menuPath !== pathname) {
-    // A menu link was followed: close the menu on the new page.
-    setMenuPath(pathname);
-    setMenuOpen(false);
-  }
-  const main = useRef<HTMLElement>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const notice = useFocus((s) => s.notice);
-  const hasMix = useFocus((s) => Object.keys(s.layers).length > 0);
-  const { canPrompt } = useInstallPrompt();
 
   useEffect(() => {
     actions.visit(intent);
@@ -78,30 +69,25 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
   }, [notice]);
 
   const router = useRouter();
-  const go = useCallback((next: Tab) => router.push(TABS.find((t) => t.id === next)!.href), [router]);
-
-  const share = useCallback(async (): Promise<ShareResult> => {
-    const url = shareUrl();
-    try {
-      if (navigator.share && matchMedia("(pointer: coarse)").matches) {
-        await navigator.share({ title: "A focus mix", text: "Listen to my focus mix", url });
-        return "shared";
-      }
-      await navigator.clipboard.writeText(url);
-      return "copied";
-    } catch (e) {
-      if ((e as Error).name === "AbortError") return "cancelled";
-      actions.showNotice("Couldn’t share this mix.");
-      return "failed";
-    }
-  }, []);
+  /** Shows a tab now; tabs with a page of their own also move there. */
+  const go = useCallback(
+    (next: Tab) => {
+      actions.setTab(next);
+      const href = TABS.find((t) => t.id === next)?.href;
+      if (href) router.push(href);
+    },
+    [router],
+  );
+  const openFocus = useCallback(() => setFocusOpen(true), []);
+  const openSheet = useCallback(() => setSheetOpen(true), []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
       const target = e.target as HTMLElement;
       if (target.closest?.("input, textarea, select, [contenteditable]")) return;
-      if (e.key === " " && !target.closest("button, a, [role=tab]")) {
+      // On a reading page (a guide) Space scrolls, as it does on any web page.
+      if (e.key === " " && !reading && !target.closest("button, a, [role=tab], summary")) {
         e.preventDefault();
         actions.toggle();
       } else if (e.key === "v" || e.key === "V") {
@@ -118,382 +104,314 @@ export function FocusShell({ heading, intro, intent, nav, children }: FocusShell
         actions.toggleMute();
       } else if (e.key === "Escape") {
         setFocusOpen(false);
-      } else if (["1", "2", "3"].includes(e.key) && !focusOpen) {
+      } else if (e.key === "/" && !focusOpen) {
+        e.preventDefault();
+        go("sounds");
+        // Whichever search box this layout shows: the heading's on wide screens, the library's on phones.
+        requestAnimationFrame(() =>
+          [...document.querySelectorAll<HTMLInputElement>("input[data-sound-search]")].find((el) => el.offsetParent)?.focus(),
+        );
+      } else if (["1", "2", "3", "4"].includes(e.key) && !focusOpen) {
         go(TABS[Number(e.key) - 1].id);
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [focusOpen, go]);
+  }, [focusOpen, go, reading]);
 
   return (
     <div className="flex h-dvh overflow-hidden">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-raised md:flex">
-        <div className="flex h-16 items-center px-5">
-          <Link href="/" aria-label="Focuship home">
-            <Logo />
-          </Link>
-        </div>
-        <nav aria-label="Main" className="flex flex-col gap-1 px-3 pt-2">
-          {TABS.map(({ id, label, icon: Icon, href }) => (
-            <Link
-              key={id}
-              href={href}
-              aria-current={tab === id ? "page" : undefined}
-              className={cx(
-                "flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm transition-colors",
-                tab === id ? "bg-surface-2 text-fg" : "text-muted hover:bg-surface hover:text-fg",
-              )}
-            >
-              <Icon className="size-4" aria-hidden />
-              {label}
-              {tab === id && <span className="ml-auto h-4 w-0.5 bg-brand" aria-hidden />}
-            </Link>
-          ))}
-        </nav>
-        {nav && (
-          <div className="no-scrollbar mx-3 mt-3 min-h-0 flex-1 overflow-y-auto border-t border-line pt-3 pb-4">{nav}</div>
-        )}
-        <div className="mt-auto flex flex-col gap-1 border-t border-line p-3">
-          <button
-            type="button"
-            onClick={() => setFocusOpen(true)}
-            className="flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm text-muted hover:bg-surface hover:text-fg"
-          >
-            <Expand className="size-4" aria-hidden /> Focus mode
-            <kbd className="ml-auto font-mono text-[0.6875rem] text-faint">V</kbd>
-          </button>
-          {CLOUD_ENABLED && <AccountLink variant="sidebar" />}
-          <button
-            type="button"
-            onClick={() => setAboutOpen(true)}
-            className="flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm text-muted hover:bg-surface hover:text-fg"
-          >
-            <Info className="size-4" aria-hidden /> About & offline
-          </button>
-        </div>
-      </aside>
+      <Sidebar tab={tab} nav={nav} onOpenFocus={openFocus} />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="pt-safe shrink-0 border-b border-line bg-bg md:hidden">
-          <div className="flex h-14 items-center justify-between px-4">
-            <Link href="/" aria-label="Focuship home">
-              <Logo />
-            </Link>
-            <div className="flex items-center gap-1">
-              {canPrompt && (
-                <IconButton label="Install app" variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
-                  <Download className="size-4" />
-                </IconButton>
-              )}
-              {CLOUD_ENABLED && <AccountLink variant="header" />}
-              <IconButton label="About and offline" variant="ghost" size="sm" onClick={() => setAboutOpen(true)}>
-                <Info className="size-4" />
+        <header className="pt-safe shrink-0 md:hidden">
+          <div className="flex h-11 items-center justify-between pr-3 pl-5">
+            {tab === "mix" || !tab ? (
+              <Link href="/" aria-label="Focuship home" className="flex h-11 items-center">
+                <Logo />
+              </Link>
+            ) : (
+              <span className="text-[0.9375rem] font-semibold">{TABS.find((t) => t.id === tab)?.title}</span>
+            )}
+            <div className="flex gap-1">
+              <IconButton label="Focus mode" onClick={openFocus}>
+                <Expand className="size-[22px]" strokeWidth={1.75} />
               </IconButton>
-              {nav && (
-                <IconButton label="Menu" variant="ghost" size="sm" onClick={() => setMenuOpen(true)}>
-                  <Menu className="size-4" />
+              {tab === "mix" && (
+                <IconButton label="Save or share this mix" onClick={openSheet}>
+                  <Share className="size-[22px]" strokeWidth={1.75} />
                 </IconButton>
               )}
             </div>
           </div>
         </header>
 
-        <main ref={main} className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto w-full max-w-5xl px-4 max-md:pt-3 md:px-8 md:pt-6">
-            {/* Visually hidden, but kept for SEO and screen readers: every landing page's H1 lives here. */}
-            <header className="sr-only">
-              <h1>{heading}</h1>
-              <p>{intro}</p>
-            </header>
-            <div hidden={tab !== "mix"} className="view-in">
-              <MixView onOpenFocus={() => setFocusOpen(true)} onShare={share} onBrowse={() => go("sounds")} />
-            </div>
-            <div hidden={tab !== "sounds"} className="view-in">
-              <SoundsView />
-            </div>
-            <div hidden={tab !== "timer"} className="view-in">
-              <TimerView />
-            </div>
-            {children}
+        <main className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto w-full max-w-[1180px] px-5 pt-4 md:px-8 md:pt-7">
+            {tab ? (
+              <>
+                <PageHeading
+                  tab={tab}
+                  heading={heading}
+                  intro={intro}
+                  onOpenFocus={openFocus}
+                  onOpenSheet={openSheet}
+                  search={<SoundSearch query={query} onQuery={setQuery} className="md:w-80" />}
+                />
+                {/* The views show saved state (your mix, timer, account); they wait for it so the prerendered defaults never flash. */}
+                <div className="await-state" data-ready={hydrated || undefined}>
+                  <div hidden={tab !== "mix"} className="view-in">
+                    <MixView
+                      onOpenSheet={openSheet}
+                      onBrowse={() => go("sounds")}
+                      onTimer={() => go("timer")}
+                      onAbout={() => go("you")}
+                    />
+                  </div>
+                  <div hidden={tab !== "sounds"} className="view-in">
+                    <SoundsView guides={guides} query={query} onQuery={setQuery} />
+                  </div>
+                  <div hidden={tab !== "timer"} className="view-in">
+                    <TimerView onMix={() => actions.setTab("mix")} />
+                  </div>
+                  <div hidden={tab !== "you"} className="view-in">
+                    <YouView nav={nav} />
+                  </div>
+                </div>
+                {children}
+              </>
+            ) : (
+              page
+            )}
           </div>
         </main>
 
-        <div className="relative shrink-0">
+        <div className={cx("pb-safe relative shrink-0 px-3 pt-2 md:px-8 md:pb-4", tab === "mix" && "md:p-0")}>
           {notice && (
             <div
               role="status"
-              className="absolute inset-x-4 bottom-full mb-3 rounded-[6px] border border-line-strong bg-surface-2 px-3 py-2.5 text-sm shadow-lg md:mx-auto md:max-w-md"
+              className="absolute inset-x-4 bottom-full mb-3 rounded-[14px] border border-line-strong bg-surface-2 px-4 py-3 text-sm shadow-lg md:mx-auto md:max-w-md"
             >
               {notice}
             </div>
           )}
-          <div className="max-md:hidden">
-            {hasMix && <PlayerBar onOpenMixer={() => setMixerOpen(true)} onOpenFocus={() => setFocusOpen(true)} />}
-          </div>
-          <MobileNav tab={tab} onOpenFocus={() => setFocusOpen(true)} />
+          {tab !== "mix" && (
+            <div className="await-state" data-ready={hydrated || undefined}>
+              <MiniPlayer
+                showTimer={tab !== "timer"}
+                onOpen={() => (tab ? actions.setTab("mix") : go("mix"))}
+                onTimer={() => go("timer")}
+              />
+            </div>
+          )}
+          <TabBar tab={tab} onGo={go} />
         </div>
       </div>
 
-      <MixerSheet open={mixerOpen} onClose={() => setMixerOpen(false)} onShare={share} />
-      <AboutSheet open={aboutOpen} onClose={() => setAboutOpen(false)} />
-      {nav && (
-        <Sheet open={menuOpen} onClose={() => setMenuOpen(false)} title="Menu">
-          <div className="-mx-3 pt-2 pb-2">{nav}</div>
-        </Sheet>
-      )}
+      <MixSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
       <FocusMode open={focusOpen} onClose={() => setFocusOpen(false)} fullscreenRequest={fullscreenRequest} />
     </div>
   );
 }
 
-function PlayerBar({ onOpenMixer, onOpenFocus }: { onOpenMixer(): void; onOpenFocus(): void }) {
-  const layers = useFocus((s) => s.layers);
-  const playing = useFocus((s) => s.playing);
-  const timer = useFocus((s) => s.timer);
-  const count = Object.keys(layers).length;
-  const showTimer = timer.status !== "idle";
-  const preset = matchPreset(layers);
-
+/**
+ * The page's one H1. On the mixer it is a quiet caption above the player; on the
+ * library and the timer it is the view's title; the You tab brings its own title.
+ */
+function PageHeading({ tab, heading, intro, onOpenFocus, onOpenSheet, search }: {
+  tab: Tab;
+  heading: string;
+  intro: string;
+  onOpenFocus(): void;
+  onOpenSheet(): void;
+  /** The library's search box, beside the heading on wide screens. */
+  search: ReactNode;
+}) {
+  if (tab === "mix") {
+    return (
+      <header className="flex min-h-11 flex-wrap items-center justify-between gap-3 md:mb-7">
+        <h1 className="text-[0.8125rem] font-medium text-faint md:text-sm">{heading}</h1>
+        <p className="sr-only">{intro}</p>
+        <div className="flex gap-2 max-md:hidden">
+          <button type="button" onClick={onOpenFocus} className={outlineButton}>
+            <Expand className="size-4" strokeWidth={1.75} aria-hidden /> Focus mode
+          </button>
+          <button type="button" onClick={onOpenSheet} className={outlineButton}>
+            <Share className="size-4" strokeWidth={1.75} aria-hidden /> Share mix
+          </button>
+        </div>
+      </header>
+    );
+  }
   return (
-    <div className="border-t border-line bg-bg/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center gap-2 px-3 py-2 md:px-8">
-        <button
-          type="button"
-          onClick={onOpenMixer}
-          aria-label="Open the mixer"
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-[4px] py-1 text-left"
-        >
-          <span className="relative grid size-10 shrink-0 place-items-center rounded-[4px] border border-line bg-surface">
-            {preset ? (
-              <>
-                <PresetIcon key={preset.id} id={preset.id} className="size-5 animate-pop-in text-muted" />
-                <Eq playing={playing} className="absolute -right-1 -bottom-1 rounded-[2px] bg-bg px-[3px] py-[2px]" />
-              </>
-            ) : (
-              <Eq playing={playing} />
-            )}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-sm font-medium">
-              <SwapText text={mixName(layers)} className="max-w-full truncate align-bottom" />
-            </span>
-            <span className="label-mono flex items-center gap-1.5 truncate text-faint">
-              <StatusDot tone={playing ? "brand" : "idle"} pulse={playing} />
-              {count} sound{count === 1 ? "" : "s"}
-              {showTimer && <TimerChip />}
-            </span>
-          </span>
-        </button>
-        <IconButton label="Focus mode" variant="ghost" onClick={onOpenFocus}>
-          <Expand className="size-5" />
-        </IconButton>
-        <IconButton label={playing ? "Pause" : "Play"} variant="solid" onClick={actions.toggle}>
-          {playing ? <Pause className="size-5" fill="currentColor" /> : <Play className="size-5" fill="currentColor" />}
-        </IconButton>
+    <header className={cx("flex flex-col gap-5 pt-2 md:flex-row md:flex-wrap md:items-end md:justify-between md:pt-0", tab === "you" && "sr-only")}>
+      <div className="flex max-w-xl flex-col gap-2">
+        <h1 className="text-[1.75rem] leading-[1.12] font-semibold tracking-[-0.035em] text-balance md:text-[2.25rem] md:leading-[1.08] md:tracking-[-0.04em]">
+          {heading}
+        </h1>
+        <p className="text-sm leading-[1.45] text-muted md:text-[0.9375rem] md:leading-normal">{intro}</p>
       </div>
-    </div>
+      {tab === "sounds" && <div className="max-md:hidden">{search}</div>}
+    </header>
   );
 }
 
-/**
- * The phone bottom bar: the two outer pairs switch views, the raised centre button plays
- * and pauses the mix (loading the default soundscape when the mix is empty), and Focus
- * opens focus mode. Replaces the floating player bar on small screens.
- */
-function MobileNav({ tab, onOpenFocus }: { tab: Tab; onOpenFocus(): void }) {
-  const playing = useFocus((s) => s.playing);
+const outlineButton =
+  "inline-flex h-10 cursor-pointer items-center gap-2 rounded-[12px] border border-edge px-3.5 text-[0.84rem] transition-colors hover:bg-white/[0.04]";
 
-  const inner = (active: boolean, label: string, Icon: typeof Disc3) => (
-    <>
-      <span
-        className={cx(
-          "grid h-7 w-12 place-items-center rounded-full transition-all duration-200 group-active:scale-90",
-          active ? "bg-brand/15 text-brand-light" : "text-faint",
-        )}
-      >
-        <Icon className="size-5" aria-hidden />
-      </span>
-      <span
-        className={cx(
-          "font-mono text-[0.625rem] tracking-wider uppercase transition-colors duration-200",
-          active ? "text-fg" : "text-faint",
-        )}
-      >
-        {label}
-      </span>
-    </>
-  );
-
-  const tabItem = ({ id, label, icon, href }: (typeof TABS)[number]) => (
-    <Link
-      key={id}
-      href={href}
-      aria-current={tab === id ? "page" : undefined}
-      className="group flex h-16 flex-col items-center justify-center gap-1"
-    >
-      {inner(tab === id, label, icon)}
-    </Link>
-  );
-
+function Sidebar({ tab, nav, onOpenFocus }: { tab: Tab | null; nav?: ReactNode; onOpenFocus(): void }) {
+  // The highlight follows the view on screen; "current page" is only the link to this very URL.
+  const pathname = usePathname();
+  const user = useFocus((s) => s.account.user);
+  const now = useClock();
+  const link =
+    "flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-[10px] px-2.5 text-sm text-muted transition-colors hover:bg-white/[0.03] hover:text-fg";
+  const icon = "size-[18px] shrink-0";
   return (
-    <nav aria-label="Tabs" className="pb-safe border-t border-line bg-raised/95 backdrop-blur-md md:hidden">
-      <div className="grid grid-cols-5 px-1">
-        {TABS.slice(0, 2).map(tabItem)}
-        <div className="flex items-start justify-center">
-          <button
-            type="button"
-            aria-label={playing ? "Pause" : "Play"}
-            onClick={actions.toggle}
+    <aside className="hidden w-60 shrink-0 flex-col border-r border-[#1a1a1a] md:flex">
+      <div className="px-7 pt-7 pb-6">
+        <Link href="/" aria-label="Focuship home" onClick={() => actions.setTab("mix")} className="inline-flex">
+          <Logo size={26} className="gap-2.5 text-[1.1875rem]" />
+        </Link>
+      </div>
+      <nav aria-label="Main" className="flex flex-col gap-0.5 px-[18px]">
+        {TABS.filter((t) => t.id !== "you").map(({ id, label, icon: Icon, href }, i) => (
+          <Link
+            key={id}
+            href={href!}
+            onClick={() => actions.setTab(id)}
+            aria-current={pathname === href ? "page" : undefined}
             className={cx(
-              "-mt-5 grid size-14 cursor-pointer place-items-center rounded-full border border-brand-dark bg-brand text-white transition-all duration-200 active:scale-90",
-              playing ? "shadow-[0_6px_28px_rgba(210,86,17,0.55)]" : "shadow-[0_6px_18px_rgba(0,0,0,0.5)]",
+              "flex h-10 items-center gap-2.5 rounded-[10px] px-2.5 text-sm transition-colors",
+              tab === id ? "bg-[#161616] font-[550] text-fg" : "text-muted hover:bg-white/[0.03] hover:text-fg",
             )}
           >
-            {playing ? (
-              <Pause className="size-6 animate-pop-in" fill="currentColor" aria-hidden />
-            ) : (
-              <Play className="size-6 translate-x-0.5 animate-pop-in" fill="currentColor" aria-hidden />
-            )}
+            <Icon className="size-[18px]" strokeWidth={1.75} aria-hidden />
+            {label}
+            <kbd className="label-mono ml-auto text-[0.6875rem]">{i + 1}</kbd>
+          </Link>
+        ))}
+      </nav>
+      <div className="no-scrollbar mt-0.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-[18px] pb-6">
+        {nav}
+        <nav aria-label="More" className="flex flex-col gap-0.5">
+          <button type="button" onClick={onOpenFocus} className={link}>
+            <Scan className={icon} strokeWidth={1.75} aria-hidden />
+            Focus mode <kbd className="label-mono ml-auto text-[0.6875rem]">V</kbd>
           </button>
-        </div>
-        {TABS.slice(2).map(tabItem)}
-        <button
-          type="button"
-          onClick={onOpenFocus}
-          className="group flex h-16 cursor-pointer flex-col items-center justify-center gap-1"
-        >
-          {inner(false, "Focus", Expand)}
-        </button>
+          {CLOUD_ENABLED && (
+            <Link href="/account" className={link}>
+              {user ? (
+                <Avatar user={user} className="size-[18px] text-[0.5rem] font-[650]" />
+              ) : (
+                <LogIn className={icon} strokeWidth={1.75} aria-hidden />
+              )}
+              <span className="truncate">{user ? user.name : "Sign in"}</span>
+              {user && <span className="ml-auto size-1.5 shrink-0 rounded-full bg-ok" aria-hidden />}
+            </Link>
+          )}
+        </nav>
+      </div>
+      <div className="mx-[18px] flex flex-col gap-1 border-t border-[#1a1a1a] px-2.5 pt-4 pb-7">
+        {/* Unknown until mounted (the page is prerendered), so it fades in rather than popping. */}
+        <span className={cx("h-7 font-mono text-[1.375rem] font-light tracking-[-0.03em] transition-opacity duration-500", !now && "opacity-0")}>
+          {now?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) ?? ""}
+        </span>
+        <span className="text-[0.78rem] text-faint">One thing at a time.</span>
+      </div>
+    </aside>
+  );
+}
+
+/** The floating bottom tab bar on phones. */
+function TabBar({ tab, onGo }: { tab: Tab | null; onGo(tab: Tab): void }) {
+  const pathname = usePathname();
+  const user = useFocus((s) => s.account.user);
+  return (
+    <nav aria-label="Tabs" className="mt-2 mb-[max(0px,calc(26px-env(safe-area-inset-bottom)))] md:hidden">
+      <div className="grid grid-cols-4 rounded-[26px] border border-[#232323] bg-surface p-1.5">
+        {TABS.map(({ id, label, icon: Icon, href }) => {
+          const active = tab === id;
+          // Signed in, the You tab shows your avatar, ringed when it is the current tab.
+          const avatar = id === "you" && CLOUD_ENABLED && user;
+          const inner = (
+            <>
+              <span
+                className={cx(
+                  "grid h-7 w-[52px] place-items-center rounded-full transition-[background-color,scale] duration-200 group-active:scale-90",
+                  avatar ? "" : active ? "bg-accent text-accent-ink" : "text-faint",
+                )}
+              >
+                {avatar ? (
+                  <Avatar
+                    user={user}
+                    className={cx(
+                      "size-6 text-[0.59rem] font-[650]",
+                      active ? "shadow-[0_0_0_2px_var(--surface),0_0_0_3.5px_var(--accent)]" : "opacity-80",
+                    )}
+                  />
+                ) : (
+                  <Icon className="size-5" strokeWidth={active ? 1.9 : 1.75} aria-hidden />
+                )}
+              </span>
+              <span className={cx("text-[0.6875rem]", active ? "font-semibold text-fg" : "font-medium text-faint")}>{label}</span>
+            </>
+          );
+          const className = "group flex min-h-[54px] cursor-pointer flex-col items-center justify-center gap-1";
+          return href ? (
+            <Link key={id} href={href} onClick={() => actions.setTab(id)} aria-current={pathname === href ? "page" : undefined} className={className}>
+              {inner}
+            </Link>
+          ) : (
+            <button key={id} type="button" onClick={() => onGo(id)} aria-current={active ? "page" : undefined} className={className}>
+              {inner}
+            </button>
+          );
+        })}
       </div>
     </nav>
   );
 }
 
-/** The way into /account: a sidebar row on desktop, an icon in the phone header. */
-function AccountLink({ variant }: { variant: "sidebar" | "header" }) {
-  const user = useFocus((s) => s.account.user);
-  const label = user ? `Account — ${user.name}` : "Sign in";
-  if (variant === "header") {
-    return (
-      <Link
-        href="/account"
-        aria-label={label}
-        title={label}
-        className="relative inline-grid size-9 shrink-0 place-items-center rounded-[4px] text-muted transition-colors hover:text-fg"
-      >
-        <UserRound className="size-4" aria-hidden />
-        {user && <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-ok" aria-hidden />}
-      </Link>
-    );
-  }
-  return (
-    <Link
-      href="/account"
-      className="flex h-10 cursor-pointer items-center gap-3 rounded-[4px] px-3 text-sm text-muted hover:bg-surface hover:text-fg"
-    >
-      <UserRound className="size-4" aria-hidden />
-      <span className="truncate">{user ? user.name : "Sign in"}</span>
-      {user && <span className="ml-auto size-1.5 shrink-0 rounded-full bg-ok" aria-hidden />}
-    </Link>
-  );
-}
-
-function TimerChip() {
+/** The current mix in one row, with play/pause; shown on every tab but the mixer. */
+function MiniPlayer({ showTimer, onOpen, onTimer }: { showTimer: boolean; onOpen(): void; onTimer(): void }) {
+  const layers = useFocus((s) => s.layers);
+  const playing = useFocus((s) => s.playing);
   const timer = useFocus((s) => s.timer);
   const { remaining } = useTimerClock(timer);
-  return (
-    <span className="text-brand-light">
-      · {timer.mode === "focus" ? "focus" : "break"} {formatClock(remaining)}
-    </span>
-  );
-}
-
-function MixerSheet({
-  open,
-  onClose,
-  onShare,
-}: {
-  open: boolean;
-  onClose(): void;
-  onShare(): Promise<ShareResult>;
-}) {
-  const [copied, flagCopied] = useCopied();
-  const layers = useFocus((s) => s.layers);
-  const volume = useFocus((s) => s.volume);
-  const loading = useFocus((s) => s.loading);
   const ids = Object.keys(layers);
-
-  useEffect(() => {
-    if (open && ids.length === 0) onClose();
-  }, [open, ids.length, onClose]);
+  const preset = matchPreset(layers);
+  const detail = ids.length ? ids.map((id) => SOUND_BY_ID.get(id)?.label ?? id).join(", ") : "No sounds yet";
 
   return (
-    <Sheet open={open} onClose={onClose} title="Mixer">
-      <div className="flex flex-col gap-4 pt-2 pb-2">
-        <div className="flex items-center gap-3 rounded-[6px] border border-line bg-raised px-3 py-2">
-          <IconButton label={volume > 0 ? "Mute" : "Unmute"} variant="ghost" size="sm" onClick={actions.toggleMute}>
-            {volume > 0 ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
-          </IconButton>
-          <Slider label="Master volume" value={volume} onChange={actions.setVolume} className="flex-1" />
-        </div>
-
-        <ul className="flex flex-col gap-1">
-          {ids.map((id) => {
-            const sound = SOUND_BY_ID.get(id);
-            if (!sound) return null;
-            const Icon = CATEGORY_ICONS[sound.category];
-            return (
-              <li key={id} className="flex items-center gap-3 py-1">
-                <Icon className="size-4 shrink-0 text-muted" aria-hidden />
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2 truncate text-sm">
-                    {sound.label}
-                    {loading.includes(id) && <span className="label-mono text-faint">loading…</span>}
-                  </p>
-                  <Slider
-                    label={`${sound.label} volume`}
-                    value={layers[id]}
-                    size="sm"
-                    className="mt-1.5"
-                    onChange={(v) => actions.setLayerVolume(id, v)}
-                  />
-                </div>
-                <IconButton label={`Remove ${sound.label}`} variant="ghost" size="sm" onClick={() => actions.toggleSound(id)}>
-                  <Trash2 className="size-4" />
-                </IconButton>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => onShare().then((result) => result === "copied" && flagCopied())}
-            className={cx(
-              "inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[4px] border font-mono text-xs transition-colors",
-              copied ? "border-ok/60 bg-ok/10 text-ok" : "border-line-strong",
-            )}
-          >
-            {copied ? <Check className="size-4 animate-pop-in" /> : <Share2 className="size-4" />}
-            {copied ? "Link copied" : "Share mix"}
-          </button>
-          <span role="status" className="sr-only">
-            {copied ? "Link copied" : ""}
+    <div className="flex h-16 items-center gap-1 rounded-[20px] border border-edge bg-[#161616] px-2 md:mx-auto md:h-[68px] md:max-w-[1116px] md:gap-3.5 md:pr-3 md:pl-2.5">
+      <button type="button" onClick={onOpen} aria-label="Open the mixer" className="flex h-14 min-w-0 flex-1 cursor-pointer items-center gap-3 text-left">
+        <span className="size-[46px] shrink-0 overflow-hidden rounded-[12px] border border-[#232323] bg-[#0e0e0e]">
+          <PresetArt id={preset?.id ?? "custom"} className="size-full" />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="truncate text-sm font-semibold">
+            <SwapText text={ids.length ? mixName(layers) : "Pick a soundscape"} className="max-w-full truncate align-bottom" />
           </span>
-          <button
-            type="button"
-            onClick={() => {
-              actions.clear();
-              onClose();
-            }}
-            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-[4px] border border-line-strong font-mono text-xs text-muted"
-          >
-            <Trash2 className="size-4" /> Clear all
-          </button>
-        </div>
-      </div>
-    </Sheet>
+          <span className="truncate text-xs text-muted">
+            {detail}
+          </span>
+        </span>
+        {ids.length > 0 && <Eq playing={playing} className="mr-1.5" />}
+      </button>
+      {showTimer && (
+        <button
+          type="button"
+          onClick={onTimer}
+          aria-label={`Timer, ${formatClock(remaining)} left`}
+          className="h-10 cursor-pointer rounded-[12px] border border-[#2a2a2a] px-3 font-mono text-[0.8125rem] tabular-nums transition-colors hover:bg-white/[0.04] max-md:hidden"
+        >
+          {formatClock(remaining)}
+        </button>
+      )}
+      <IconButton label={playing ? "Pause" : "Play"} variant="solid" round onClick={actions.toggle}>
+        {playing ? <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} /> : <Play className="size-[18px] translate-x-px" fill="currentColor" strokeWidth={0} />}
+      </IconButton>
+    </div>
   );
 }

@@ -18,7 +18,7 @@ export default function Page() {
       <ul className="mt-10 flex flex-col gap-6">
         {GUIDES.map((guide) => (
           <li key={guide.slug}>
-            <Link href={guidePath(guide)} className="text-lg font-medium hover:text-brand-light">
+            <Link href={guidePath(guide)} className="text-lg font-medium hover:text-soft">
               {guide.heading}
             </Link>
             <p className="mt-1 text-sm text-muted">{guide.description}</p>

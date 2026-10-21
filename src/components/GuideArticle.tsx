@@ -1,3 +1,4 @@
+import { Play } from "lucide-react";
 import Link from "next/link";
 import { GuideLayout } from "./GuideLayout";
 import { JsonLd } from "./JsonLd";
@@ -13,18 +14,18 @@ export function GuideArticle({ guide }: { guide: Guide }) {
   const path = guidePath(guide);
   return (
     <GuideLayout>
-      <nav aria-label="Breadcrumb" className="label-mono mb-6 flex gap-2">
-        <Link href="/" className="hover:text-fg">
+      <nav aria-label="Breadcrumb" className="mb-6 flex gap-1.5 text-[0.78rem] text-faint">
+        <Link href="/" className="text-muted hover:text-fg">
           Focuship
         </Link>
         <span aria-hidden>/</span>
-        <Link href={GUIDES_HUB.path} className="hover:text-fg">
+        <Link href={GUIDES_HUB.path} className="text-muted hover:text-fg">
           {GUIDES_HUB.label}
         </Link>
       </nav>
-      <article className="page-copy text-[0.9375rem] leading-relaxed text-muted">
-        <h1 className="text-3xl leading-tight font-semibold tracking-tight text-balance text-fg sm:text-4xl">{guide.heading}</h1>
-        <p className="mt-4 text-lg text-muted">{guide.standfirst}</p>
+      <article className="page-copy text-[0.9375rem] leading-[1.6] text-body">
+        <h1 className="text-[2.125rem] leading-[1.05] font-semibold tracking-[-0.045em] text-balance text-fg sm:text-[2.625rem]">{guide.heading}</h1>
+        <p className="mt-4 text-lg leading-[1.45] text-muted">{guide.standfirst}</p>
         <p className="label-mono mt-4">
           By{" "}
           <a href={AUTHOR.url} rel="author" className="!no-underline">
@@ -39,7 +40,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
           )}
         </p>
         {guide.notice && (
-          <p role="note" className="mt-6 rounded-[6px] border border-line-strong bg-raised p-3 text-sm text-fg">
+          <p role="note" className="mt-6 rounded-[14px] border border-line-strong bg-raised p-4 text-sm text-fg">
             {guide.notice}
           </p>
         )}
@@ -48,9 +49,9 @@ export function GuideArticle({ guide }: { guide: Guide }) {
             <Link
               key={item.path}
               href={item.path}
-              className="inline-flex h-9 items-center rounded-[4px] border border-line-strong px-3 font-mono text-xs !text-fg !no-underline hover:border-brand"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-edge bg-surface px-4 text-[0.8125rem] font-[550] !text-fg !no-underline hover:bg-surface-2"
             >
-              ▶ {item.label}
+              <Play className="size-3.5" fill="currentColor" strokeWidth={0} aria-hidden /> {item.label}
             </Link>
           ))}
         </div>

@@ -27,19 +27,17 @@ export interface Sound {
 export interface Category {
   id: CategoryId;
   label: string;
-  /** Hue used for the ambient background when this category dominates. */
-  hue: number;
 }
 
 export const CATEGORIES: Category[] = [
-  { id: "rain", label: "Rain", hue: 205 },
-  { id: "nature", label: "Nature", hue: 150 },
-  { id: "animals", label: "Animals", hue: 85 },
-  { id: "places", label: "Places", hue: 28 },
-  { id: "transport", label: "Transport", hue: 235 },
-  { id: "things", label: "Things", hue: 275 },
-  { id: "urban", label: "Urban", hue: 215 },
-  { id: "generated", label: "Noise & tones", hue: 22 },
+  { id: "rain", label: "Rain" },
+  { id: "nature", label: "Nature" },
+  { id: "animals", label: "Animals" },
+  { id: "places", label: "Places" },
+  { id: "transport", label: "Transport" },
+  { id: "things", label: "Things" },
+  { id: "urban", label: "Urban" },
+  { id: "generated", label: "Noise & tones" },
 ];
 
 const file = (
