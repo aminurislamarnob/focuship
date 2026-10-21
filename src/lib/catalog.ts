@@ -196,23 +196,28 @@ export interface Preset {
   label: string;
   blurb: string;
   layers: Layers;
+  /** Its landing page, which loads exactly these layers; a share link for the untouched preset points here. */
+  page?: string;
 }
 
 export const PRESETS: Preset[] = [
   {
     id: "deep-work",
+    page: "/mix/deep-work",
     label: "Deep work",
     blurb: "Brown noise with a slow alpha pulse",
     layers: { "brown-noise": 0.55, alpha: 0.4 },
   },
   {
     id: "rainy-desk",
+    page: "/mix/rainy-desk",
     label: "Rainy desk",
     blurb: "Rain on glass and quiet keys",
     layers: { "rain-on-window": 0.6, keyboard: 0.25, "pink-noise": 0.2 },
   },
   {
     id: "corner-cafe",
+    page: "/mix/corner-cafe",
     label: "Corner café",
     blurb: "Chatter, cups and a drizzle outside",
     layers: { cafe: 0.6, "light-rain": 0.3 },
@@ -225,42 +230,49 @@ export const PRESETS: Preset[] = [
   },
   {
     id: "coastline",
+    page: "/mix/coastline",
     label: "Coastline",
     blurb: "Waves, gulls and sea air",
     layers: { waves: 0.65, seagulls: 0.15, wind: 0.2 },
   },
   {
     id: "night-camp",
+    page: "/mix/night-camp",
     label: "Night camp",
     blurb: "Crackling fire under the stars",
     layers: { campfire: 0.6, crickets: 0.3, owl: 0.15 },
   },
   {
     id: "reading-room",
+    page: "/mix/reading-room",
     label: "Reading room",
     blurb: "Hushed library, turning pages",
     layers: { library: 0.6, paper: 0.2, clock: 0.12 },
   },
   {
     id: "sleeper-car",
+    page: "/mix/sleeper-car",
     label: "Sleeper car",
     blurb: "A long train ride through the rain",
     layers: { "inside-a-train": 0.6, "rain-on-window": 0.3 },
   },
   {
     id: "morning-trail",
+    page: "/mix/morning-trail",
     label: "Morning trail",
     blurb: "Birdsong over a running stream",
     layers: { birds: 0.45, river: 0.35, "wind-in-trees": 0.25 },
   },
   {
     id: "deep-dive",
+    page: "/mix/deep-dive",
     label: "Deep dive",
     blurb: "Submerged and far from everything",
     layers: { submarine: 0.45, underwater: 0.4, "brown-noise": 0.2 },
   },
   {
     id: "deep-space",
+    page: "/mix/deep-space",
     label: "Deep space",
     blurb: "The engine hum of a ship between stars",
     layers: { "starship-hum": 0.6, "brown-noise": 0.15 },

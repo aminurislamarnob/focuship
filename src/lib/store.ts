@@ -221,11 +221,20 @@ export function decodeMix(value: string): Layers {
   return layers;
 }
 
+/**
+ * A link that opens the current mix. An untouched preset shares its own page (/mix/rainy-desk), which
+ * previews with its name; anything else spells the mix out as ?mix=rain-on-window:60,keyboard:30.
+ * Ids, ":" and "," are all valid in a query, so the link is written unencoded and stays readable.
+ */
 export function shareUrl(): string {
-  const url = new URL("/", location.origin);
-  url.searchParams.set("mix", encodeMix(state.layers));
-  return url.href;
+  const preset = PRESETS.find((p) => p.page && sameMix(p.layers, state.layers));
+  if (preset?.page) return `${location.origin}${preset.page}`;
+  return `${location.origin}/?mix=${encodeMix(state.layers)}`;
 }
+
+/** Same sounds at the same volumes, to the percent a share link keeps. */
+const sameMix = (a: Layers, b: Layers) =>
+  sameKeys(a, b) && Object.keys(a).every((id) => Math.round(a[id] * 100) === Math.round(b[id] * 100));
 
 // Media session --------------------------------------------------------------
 

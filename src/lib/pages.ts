@@ -1,4 +1,4 @@
-import { CATEGORIES, SOUND_BY_ID, type Layers } from "./catalog";
+import { CATEGORIES, PRESETS, SOUND_BY_ID, type Layers } from "./catalog";
 import type { Tab } from "./store";
 import { SOUND_PAGES } from "@/content/sounds";
 import { NATURE_SOUND_PAGES } from "@/content/sounds-nature";
@@ -194,4 +194,15 @@ for (const page of PAGES) {
       throw new Error(`${at} links to unknown page ${link}`);
     }
   }
+}
+
+// A preset's share link opens its page, so that page must load exactly the preset's layers.
+for (const preset of PRESETS) {
+  if (!preset.page) continue;
+  const page = PAGES.find((p) => pagePath(p) === preset.page);
+  const layers = page?.intent.layers ?? {};
+  const same =
+    Object.keys(layers).length === Object.keys(preset.layers).length &&
+    Object.entries(preset.layers).every(([id, volume]) => layers[id] === volume);
+  if (!page || !same) throw new Error(`Preset "${preset.id}" shares ${preset.page}, which doesn't load the same mix`);
 }
