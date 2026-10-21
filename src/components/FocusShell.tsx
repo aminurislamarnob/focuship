@@ -1,6 +1,6 @@
 "use client";
 
-import { Expand, LayoutGrid, LogIn, Pause, Play, Scan, Share, SlidersVertical, Timer, UserRound } from "lucide-react";
+import { Expand, LayoutGrid, LogIn, Scan, Share, SlidersVertical, Timer, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -15,7 +15,7 @@ import { MixSheet } from "./MixSheet";
 import { MixView } from "./MixView";
 import { SoundSearch, SoundsView, type SoundGuide } from "./SoundsView";
 import { TimerView, formatClock, useTimerClock } from "./TimerView";
-import { Eq, IconButton, PresetArt, SwapText, cx } from "./ui";
+import { Eq, IconButton, PauseIcon, PlayIcon, PresetArt, SwapText, cx } from "./ui";
 import { Avatar, YouView } from "./YouView";
 
 const TABS: { id: Tab; label: string; title: string; icon: typeof Timer; href?: string }[] = [
@@ -410,7 +410,7 @@ function MiniPlayer({ showTimer, onOpen, onTimer }: { showTimer: boolean; onOpen
         </button>
       )}
       <IconButton label={playing ? "Pause" : "Play"} variant="solid" round onClick={actions.toggle}>
-        {playing ? <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} /> : <Play className="size-[18px] translate-x-px" fill="currentColor" strokeWidth={0} />}
+        {playing ? <PauseIcon className="size-[18px]" /> : <PlayIcon className="size-[18px]" />}
       </IconButton>
     </div>
   );

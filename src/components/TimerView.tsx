@@ -1,9 +1,9 @@
 "use client";
 
-import { ChevronRight, Minus, Pause, Play, Plus, RotateCcw, SkipForward } from "lucide-react";
+import { ChevronRight, Minus, Plus, RotateCcw, SkipForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { actions, mixName, timerRemaining, useFocus, type TimerMode, type TimerSettings, type TimerState } from "@/lib/store";
-import { IconButton, Switch, SwapText, cx } from "./ui";
+import { IconButton, PauseIcon, PlayIcon, SwapText, Switch, cx } from "./ui";
 
 const MODES: { id: TimerMode; label: string; short: string }[] = [
   { id: "focus", label: "Focus", short: "Focus" },
@@ -190,9 +190,9 @@ export function TimerView({ onMix }: { onMix(): void }) {
             className="inline-flex h-[60px] w-[168px] cursor-pointer items-center justify-center gap-2.5 rounded-full bg-accent text-[1.0625rem] font-semibold text-accent-ink transition-[filter,scale] hover:brightness-105 active:scale-[0.97] md:h-[58px] md:w-[180px]"
           >
             {running ? (
-              <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} aria-hidden />
+              <PauseIcon className="size-[18px]" />
             ) : (
-              <Play className="size-[18px]" fill="currentColor" strokeWidth={0} aria-hidden />
+              <PlayIcon className="size-[18px]" />
             )}
             {running ? "Pause" : timer.status === "paused" ? "Resume" : "Start"}
           </button>
@@ -364,9 +364,9 @@ export function TimerCard({ onOpen }: { onOpen(): void }) {
         className="mt-5 inline-flex h-12 cursor-pointer items-center justify-center gap-2 self-stretch rounded-[14px] bg-accent text-[0.9375rem] font-semibold text-accent-ink transition-[filter] hover:brightness-105"
       >
         {running ? (
-          <Pause className="size-4" fill="currentColor" strokeWidth={0} aria-hidden />
+          <PauseIcon className="size-4" />
         ) : (
-          <Play className="size-4" fill="currentColor" strokeWidth={0} aria-hidden />
+          <PlayIcon className="size-4" />
         )}
         {running ? "Pause" : timer.status === "paused" ? "Resume" : "Start"}
       </button>

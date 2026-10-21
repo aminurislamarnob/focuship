@@ -207,6 +207,25 @@ export function cx(...classes: (string | false | null | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+/** The play glyph: a rounded triangle, set right of centre so it looks centred in a circle. Sized by className. */
+export function PlayIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={cx("shrink-0", className)}>
+      <path d="M8.5 5.6v12.8a1 1 0 0 0 1.5.86l10.2-6.4a1 1 0 0 0 0-1.72L10 4.74a1 1 0 0 0-1.5.86z" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** The pause glyph: two rounded bars. Sized by className. */
+export function PauseIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={cx("shrink-0", className)}>
+      <rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor" />
+      <rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
 /** Three small level bars that sway while the mix plays. */
 export function Eq({ playing, className }: { playing: boolean; className?: string }) {
   return (

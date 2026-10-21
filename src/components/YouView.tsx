@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, ChevronLeft, ChevronRight, Download, Heart, Link2, Pause, Play, RefreshCw, Share, SquarePlus, UserRound } from "lucide-react";
+import { Bookmark, ChevronLeft, ChevronRight, Download, Heart, Link2, RefreshCw, Share, SquarePlus, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { SOUND_BY_ID, SOUNDS } from "@/lib/catalog";
@@ -9,7 +9,7 @@ import type { CloudUser } from "@/lib/cloud";
 import { actions, matchPreset, presetByRef, useFocus } from "@/lib/store";
 import { REPO_URL } from "@/lib/site";
 import { CLOUD_ENABLED } from "@/lib/supabase";
-import { IconButton, Kbd, cx } from "./ui";
+import { IconButton, Kbd, PauseIcon, PlayIcon, cx } from "./ui";
 
 const noSubscribe = () => () => {};
 const FILE_PATHS = SOUNDS.flatMap((s) => (s.source.type === "file" ? [s.source.path] : []));
@@ -311,9 +311,9 @@ function ProfilePresets() {
                   onClick={() => (live ? actions.pause() : actions.applyPreset(preset.layers, preset.id))}
                 >
                   {live ? (
-                    <Pause className="size-4" fill="currentColor" strokeWidth={0} />
+                    <PauseIcon className="size-4" />
                   ) : (
-                    <Play className="size-4 translate-x-px" fill="currentColor" strokeWidth={0} />
+                    <PlayIcon className="size-4" />
                   )}
                 </IconButton>
               </li>

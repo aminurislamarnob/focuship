@@ -6,9 +6,7 @@ import {
   Globe2,
   Link2,
   Lock,
-  Pause,
   Pencil,
-  Play,
   Plus,
   Shuffle,
   Star,
@@ -29,6 +27,8 @@ import {
   EmberBackdrop,
   IconButton,
   Kbd,
+  PauseIcon,
+  PlayIcon,
   PresetArt,
   Sheet,
   Slider,
@@ -149,9 +149,9 @@ function Player({ onOpenSheet, onTimer }: { onOpenSheet(): void; onTimer(): void
   const playLabel = playing ? "Pause" : "Play";
   const playIcon = (size: string) =>
     playing ? (
-      <Pause className={size} fill="currentColor" strokeWidth={0} aria-hidden />
+      <PauseIcon className={size} />
     ) : (
-      <Play className={cx(size, "translate-x-[2px]")} fill="currentColor" strokeWidth={0} aria-hidden />
+      <PlayIcon className={size} />
     );
   const chip =
     "inline-flex h-[52px] w-[100px] cursor-pointer items-center justify-center gap-2 rounded-[16px] border border-[#232323] bg-surface text-sm font-medium transition-colors hover:bg-surface-2 disabled:cursor-default disabled:opacity-40";

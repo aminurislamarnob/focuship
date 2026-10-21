@@ -1,8 +1,8 @@
-import { Play } from "lucide-react";
 import Link from "next/link";
 import { GuideLayout } from "./GuideLayout";
 import { JsonLd } from "./JsonLd";
 import { FaqList, RelatedLinks, Sections, breadcrumbs, faqPage } from "./Landing";
+import { PlayIcon } from "./ui";
 import { GUIDES_HUB, guidePath, type Guide } from "@/lib/guides";
 import { AUTHOR, SITE_URL, absoluteUrl } from "@/lib/site";
 
@@ -51,7 +51,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
               href={item.path}
               className="inline-flex h-10 items-center gap-2 rounded-full border border-edge bg-surface px-4 text-[0.8125rem] font-[550] !text-fg !no-underline hover:bg-surface-2"
             >
-              <Play className="size-3.5" fill="currentColor" strokeWidth={0} aria-hidden /> {item.label}
+              <PlayIcon className="size-3.5" /> {item.label}
             </Link>
           ))}
         </div>

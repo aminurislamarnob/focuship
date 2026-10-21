@@ -1,10 +1,10 @@
 "use client";
 
-import { Maximize2, Minimize2, Pause, Play, Sun, X } from "lucide-react";
+import { Maximize2, Minimize2, Sun, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { actions, mixName, useFocus } from "@/lib/store";
 import { formatClock, sessionInCycle, useTimerClock } from "./TimerView";
-import { IconButton, SwapText, cx } from "./ui";
+import { IconButton, PauseIcon, PlayIcon, SwapText, cx } from "./ui";
 
 const IDLE_MS = 3000;
 const LINE_MS = 120_000;
@@ -266,9 +266,9 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
             onClick={actions.toggle}
           >
             {playing ? (
-              <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} />
+              <PauseIcon className="size-[18px]" />
             ) : (
-              <Play className="size-[18px] translate-x-px" fill="currentColor" strokeWidth={0} />
+              <PlayIcon className="size-[18px]" />
             )}
           </IconButton>
         </div>
