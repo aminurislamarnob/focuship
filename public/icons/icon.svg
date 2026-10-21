@@ -1,9 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#0a0a0a"/>
-  <g transform="translate(0 0) scale(1)">
-    <path d="M22 36V22h14 M64 22h14v14 M78 64v14H64 M36 78H22V64" fill="none" stroke="#d25611" stroke-width="6" stroke-linecap="square"/>
-    <rect x="35" y="44" width="7" height="22" fill="#fafafa"/>
-    <rect x="46.5" y="34" width="7" height="32" fill="#fafafa"/>
-    <rect x="58" y="50" width="7" height="16" fill="#fafafa"/>
+  <defs>
+    <radialGradient id="glow" cx="0.7" cy="0.25" r="0.9">
+      <stop offset="0" stop-color="#ea580c" stop-opacity="0.28"/>
+      <stop offset="0.45" stop-color="#9a3412" stop-opacity="0.12"/>
+      <stop offset="0.75" stop-color="#0e0c0b" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="100" height="100" rx="25" fill="#0e0c0b"/><rect width="100" height="100" rx="25" fill="url(#glow)"/>
+  <g transform="translate(12.5 12.5) scale(1.171875)">
+    <circle cx="32" cy="32" r="21" fill="none" stroke="#e8e6e3" stroke-width="7" stroke-linecap="round" stroke-dasharray="108 24" transform="rotate(-62 32 32)"/>
+    <circle cx="32" cy="32" r="8" fill="#f08a4b"/>
   </g>
 </svg>

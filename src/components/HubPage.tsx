@@ -15,38 +15,31 @@ export const hubMetadata = (id: HubId) => {
   return pageMetadata({ title, description, path, noindex: !pagesInHub(id).some(isIndexable) });
 };
 
-/**
- * A hub: the app screen, with the hub's copy, page list and FAQ folded into a closed
- * disclosure so the screen stays clean. The content remains server-rendered in the HTML
- * (search engines index <details> content), so the hub keeps its SEO weight.
- */
+/** A hub: the app screen, then the hub's page list, copy and FAQ. */
 export function HubPage({ id }: { id: HubId }) {
   const { title, heading, intro, path, label, copy, faq, intent } = hub(id);
   const pages = pagesInHub(id).filter(isIndexable);
   return (
     <FocusApp heading={heading ?? title} intro={intro} intent={intent}>
       <PageCopy>
-        <details className="group">
-          <summary className="label-mono flex cursor-pointer list-none items-center gap-2 py-2 select-none hover:text-fg [&::-webkit-details-marker]:hidden">
-            <ChevronRight className="size-3.5 transition-transform group-open:rotate-90" aria-hidden />
-            All {label.toLowerCase()}, notes &amp; FAQ
-          </summary>
-          <div className="pt-4">
-            {copy && <Sections sections={copy} />}
-            <h2>All {label.toLowerCase()}</h2>
-            <ul className="!list-none !pl-0">
-              {pages.map((page) => (
-                <li key={page.slug} className="!mb-4">
-                  <Link href={pagePath(page)} className="font-medium">
-                    {page.heading}
-                  </Link>
-                  <p className="!mb-0 text-sm">{page.description}</p>
-                </li>
-              ))}
-            </ul>
-            {faq && <FaqList faq={faq} />}
-          </div>
-        </details>
+        <h2>All {label.toLowerCase()}</h2>
+        <nav aria-label={`All ${label.toLowerCase()}`} className="mb-4 border-b border-line">
+          {pages.map((page) => (
+            <Link
+              key={page.slug}
+              href={pagePath(page)}
+              className="flex min-h-16 items-center gap-3 border-t border-line py-3 !no-underline"
+            >
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="text-[0.9375rem] font-[550] text-fg">{page.heading}</span>
+                <span className="line-clamp-2 text-[0.78rem] leading-normal text-faint">{page.description}</span>
+              </span>
+              <ChevronRight className="size-[18px] shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
+            </Link>
+          ))}
+        </nav>
+        {copy && <Sections sections={copy} />}
+        {faq && <FaqList faq={faq} />}
       </PageCopy>
       <JsonLd
         nodes={[

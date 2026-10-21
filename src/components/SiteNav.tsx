@@ -21,7 +21,7 @@ const GROUPS = [
 /**
  * Site-wide links to the hero pages and hubs. A server component, so the page catalogue
  * stays out of the client bundle: only the plain {href, label} list crosses to the client,
- * where SiteNavGroups folds it into menus and highlights the current page.
+ * where SiteNavGroups lists it and marks the current page.
  */
 export function SiteNav() {
   return <SiteNavGroups groups={GROUPS} />;

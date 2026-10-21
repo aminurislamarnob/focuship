@@ -11,7 +11,7 @@ interface SocialImageProps {
   detail?: string;
 }
 
-/** The shared Open Graph card: near-black, the bracket mark, an orange eyebrow and a large title. */
+/** The shared Open Graph card: near-black, the ring mark, an ember eyebrow and a large title. */
 export function SocialImage({ eyebrow, title, detail }: SocialImageProps) {
   return new ImageResponse(
     (
@@ -24,27 +24,25 @@ export function SocialImage({ eyebrow, title, detail }: SocialImageProps) {
           justifyContent: "space-between",
           padding: 72,
           background: "#0a0a0a",
-          color: "#ededed",
+          color: "#e8e6e3",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <svg width="64" height="64" viewBox="0 0 100 100">
-            <path d="M22 36V22h14 M64 22h14v14 M78 64v14H64 M36 78H22V64" fill="none" stroke="#d25611" strokeWidth="8" />
-            <rect x="35" y="44" width="7" height="22" fill="#ededed" />
-            <rect x="46.5" y="34" width="7" height="32" fill="#ededed" />
-            <rect x="58" y="50" width="7" height="16" fill="#ededed" />
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="21" stroke="#e8e6e3" strokeWidth="5" strokeLinecap="round" strokeDasharray="108 24" transform="rotate(-62 32 32)" />
+            <circle cx="32" cy="32" r="6.5" fill="#f08a4b" />
           </svg>
-          <div style={{ fontSize: 28, letterSpacing: 6, textTransform: "uppercase", color: "#d25611" }}>{eyebrow}</div>
+          <div style={{ fontSize: 28, letterSpacing: 6, textTransform: "uppercase", color: "#f08a4b" }}>{eyebrow}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div style={{ fontSize: title.length > 32 ? 68 : 84, fontWeight: 600, lineHeight: 1.05, letterSpacing: -2 }}>
             {title}
           </div>
-          {detail && <div style={{ fontSize: 32, color: "#8f8f8f" }}>{detail}</div>}
+          {detail && <div style={{ fontSize: 32, color: "#a29f99" }}>{detail}</div>}
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#6b6b6b" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#8c8983" }}>
           <span>Free · No sign-up · Works offline</span>
-          <span style={{ color: "#ededed" }}>{SITE_HOST}</span>
+          <span style={{ color: "#e8e6e3" }}>{SITE_HOST}</span>
         </div>
       </div>
     ),

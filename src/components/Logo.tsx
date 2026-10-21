@@ -1,14 +1,33 @@
-/** The bracket mark and wordmark. */
-export function Logo() {
+/** The mark's ember dot; lighter than the glow so it reads at favicon size. */
+export const MARK_EMBER = "#f08a4b";
+
+/** The mark: an open timer ring around one ember dot. Strokes thicken as it shrinks so it holds up small. */
+export function Mark({ size = 24, className }: { size?: number; className?: string }) {
+  const stroke = size <= 28 ? 6 : size <= 48 ? 5 : 4.5;
+  const dot = size <= 28 ? 7.5 : size <= 48 ? 6.5 : 6;
   return (
-    <span className="flex items-center gap-2">
-      <svg viewBox="0 0 100 100" className="size-6" aria-hidden>
-        <path d="M22 36V22h14 M64 22h14v14 M78 64v14H64 M36 78H22V64" fill="none" stroke="var(--brand)" strokeWidth="8" />
-        <rect x="35" y="44" width="7" height="22" fill="var(--fg)" />
-        <rect x="46.5" y="34" width="7" height="32" fill="var(--fg)" />
-        <rect x="58" y="50" width="7" height="16" fill="var(--fg)" />
-      </svg>
-      <span className="font-mono text-[0.8125rem] font-semibold tracking-[0.18em] uppercase">Focuship</span>
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden className={`shrink-0 ${className ?? ""}`}>
+      <circle
+        cx="32"
+        cy="32"
+        r="21"
+        stroke="currentColor"
+        strokeWidth={stroke}
+        strokeLinecap="round"
+        strokeDasharray="108 24"
+        transform="rotate(-62 32 32)"
+      />
+      <circle cx="32" cy="32" r={dot} fill={MARK_EMBER} />
+    </svg>
+  );
+}
+
+/** The mark and wordmark. */
+export function Logo({ size = 24, className }: { size?: number; className?: string }) {
+  return (
+    <span className={`inline-flex items-center font-[650] tracking-[-0.02em] ${className ?? "gap-[9px] text-lg"}`}>
+      <Mark size={size} />
+      Focuship
     </span>
   );
 }

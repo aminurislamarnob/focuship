@@ -1,10 +1,10 @@
 "use client";
 
-import { Maximize2, Minimize2, Pause, Play, Timer, X } from "lucide-react";
+import { Maximize2, Minimize2, Pause, Play, Sun, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { actions, matchPreset, mixMood, mixName, useFocus } from "@/lib/store";
-import { formatClock, useTimerClock } from "./TimerView";
-import { Ambient, IconButton, PresetIcon, Slider, StatusDot, SwapText, cx } from "./ui";
+import { actions, mixName, useFocus } from "@/lib/store";
+import { formatClock, sessionInCycle, useTimerClock } from "./TimerView";
+import { IconButton, SwapText, cx } from "./ui";
 
 const IDLE_MS = 3000;
 const LINE_MS = 120_000;
@@ -20,6 +20,8 @@ const LINES = [
   "Good work is quiet work.",
   "Breathe out. Keep going.",
 ];
+
+const MODE_LABELS = { focus: "Focus", short: "Short break", long: "Long break" } as const;
 
 function useWakeLock(enabled: boolean) {
   useEffect(() => {
@@ -46,7 +48,8 @@ function useWakeLock(enabled: boolean) {
   }, [enabled]);
 }
 
-function useClock() {
+/** The current time, refreshed every ten seconds; null until mounted (the page is prerendered). */
+export function useClock() {
   const [now, setNow] = useState<Date | null>(null);
   useEffect(() => {
     const update = () => setNow(new Date());
@@ -55,6 +58,14 @@ function useClock() {
     return () => clearInterval(id);
   }, []);
   return now;
+}
+
+/** Hours and minutes in the visitor's own 12- or 24-hour style, without the AM/PM. */
+function clockParts(now: Date | null) {
+  if (!now) return ["--", "--"];
+  const parts = new Intl.DateTimeFormat([], { hour: "2-digit", minute: "2-digit" }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "--";
+  return [get("hour").padStart(2, "0"), get("minute")];
 }
 
 interface FocusModeProps {
@@ -69,18 +80,20 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
   const handledRequest = useRef(fullscreenRequest);
   const layers = useFocus((s) => s.layers);
   const playing = useFocus((s) => s.playing);
-  const volume = useFocus((s) => s.volume);
   const timer = useFocus((s) => s.timer);
-  const { remaining } = useTimerClock(timer);
+  const { remaining, progress } = useTimerClock(timer);
   const now = useClock();
   const [idle, setIdle] = useState(false);
   const [full, setFull] = useState(false);
+  const [choice, setChoice] = useState<"timer" | "clock" | null>(null);
   // A new line every couple of minutes, without extra timers.
   const line = now ? Math.floor(now.getTime() / LINE_MS) % LINES.length : 0;
   const canFullscreen = useFocus((s) => s.hydrated) && typeof document !== "undefined" && document.fullscreenEnabled;
   const hasTimer = timer.status !== "idle";
   const hasMix = Object.keys(layers).length > 0;
-  const preset = matchPreset(layers);
+  const view = choice ?? (hasTimer ? "timer" : "clock");
+  const running = timer.status === "running";
+  const minutesLeft = Math.ceil(remaining / 60_000);
 
   useWakeLock(open);
 
@@ -122,7 +135,24 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
     else root.current?.requestFullscreen?.({ navigationUI: "hide" }).catch(() => {});
   };
 
-  const clock = now?.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) ?? "";
+  const [top, bottom] = view === "timer" ? formatClock(remaining).split(":") : clockParts(now);
+  const caption =
+    view === "timer"
+      ? `${MODE_LABELS[timer.mode]} · Session ${sessionInCycle(timer)} of ${timer.settings.longEvery}`
+      : "Local time";
+  const sub =
+    view === "timer"
+      ? !hasTimer
+        ? "Ready when you are"
+        : timer.status === "paused"
+          ? "Paused"
+          : timer.mode === "focus"
+            ? `Break in ${minutesLeft} min`
+            : `Focus in ${minutesLeft} min`
+      : hasTimer
+        ? `${timer.mode === "focus" ? "Focus ends" : "Break ends"} in ${minutesLeft} min`
+        : "";
+  const chrome = cx("transition-opacity duration-700", idle && "pointer-events-none opacity-0");
 
   return (
     <div
@@ -134,71 +164,93 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
       onPointerMove={wake}
       onPointerDown={wake}
       onKeyDown={wake}
-      className={cx("fade fixed inset-0 z-[60] isolate overflow-hidden bg-bg text-fg", idle && "cursor-none")}
+      className={cx("fade fixed inset-0 z-[60] overflow-hidden bg-bg text-fg", idle && "cursor-none")}
     >
-      {open && <Ambient mood={mixMood(layers)} layers={layers} active={playing} className="-z-10" />}
-
-      <div className="pt-safe absolute inset-x-0 top-0">
-        <div
-          className={cx(
-            "flex items-center justify-between px-4 py-3 transition-opacity duration-700",
-            idle && "pointer-events-none opacity-0",
-          )}
-        >
-          <p className="label-mono flex items-center gap-2">
-            <StatusDot tone={playing ? "brand" : "idle"} pulse={playing} /> Focus mode
-          </p>
-          <div className="flex gap-2">
+      <div className="pt-safe pb-safe mx-auto flex h-full w-full max-w-4xl flex-col px-5 md:px-10">
+        <div className={cx("flex items-center justify-between pt-4 md:pt-8", chrome)}>
+          <IconButton label="Exit focus mode" className="-ml-2" onClick={onClose}>
+            <X className="size-[22px]" strokeWidth={1.75} />
+          </IconButton>
+          <div className="flex items-center gap-2">
             {canFullscreen && (
-              <IconButton label={full ? "Exit full screen" : "Full screen"} onClick={toggleFullscreen}>
-                {full ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+              <IconButton label={full ? "Exit full screen" : "Full screen"} className="text-muted max-md:hidden" onClick={toggleFullscreen}>
+                {full ? <Minimize2 className="size-5" strokeWidth={1.75} /> : <Maximize2 className="size-5" strokeWidth={1.75} />}
               </IconButton>
             )}
-            <IconButton label="Close focus mode" onClick={onClose}>
-              <X className="size-4" />
-            </IconButton>
+            <div role="group" aria-label="Show" className="flex gap-0.5 rounded-full border border-edge p-[3px]">
+              {(["timer", "clock"] as const).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  aria-pressed={view === id}
+                  onClick={() => setChoice(id)}
+                  className={cx(
+                    "h-[38px] cursor-pointer rounded-full px-4 text-[0.8125rem] font-[550] capitalize transition-colors",
+                    view === id ? "bg-accent text-accent-ink" : "text-soft hover:text-fg",
+                  )}
+                >
+                  {id}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-        <p className="label-mono">
-          <SwapText text={hasTimer ? (timer.mode === "focus" ? "Focus" : "Break") : "Local time"} />
-        </p>
-        <p className="mt-2 font-mono text-[clamp(4.5rem,22vw,11rem)] leading-none font-medium tracking-tighter tabular-nums">
-          {hasTimer ? formatClock(remaining) : clock}
-        </p>
-        <p className="mt-6 max-w-sm text-lg text-balance text-muted sm:text-xl">
+        <div className="flex flex-1 flex-col justify-center gap-[22px]">
+          <span className="inline-flex items-center gap-2 text-[0.8125rem] text-muted">
+            <span aria-hidden className={cx("size-1.5 rounded-full bg-accent", (playing || running) && "animate-breathe")} />
+            <SwapText text={caption} />
+          </span>
+          <div
+            role="timer"
+            aria-label={view === "timer" ? `${Number(top)} minutes ${Number(bottom)} seconds left` : `Time ${top}:${bottom}`}
+            className="-ml-1.5 flex flex-col font-mono text-[clamp(7rem,43vw,10.5rem)] leading-[0.86] font-[150] tracking-[-0.07em] tabular-nums md:flex-row md:gap-[0.18em] md:text-[clamp(10rem,19vw,15rem)]"
+          >
+            <span>{top}</span>
+            <span className="text-muted">{bottom}</span>
+          </div>
+          <div aria-hidden className="h-0.5 w-full overflow-hidden rounded-full bg-line">
+            <div className="h-full bg-accent transition-[width] duration-500" style={{ width: `${hasTimer ? progress * 100 : 0}%` }} />
+          </div>
+          <div className="flex min-h-6 items-center justify-between gap-4 text-[0.8125rem] text-faint">
+            <span>{sub}</span>
+            {view === "timer" && (
+              <button
+                type="button"
+                onClick={running ? actions.pauseTimer : actions.startTimer}
+                className={cx("min-h-11 cursor-pointer text-soft underline underline-offset-4 hover:text-fg", chrome)}
+              >
+                {running ? "Pause timer" : timer.status === "paused" ? "Resume timer" : "Start timer"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        <p className="mb-[18px] text-[0.9375rem] tracking-[-0.01em] text-faint">
           <SwapText text={LINES[line]} />
         </p>
-      </div>
 
-      <div className="pb-safe absolute inset-x-0 bottom-0">
-        <div
-          className={cx(
-            "mx-auto flex max-w-lg flex-col gap-3 px-4 pb-5 transition-opacity duration-700",
-            idle && "pointer-events-none opacity-0",
-          )}
-        >
-          <p className="flex items-center justify-center gap-2 truncate text-center text-sm text-muted">
-            {preset && <PresetIcon key={preset.id} id={preset.id} className="size-4 animate-pop-in text-faint" />}
-            <SwapText text={hasMix ? mixName(layers) : "No sounds yet"} />
-            {hasMix && <SwapText className="ml-1 text-faint" text={`· ${playing ? "playing" : "paused"}`} />}
-          </p>
-          <div className="flex items-center gap-3">
-            <IconButton label={playing ? "Pause sounds" : "Play sounds"} size="lg" variant="solid" onClick={actions.toggle}>
-              {playing ? <Pause className="size-5" fill="currentColor" /> : <Play className="size-5" fill="currentColor" />}
-            </IconButton>
-            <Slider label="Volume" value={volume} onChange={actions.setVolume} className="flex-1" />
-            <IconButton
-              label={timer.status === "running" ? "Pause timer" : "Start timer"}
-              size="lg"
-              onClick={timer.status === "running" ? actions.pauseTimer : actions.startTimer}
-              className={cx(timer.status === "running" && "border-brand text-brand-light")}
-            >
-              <Timer className="size-5" />
-            </IconButton>
+        <div className={cx("flex items-center gap-3 border-t border-line pt-4 pb-8", chrome)}>
+          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="truncate text-sm font-semibold">
+              <SwapText text={hasMix ? mixName(layers) : "No sounds yet"} className="max-w-full truncate align-bottom" />
+            </span>
+            <span className="flex items-center gap-1.5 text-xs text-faint">
+              <Sun className="size-3.5" strokeWidth={1.75} aria-hidden /> Screen stays awake
+            </span>
           </div>
+          <IconButton
+            label={playing ? "Pause sounds" : "Play sounds"}
+            round
+            className="size-[52px] border border-line-strong"
+            onClick={actions.toggle}
+          >
+            {playing ? (
+              <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} />
+            ) : (
+              <Play className="size-[18px] translate-x-px" fill="currentColor" strokeWidth={0} />
+            )}
+          </IconButton>
         </div>
       </div>
     </div>

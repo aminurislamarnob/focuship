@@ -1,7 +1,7 @@
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { AccountView } from "@/components/AccountView";
 import { JsonLd, organization } from "@/components/JsonLd";
-import { Logo } from "@/components/Logo";
 import { pageMetadata } from "@/lib/seo";
 import { SITE_URL, absoluteUrl } from "@/lib/site";
 
@@ -20,26 +20,20 @@ export const metadata = pageMetadata({
 export default function AccountPage() {
   return (
     <div className="flex h-dvh flex-col overflow-y-auto">
-      <header className="pt-safe shrink-0 border-b border-line">
-        <div className="mx-auto flex h-14 w-full max-w-lg items-center justify-between px-4">
-          <Link href="/" aria-label="Focuship home">
-            <Logo />
-          </Link>
-          <Link href="/" className="label-mono hover:text-fg">
-            Back to the app
-          </Link>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-lg flex-1 px-4 py-10">
-        <AccountView />
-      </main>
-      <footer className="border-t border-line">
-        <div className="label-mono mx-auto flex w-full max-w-lg gap-5 px-4 py-5">
-          <Link href="/privacy" className="hover:text-fg">
+      <div className="pt-safe pb-safe mx-auto flex w-full max-w-[440px] flex-1 flex-col px-5">
+        <Link href="/" className="-ml-2.5 flex h-11 items-center gap-0.5 self-start pr-2.5 text-[0.9375rem] max-md:mt-2 md:mt-8">
+          <ChevronLeft className="size-[22px]" strokeWidth={1.75} aria-hidden />
+          Back to the app
+        </Link>
+        <main className="flex-1 pt-7 pb-10">
+          <AccountView />
+        </main>
+        <footer className="pb-8">
+          <Link href="/privacy" className="inline-flex min-h-11 items-center text-[0.8125rem] text-muted hover:text-fg">
             Privacy policy
           </Link>
-        </div>
-      </footer>
+        </footer>
+      </div>
       <JsonLd
         nodes={[
           organization(),

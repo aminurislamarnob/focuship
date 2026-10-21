@@ -18,9 +18,9 @@ const RESEND_AFTER_S = 60;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const field =
-  "h-12 w-full rounded-[4px] border border-line-strong bg-raised px-4 text-[0.9375rem] outline-none transition-colors placeholder:text-faint focus-visible:border-brand disabled:opacity-60";
+  "h-[52px] w-full rounded-[14px] border border-[#2e2e2e] bg-[#0e0e0e] px-3.5 text-[0.9375rem] text-fg outline-none placeholder:text-faint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fg disabled:opacity-60";
 const primary =
-  "inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-[4px] bg-fg text-[0.9375rem] font-medium text-bg transition-colors hover:bg-white active:bg-neutral-300 disabled:cursor-default disabled:opacity-50";
+  "inline-flex h-[52px] w-full cursor-pointer items-center justify-center rounded-[14px] bg-accent text-[0.9375rem] font-semibold text-accent-ink transition-[filter,background-color,color] hover:brightness-105 disabled:cursor-default disabled:bg-edge disabled:text-muted";
 
 export function EmailSignIn({ siteKey }: { siteKey: string }) {
   const { slot, getToken } = useTurnstile(siteKey);
@@ -130,7 +130,7 @@ export function EmailSignIn({ siteKey }: { siteKey: string }) {
           </button>
         </form>
         {error && (
-          <p id="email-error" role="alert" className="text-sm text-red-400">
+          <p id="email-error" role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}
@@ -142,7 +142,7 @@ export function EmailSignIn({ siteKey }: { siteKey: string }) {
               setCode("");
               setError(null);
             }}
-            className="label-mono inline-flex cursor-pointer items-center gap-1.5 hover:text-fg"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 text-[0.8125rem] text-muted hover:text-fg"
           >
             <ArrowLeft className="size-3.5" aria-hidden /> Use a different email
           </button>
@@ -150,7 +150,7 @@ export function EmailSignIn({ siteKey }: { siteKey: string }) {
             type="button"
             disabled={busy || resendIn > 0}
             onClick={send}
-            className="label-mono cursor-pointer hover:text-fg disabled:cursor-default disabled:text-faint"
+            className="min-h-11 cursor-pointer text-[0.8125rem] text-muted hover:text-fg disabled:cursor-default disabled:text-faint"
           >
             {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
           </button>
@@ -172,7 +172,7 @@ export function EmailSignIn({ siteKey }: { siteKey: string }) {
         }}
         className="flex flex-col gap-3"
       >
-        <label htmlFor="email-address" className="sr-only">
+        <label htmlFor="email-address" className="-mb-1 text-[0.8125rem] font-medium text-soft">
           Email address
         </label>
         <input
@@ -183,7 +183,7 @@ export function EmailSignIn({ siteKey }: { siteKey: string }) {
             setEmail(e.target.value);
             if (error) setError(null);
           }}
-          placeholder="Enter your email"
+          placeholder="you@example.com"
           autoComplete="email"
           inputMode="email"
           disabled={busy}
@@ -195,7 +195,7 @@ export function EmailSignIn({ siteKey }: { siteKey: string }) {
           {busy ? "Sending code…" : "Continue with email"}
         </button>
         {error && (
-          <p id="email-error" role="alert" className="text-sm text-red-400">
+          <p id="email-error" role="alert" className="text-sm text-danger">
             {error}
           </p>
         )}

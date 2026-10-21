@@ -26,7 +26,7 @@ export default function NotFound() {
           {[{ path: "/", label: "Open the app", title: "Ambient sound mixer and focus timer" }, ...HUBS, GUIDES_HUB].map(
             (item) => (
               <li key={item.path}>
-                <Link href={item.path} className="text-fg underline underline-offset-4 hover:decoration-brand">
+                <Link href={item.path} className="text-fg underline underline-offset-4 hover:decoration-fg">
                   {item.label}
                 </Link>
                 <span className="ml-2 text-sm text-faint">{item.title}</span>

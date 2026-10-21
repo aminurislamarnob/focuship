@@ -14,14 +14,14 @@ export function GuideLayout({ children }: { children: ReactNode }) {
           <Link href="/" aria-label="Focuship home">
             <Logo />
           </Link>
-          <Link href="/" className="rounded-[4px] bg-fg px-3 py-1.5 text-sm font-medium text-bg">
+          <Link href="/" className="inline-flex h-10 items-center rounded-[12px] bg-accent px-4 text-sm font-semibold text-accent-ink">
             Open the app
           </Link>
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 pt-10 pb-16">{children}</main>
       <footer className="border-t border-line">
-        <nav aria-label="Site" className="label-mono mx-auto flex max-w-3xl flex-wrap gap-x-5 gap-y-2 px-4 py-6">
+        <nav aria-label="Site" className="mx-auto flex max-w-3xl flex-wrap gap-x-5 gap-y-2 px-4 py-6 text-[0.8125rem] text-muted">
           {nav.map((item) => (
             <Link key={item.path} href={item.path} className="hover:text-fg">
               {item.label}

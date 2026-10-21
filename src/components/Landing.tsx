@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { FocusApp } from "./FocusApp";
 import { JsonLd, webApplication } from "./JsonLd";
@@ -57,16 +58,19 @@ export function FaqList({ faq }: { faq: Faq[] }) {
   return (
     <>
       <h2>Questions</h2>
-      <dl>
+      <div className="mb-4 border-b border-line">
         {faq.map(({ q, a }) => (
-          <div key={q} className="mb-4">
-            <dt className="font-medium text-fg">{q}</dt>
-            <dd className="mt-1">
+          <details key={q} className="faq border-t border-line">
+            <summary className="flex min-h-14 items-center justify-between gap-3 py-3 text-[0.9375rem] text-fg">
+              {q}
+              <Plus className="faq-chev size-4 shrink-0 text-muted transition-[rotate] duration-200" strokeWidth={1.75} aria-hidden />
+            </summary>
+            <p className="text-sm leading-[1.55] text-muted">
               <Rich text={a} />
-            </dd>
-          </div>
+            </p>
+          </details>
         ))}
-      </dl>
+      </div>
     </>
   );
 }
@@ -83,14 +87,18 @@ export function Sections({ sections }: { sections: Section[] }) {
 export function RelatedLinks({ paths }: { paths: string[] }) {
   return (
     <>
-      <h2>Related</h2>
-      <ul>
+      <h2>Keep exploring</h2>
+      <nav aria-label="Related" className="grid grid-cols-2 gap-2">
         {paths.map((path) => (
-          <li key={path}>
-            <Link href={path}>{linkLabel(path)}</Link>
-          </li>
+          <Link
+            key={path}
+            href={path}
+            className="flex min-h-[52px] items-center rounded-[14px] border border-[#222] bg-raised px-3.5 py-2.5 text-[0.84rem] leading-[1.3] !text-fg !no-underline transition-colors hover:border-edge"
+          >
+            {linkLabel(path)}
+          </Link>
         ))}
-      </ul>
+      </nav>
     </>
   );
 }
@@ -102,12 +110,12 @@ export function Landing({ page }: { page: LandingPage }) {
   return (
     <FocusApp heading={page.heading} intro={page.intro} intent={page.intent}>
       <PageCopy>
-        <nav aria-label="Breadcrumb" className="label-mono mb-6 flex gap-2">
-          <Link href="/" className="!no-underline hover:!text-fg">
+        <nav aria-label="Breadcrumb" className="mb-6 flex gap-1.5 text-[0.78rem] text-faint">
+          <Link href="/" className="!text-muted !no-underline hover:!text-fg">
             Focuship
           </Link>
           <span aria-hidden>/</span>
-          <Link href={hub.path} className="!no-underline hover:!text-fg">
+          <Link href={hub.path} className="!text-muted !no-underline hover:!text-fg">
             {hub.label}
           </Link>
         </nav>
