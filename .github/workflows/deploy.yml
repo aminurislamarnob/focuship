@@ -1,0 +1,45 @@
+# Every push to main is checked, built and deployed to https://focuship.app.
+# Needs, in the repo's Settings → Secrets and variables → Actions:
+#   secret   CLOUDFLARE_API_TOKEN  (Cloudflare "Edit Cloudflare Workers" token for the account below)
+#   variable CLOUDFLARE_ACCOUNT_ID (the account that owns the focuship.app zone and Worker)
+#   variables NEXT_PUBLIC_* from .env.local (public values baked into the static build)
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time; a newer push waits rather than racing the one in progress.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      NEXT_PUBLIC_AUTH_FACEBOOK: ${{ vars.NEXT_PUBLIC_AUTH_FACEBOOK }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      # Builds the static export into out/ and checks it; the deploy below ships that same out/.
+      - run: npm test
+      - name: Deploy to Cloudflare
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

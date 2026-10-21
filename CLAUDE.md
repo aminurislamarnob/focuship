@@ -13,7 +13,7 @@ npm start          # serve out/ locally (npx serve) — `next start` does not wo
 npm run lint       # eslint (includes react-hooks/set-state-in-effect)
 npm test           # next build, then node --test tests/*.test.mjs against out/
 npx tsc --noEmit   # typecheck
-npm run deploy     # next build && wrangler deploy → https://focuship.app
+npm run deploy     # next build && wrangler deploy → https://focuship.app (manual; pushes to main deploy on their own)
 npm run deploy:redirect  # 301 Worker (workers/redirect) for focus.aminurislam.me, focusship.app, www hosts
 npm run icons      # regenerate app icons (public/icons, src/app/icon.png) from scripts/generate-icons.mjs
 ```
@@ -40,6 +40,7 @@ A single-route (`/`), fully client-driven ambient sound mixer + focus timer, pre
 
 - No server features: no `headers()`/redirects/rewrites in `next.config.ts`, no Server Actions, no default `next/image` loader. Response headers (caching, the service worker's no-cache rule, security headers) live in `public/_headers`.
 - Don't read `Date.now()`, `Math.random()`, `window`, `localStorage` etc. during render — the page is prerendered at build time. Read them in effects or event handlers (the build fails on `Date.now()` in render).
+- Push to deploy: `.github/workflows/deploy.yml` runs lint, typecheck and `npm test` on every push to `main`, then `wrangler deploy`s the tested `out/`. It needs the repo secret `CLOUDFLARE_API_TOKEN` (an "Edit Cloudflare Workers" token for the account below) and the repo variables `CLOUDFLARE_ACCOUNT_ID` plus the `NEXT_PUBLIC_*` values from `.env.local`. When the Worker moves accounts, replace the token and the account ID variable.
 - Deployment is an assets-only Cloudflare Worker (`wrangler.jsonc`) serving `out/` on the custom domain `focuship.app`; `workers_dev` and preview URLs are off so the PWA has a single origin. A separate redirect Worker (`workers/redirect/`) 301s the old and typo hostnames to it; the one-time cutover steps are in the README. Sounds are shipped as static assets (no R2).
 - Accounts: the `focuship.app` zone and the `focuship` Worker live in Mahbub.rucse@gmail.com's Cloudflare account (`7fe8bdf125d434f9fa0b417083094a00`) for now, because a Worker's custom domain must be in its own account and the domain can't change accounts until 10 days after registration (registered 2026-10-21). Deploy with `CLOUDFLARE_ACCOUNT_ID=7fe8bdf125d434f9fa0b417083094a00 npm run deploy`, logged in to wrangler as aminur.arnob@gmail.com. From about 2026-10-31, move the domain to Aminur.arnob@gmail.com's account (Registrations → Settings → Move to another Cloudflare account, run by a super-admin), redeploy there and delete the Worker from Mahbub's account. The old `let-me-focus` Worker (dev.aiarnob@gmail.com's account) was deleted, so `focus.aminurislam.me` no longer serves the site.
 
