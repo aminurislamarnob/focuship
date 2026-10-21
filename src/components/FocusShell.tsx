@@ -13,7 +13,7 @@ import { FocusMode, useClock } from "./FocusMode";
 import { Logo } from "./Logo";
 import { MixSheet } from "./MixSheet";
 import { MixView } from "./MixView";
-import { SoundSearch, SoundsView, type SoundGuide } from "./SoundsView";
+import { SoundSearch, SoundsView, focusSoundSearch, type SoundGuide } from "./SoundsView";
 import { TimerView, formatClock, useTimerClock } from "./TimerView";
 import { Eq, IconButton, PauseIcon, PlayIcon, PresetArt, SwapText, cx } from "./ui";
 import { Avatar, YouView } from "./YouView";
@@ -106,11 +106,8 @@ export function FocusShell({ heading, intro, intent, nav, guides = [], children,
         setFocusOpen(false);
       } else if (e.key === "/" && !focusOpen) {
         e.preventDefault();
+        focusSoundSearch("/sounds");
         go("sounds");
-        // Whichever search box this layout shows: the heading's on wide screens, the library's on phones.
-        requestAnimationFrame(() =>
-          [...document.querySelectorAll<HTMLInputElement>("input[data-sound-search]")].find((el) => el.offsetParent)?.focus(),
-        );
       } else if (["1", "2", "3", "4"].includes(e.key) && !focusOpen) {
         go(TABS[Number(e.key) - 1].id);
       }

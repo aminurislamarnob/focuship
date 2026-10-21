@@ -2,7 +2,7 @@
 
 import { ChevronRight, Search, X } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CATEGORIES, SOUNDS, type CategoryId, type Sound } from "@/lib/catalog";
 import { actions, useFocus } from "@/lib/store";
 import { CATEGORY_ICONS, Kbd, cx } from "./ui";
@@ -31,13 +31,40 @@ interface SearchProps {
   onQuery(query: string): void;
 }
 
+/**
+ * Set by the "/" shortcut when it changes pages: the search box that mounts at this path takes focus.
+ * A path, not a flag, because the old page also mounts a box (its heading's) before the route changes.
+ */
+let focusOnArrival: string | null = null;
+
+/** Focuses whichever search box this layout shows: the heading's on wide screens, the library's on phones. */
+const focusVisibleSearch = () =>
+  [...document.querySelectorAll<HTMLInputElement>("input[data-sound-search]")].find((el) => el.offsetParent)?.focus();
+
+/**
+ * The "/" shortcut. Already on the library's page, it focuses the search now; otherwise the route change
+ * replaces the page, so the focus is handed to the search box that mounts at the destination.
+ */
+export function focusSoundSearch(destination: string) {
+  if (destination !== location.pathname) focusOnArrival = destination;
+  else requestAnimationFrame(focusVisibleSearch);
+}
+
 /** The library's search box; rendered under the heading on phones and beside it on wide screens. */
 export function SoundSearch({ query, onQuery, className }: SearchProps & { className?: string }) {
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // Of the two boxes, only the one this layout shows claims the handed-over focus.
+    if (focusOnArrival !== location.pathname || !input.current?.offsetParent) return;
+    focusOnArrival = null;
+    input.current.focus();
+  }, []);
   return (
     <label className={cx("flex h-12 items-center gap-2.5 rounded-[14px] border border-edge bg-surface px-3.5 md:h-[46px]", className)}>
       <Search className="size-[18px] shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
       <span className="sr-only">Search sounds</span>
       <input
+        ref={input}
         type="search"
         data-sound-search
         value={query}
