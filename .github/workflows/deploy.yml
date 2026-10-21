@@ -35,9 +35,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
       # Builds the static export into out/ and checks it; the deploy below ships that same out/.
       - run: npm test
+      # After the build: it generates the route types (PageProps, LayoutProps) that tsc needs.
+      - run: npx tsc --noEmit
       - name: Deploy to Cloudflare
         run: npx wrangler deploy
         env:
