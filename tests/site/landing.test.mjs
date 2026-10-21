@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { test } from "node:test";
-import { OUT, exists, inspect, pages, read } from "./site.mjs";
+import { test } from "vitest";
+import { OUT, exists, inspect, pages, read } from "./helpers.mjs";
 
 const TEMPLATES = /^\/(sounds|timer|pomodoro|sounds-for|mix)\/[^/]+$/;
 const built = pages().map((page) => ({ ...page, ...inspect(read(page.file)) }));

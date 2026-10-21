@@ -1,10 +1,10 @@
 // The cloud gateway (src/lib/cloud.ts), run against a fake driver: these tests
 // observe behavior at the seam — what the gateway asks of Supabase and what it
-// hands back to the app — never supabase-js internals. The module is imported
-// directly; Node strips its types (it has no runtime imports by design).
+// hands back to the app — never supabase-js internals. The module has no runtime
+// imports by design, so it runs under Vitest without any stubs.
 import assert from "node:assert/strict";
-import { test } from "node:test";
-import { CloudError, createCloud, newerSettings, PRESET_LIMIT } from "../src/lib/cloud.ts";
+import { test } from "vitest";
+import { CloudError, createCloud, newerSettings, PRESET_LIMIT } from "../../src/lib/cloud.ts";
 
 /**
  * A fake CloudDriver: records every operation and answers from `handlers`

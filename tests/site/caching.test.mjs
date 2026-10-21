@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
-import { read } from "./site.mjs";
+import { test } from "vitest";
+import { read } from "./helpers.mjs";
 
 // /sounds/<slug> landing pages and their images share a prefix with /sounds/<category>/<id>.mp3 audio.
 test("only audio files under /sounds get the immutable cache rule", () => {

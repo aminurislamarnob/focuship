@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
-import { inspect, pages, read } from "./site.mjs";
+import { test } from "vitest";
+import { inspect, pages, read } from "./helpers.mjs";
 
 const guides = pages()
   .filter((page) => /^\/guides\/[^/]+$/.test(page.path))

@@ -3,10 +3,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
-export const OUT = new URL("../out/", import.meta.url).pathname;
+export const OUT = new URL("../../out/", import.meta.url).pathname;
 
 if (!existsSync(join(OUT, "index.html"))) {
-  throw new Error("out/ is missing. Run `npm test`, which builds first, or `next build`.");
+  throw new Error("out/ is missing. Run `npm run test:site`, which builds first, or `next build`.");
 }
 
 const TEXT = /\.(html|txt|js|json|webmanifest|xml|css|md)$/;

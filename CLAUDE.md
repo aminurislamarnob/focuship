@@ -11,15 +11,26 @@ npm run dev        # next dev on :3000 (service worker is NOT registered in dev)
 npm run build      # static export to out/ (output: "export")
 npm start          # serve out/ locally (npx serve) — `next start` does not work with a static export
 npm run lint       # eslint (includes react-hooks/set-state-in-effect)
-npm test           # next build, then node --test tests/*.test.mjs against out/
-                   # (build and test share .next with `next dev`: restart a running dev server afterwards, or it serves stale CSS)
+npm test           # every layer: unit + components, next build, built-site checks, Playwright
+npm run test:unit  # Vitest: functional (tests/unit) and React Testing Library (tests/components); fast, no build
+npm run test:watch # the same, re-running on change
+npm run test:site  # next build, then Vitest checks of the export in out/ (tests/site)
+npm run test:e2e   # Playwright against out/ served on :4173, desktop + Pixel 7 (tests/e2e); needs a build first
+                   # (builds share .next with `next dev`: restart a running dev server afterwards, or it serves stale CSS)
 npx tsc --noEmit   # typecheck
 npm run deploy     # next build && wrangler deploy → https://focuship.app (manual; pushes to main deploy on their own)
 npm run deploy:redirect  # 301 Worker (workers/redirect) for focus.aminurislam.me, focusship.app, www hosts
 npm run icons      # regenerate app icons (public/icons, src/app/icon.png) from scripts/generate-icons.mjs
 ```
 
-Tests live in `tests/` and inspect the built site in `out/` — what a crawler or visitor receives (titles, canonicals, JSON-LD, sitemap, brand) — never source modules; `tests/site.mjs` has the HTML helpers. Audio, interaction, offline and redirects are verified by hand: drive the production build in a browser (PWA and offline behaviour only work against a production build served over HTTPS or localhost) and `curl` deployed URLs.
+Tests live in `tests/`, one folder per layer, and test behaviour at public seams, not internals:
+
+- `tests/unit/` (Vitest, Node or jsdom per file): the store through its actions and `useFocus` (`load-store.ts` loads a fresh copy at a given URL with saved localStorage; files stub `@/lib/audio/engine` and `@/lib/supabase` with `vi.mock`), share links, the catalogue and page-registry rules, and the cloud gateway against a fake driver.
+- `tests/components/` (Vitest + React Testing Library, jsdom): components queried by role and name as a user finds them; `setup.ts` stubs the audio engine and adds jest-dom matchers. Mock `next/navigation` per file when a component reads the path or router.
+- `tests/site/` (Vitest, Node): the built export in `out/` — what a crawler or visitor receives (titles, canonicals, JSON-LD, sitemap, brand); `helpers.mjs` has the HTML helpers.
+- `tests/e2e/` (Playwright, Chromium): whole pages of the production build, desktop and phone. `fixtures.ts` fails any test that logs a page or console error (where production React reports hydration mismatches) and has `returningVisitor()` to seed saved state.
+
+CI (`.github/workflows/deploy.yml`) runs all four before deploying. Audio output, offline/PWA install and redirects are still verified by hand: drive the production build in a browser (PWA and offline behaviour only work against a production build served over HTTPS or localhost) and `curl` deployed URLs.
 
 ## Architecture
 

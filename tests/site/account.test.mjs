@@ -2,8 +2,8 @@
 // export has no server to render it later), stay out of search surfaces, and
 // never leak into the sitemap or llms.txt.
 import assert from "node:assert/strict";
-import { test } from "node:test";
-import { inspect, read } from "./site.mjs";
+import { test } from "vitest";
+import { inspect, read } from "./helpers.mjs";
 
 const page = inspect(read("account.html"));
 

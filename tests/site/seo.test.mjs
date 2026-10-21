@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
-import { exists, inspect, pages, read } from "./site.mjs";
+import { test } from "vitest";
+import { exists, inspect, pages, read } from "./helpers.mjs";
 
 const ORIGIN = "https://focuship.app";
 const url = (path) => (path === "/" ? `${ORIGIN}/` : `${ORIGIN}${path}`);

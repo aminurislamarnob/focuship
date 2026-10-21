@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
-import { read, textFiles } from "./site.mjs";
+import { test } from "vitest";
+import { read, textFiles } from "./helpers.mjs";
 
 test("the old brand name appears nowhere in the built site", () => {
   const offenders = textFiles().filter((file) => /let[\s-]?me[\s-]?focus/i.test(read(file)));
