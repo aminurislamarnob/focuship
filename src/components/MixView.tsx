@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { PRESETS, SOUND_BY_ID, SOUNDS, type Preset } from "@/lib/catalog";
 import type { CustomPreset } from "@/lib/cloud";
 import { actions, matchPreset, mixName, presetByRef, presetShareUrl, useFocus } from "@/lib/store";
@@ -107,10 +107,10 @@ export function MixView({ onOpenSheet, onBrowse, onTimer, onAbout }: MixViewProp
       </div>
 
       <aside aria-label="Timer and mix" className="sticky top-0 hidden flex-col gap-4 lg:flex">
-        <TimerCard onOpen={onTimer} />
         <section className="rounded-[24px] border border-[#222] bg-raised p-5 [--slider-ring:var(--bg-raised)]">
           <Layers onBrowse={onBrowse} compact />
         </section>
+        <TimerCard onOpen={onTimer} />
         <section aria-labelledby="offline-card" className="flex flex-col gap-2.5 rounded-[24px] border border-[#222] p-5">
           <h2 id="offline-card" className="text-[0.9375rem] font-semibold">
             Offline sounds
@@ -162,7 +162,7 @@ function Player({ onOpenSheet, onTimer }: { onOpenSheet(): void; onTimer(): void
       className="relative isolate flex flex-col overflow-hidden rounded-[28px] border border-[#2a1f17] bg-[#0e0c0b] p-5 md:flex-row md:flex-wrap md:items-center md:gap-7 md:p-7"
     >
       <EmberBackdrop text={`${name} ${blurb}`} playing={playing} glyphs={52} />
-      <div className="flex min-w-0 flex-col md:flex-[1_1_280px]">
+      <div className="flex min-w-0 flex-col [container-type:inline-size] md:flex-[1_1_280px]">
         <div className="flex items-center justify-between" aria-live="polite">
           <span className="inline-flex h-[26px] items-center gap-2 rounded-full border border-[#2e2e2e] pr-2.5 pl-[9px] text-xs font-medium text-soft">
             <StatusDot active={playing} />
@@ -170,10 +170,20 @@ function Player({ onOpenSheet, onTimer }: { onOpenSheet(): void; onTimer(): void
           </span>
           <span className="label-mono md:hidden">{count}</span>
         </div>
-        <h2 id="mix-title" className="mt-3.5 text-[2.625rem] leading-none font-semibold tracking-[-0.04em] text-balance md:mt-4 md:text-[3.5rem] md:tracking-[-0.045em]">
-          <SwapText text={name} />
+        {/*
+          One line in a fixed-height box, whatever the name: the size shrinks to fit the card
+          (Geist runs about 0.45-0.53em per character here; 0.56 leaves room), so swapping
+          "Pick a soundscape" for "Brown noise" never changes the card's height.
+        */}
+        <h2
+          id="mix-title"
+          style={{ "--chars": name.length } as CSSProperties}
+          className="mt-2.5 flex h-[3.02rem] items-center text-[min(2.625rem,calc(100cqi/(var(--chars)*0.56)))] leading-[1.15] font-semibold tracking-[-0.04em] whitespace-nowrap md:mt-3 md:h-[4.025rem] md:text-[min(3.5rem,calc(100cqi/(var(--chars)*0.56)))] md:tracking-[-0.045em]"
+        >
+          <SwapText text={name} className="max-w-full truncate" />
         </h2>
-        <p className="mt-2.5 text-base leading-[1.4] text-muted">
+        {/* Always two lines tall, for the same reason. */}
+        <p className="mt-2 line-clamp-2 min-h-[2.8em] text-base leading-[1.4] text-muted">
           <SwapText text={blurb} />
           {!empty && <span className="whitespace-nowrap max-md:hidden"> · {count}</span>}
         </p>

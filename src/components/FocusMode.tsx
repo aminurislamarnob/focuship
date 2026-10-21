@@ -166,17 +166,20 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
       onKeyDown={wake}
       className={cx("fade fixed inset-0 z-[60] overflow-hidden bg-bg text-fg", idle && "cursor-none")}
     >
-      <div className="pt-safe pb-safe mx-auto flex h-full w-full max-w-4xl flex-col px-5 md:px-10">
+      <div className="pt-safe pb-safe mx-auto flex h-full w-full max-w-4xl flex-col px-5 md:max-w-none md:px-[clamp(20px,5vw,64px)]">
         <div className={cx("flex items-center justify-between pt-4 md:pt-8", chrome)}>
-          <IconButton label="Exit focus mode" className="-ml-2" onClick={onClose}>
+          <IconButton label="Exit focus mode" className="-ml-2 md:hidden" onClick={onClose}>
             <X className="size-[22px]" strokeWidth={1.75} />
           </IconButton>
-          <div className="flex items-center gap-2">
-            {canFullscreen && (
-              <IconButton label={full ? "Exit full screen" : "Full screen"} className="text-muted max-md:hidden" onClick={toggleFullscreen}>
-                {full ? <Minimize2 className="size-5" strokeWidth={1.75} /> : <Maximize2 className="size-5" strokeWidth={1.75} />}
-              </IconButton>
-            )}
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-11 cursor-pointer items-center gap-2 rounded-[12px] border border-edge pr-3.5 pl-2.5 text-sm transition-colors hover:bg-white/[0.04] max-md:hidden"
+          >
+            <X className="size-[18px]" strokeWidth={1.75} aria-hidden />
+            Exit focus <kbd className="font-mono text-[0.6875rem] text-faint">Esc</kbd>
+          </button>
+          <div className="flex items-center gap-3">
             <div role="group" aria-label="Show" className="flex gap-0.5 rounded-full border border-edge p-[3px]">
               {(["timer", "clock"] as const).map((id) => (
                 <button
@@ -185,7 +188,7 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
                   aria-pressed={view === id}
                   onClick={() => setChoice(id)}
                   className={cx(
-                    "h-[38px] cursor-pointer rounded-full px-4 text-[0.8125rem] font-[550] capitalize transition-colors",
+                    "h-[38px] cursor-pointer rounded-full px-4 text-[0.8125rem] font-[550] capitalize transition-colors md:px-[18px] md:text-[0.84rem]",
                     view === id ? "bg-accent text-accent-ink" : "text-soft hover:text-fg",
                   )}
                 >
@@ -193,26 +196,40 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
                 </button>
               ))}
             </div>
+            {canFullscreen && (
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="flex min-h-11 cursor-pointer items-center gap-1.5 text-[0.78rem] text-faint hover:text-fg max-md:hidden"
+              >
+                {full ? <Minimize2 className="size-3.5" strokeWidth={1.75} aria-hidden /> : <Maximize2 className="size-3.5" strokeWidth={1.75} aria-hidden />}
+                {full ? "Exit full screen" : "Full screen"}
+                <kbd className="rounded-[5px] border border-line-strong px-1.5 py-0.5 font-mono text-[0.6875rem]">F</kbd>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col justify-center gap-[22px]">
-          <span className="inline-flex items-center gap-2 text-[0.8125rem] text-muted">
-            <span aria-hidden className={cx("size-1.5 rounded-full bg-accent", (playing || running) && "animate-breathe")} />
+        <div className="flex flex-1 flex-col justify-center gap-[22px] md:items-center md:gap-5">
+          <span className="inline-flex items-center gap-2 text-[0.8125rem] text-muted md:text-sm">
+            <span aria-hidden className={cx("size-1.5 rounded-full bg-accent md:size-[7px] md:bg-[#f08a4b]", (playing || running) && "animate-breathe")} />
             <SwapText text={caption} />
           </span>
           <div
             role="timer"
             aria-label={view === "timer" ? `${Number(top)} minutes ${Number(bottom)} seconds left` : `Time ${top}:${bottom}`}
-            className="-ml-1.5 flex flex-col font-mono text-[clamp(7rem,43vw,10.5rem)] leading-[0.86] font-[150] tracking-[-0.07em] tabular-nums md:flex-row md:gap-[0.18em] md:text-[clamp(10rem,19vw,15rem)]"
+            className="-ml-1.5 flex flex-col font-mono text-[clamp(7rem,43vw,10.5rem)] leading-[0.86] font-[150] tracking-[-0.07em] tabular-nums md:ml-0 md:flex-row md:items-baseline md:text-[clamp(7.5rem,19vw,16.25rem)] md:leading-[0.9]"
           >
             <span>{top}</span>
+            <span aria-hidden className="px-[0.04em] text-[#3a3633] max-md:hidden">
+              :
+            </span>
             <span className="text-muted">{bottom}</span>
           </div>
-          <div aria-hidden className="h-0.5 w-full overflow-hidden rounded-full bg-line">
+          <div aria-hidden className="h-0.5 w-full overflow-hidden rounded-full bg-line md:w-[min(560px,80%)]">
             <div className="h-full bg-accent transition-[width] duration-500" style={{ width: `${hasTimer ? progress * 100 : 0}%` }} />
           </div>
-          <div className="flex min-h-6 items-center justify-between gap-4 text-[0.8125rem] text-faint">
+          <div className="flex min-h-6 items-center justify-between gap-4 text-[0.8125rem] text-faint md:justify-center md:gap-6 md:text-sm">
             <span>{sub}</span>
             {view === "timer" && (
               <button
@@ -226,12 +243,15 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
           </div>
         </div>
 
-        <p className="mb-[18px] text-[0.9375rem] tracking-[-0.01em] text-faint">
+        <p className="mb-[18px] text-[0.9375rem] tracking-[-0.01em] text-faint md:hidden">
           <SwapText text={LINES[line]} />
         </p>
 
-        <div className={cx("flex items-center gap-3 border-t border-line pt-4 pb-8", chrome)}>
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex items-center gap-3 border-t border-line pt-4 pb-8 md:gap-3.5 md:border-[#1a1a1a] md:pt-5">
+          <p className="min-w-0 flex-1 text-base tracking-[-0.01em] text-faint max-md:hidden">
+            <SwapText text={LINES[line]} />
+          </p>
+          <div className={cx("flex min-w-0 flex-1 flex-col gap-0.5 md:flex-none md:items-end", chrome)}>
             <span className="truncate text-sm font-semibold">
               <SwapText text={hasMix ? mixName(layers) : "No sounds yet"} className="max-w-full truncate align-bottom" />
             </span>
@@ -242,7 +262,7 @@ export function FocusMode({ open, onClose, fullscreenRequest }: FocusModeProps) 
           <IconButton
             label={playing ? "Pause sounds" : "Play sounds"}
             round
-            className="size-[52px] border border-line-strong"
+            className={cx("size-[52px] border border-line-strong", chrome)}
             onClick={actions.toggle}
           >
             {playing ? (

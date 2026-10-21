@@ -229,19 +229,24 @@ const SWAP_IN_MS = 300;
  * Text that animates when it changes: the old words blur and lift away, the
  * new ones rise into place. React renders the first value; later values are
  * written by the animation so the swap happens while the text is invisible.
+ * A change made while the text was still waiting for saved state (inside an
+ * `.await-state` that isn't ready) is written at once: the reader never saw
+ * the old value, so animating away from it would only flash the default.
  */
 export function SwapText({ text, className }: { text: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [first] = useState(text);
   const wanted = useRef(text);
   const busy = useRef(false);
+  /** Whether the text could be seen at the previous commit. */
+  const seen = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
     wanted.current = text;
     if (!el || busy.current || el.textContent === text) return;
 
-    if (document.hidden || !el.getClientRects().length || typeof el.animate !== "function") {
+    if (!seen.current || document.hidden || !el.getClientRects().length || typeof el.animate !== "function") {
       el.textContent = text;
       return;
     }
@@ -278,6 +283,11 @@ export function SwapText({ text, className }: { text: string; className?: string
     };
     run();
   }, [text]);
+
+  // After every commit (declared after the swap effect, so that one still sees the previous value).
+  useEffect(() => {
+    seen.current = !ref.current?.closest(".await-state:not([data-ready])");
+  });
 
   return (
     <span ref={ref} className={cx("inline-block", className)}>
@@ -649,7 +659,8 @@ export function EmberBackdrop({ text, playing, glyphs = 40 }: { text: string; pl
                 left: `${x}%`,
                 top: `${y}%`,
                 color: warm ? "#f08a4b" : "var(--fg)",
-                opacity: 0.05 + hash(i * 7.7 + 2) * (warm ? 0.16 : 0.08),
+                // Rounded so the prerendered HTML and the client render the same string.
+                opacity: Math.round((0.05 + hash(i * 7.7 + 2) * (warm ? 0.16 : 0.08)) * 1000) / 1000,
               }}
             >
               <span

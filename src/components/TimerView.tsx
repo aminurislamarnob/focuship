@@ -48,7 +48,7 @@ export function useTimerClock(timer: TimerState) {
 export const sessionInCycle = (timer: TimerState) =>
   Math.max(1, (timer.rounds % timer.settings.longEvery) + (timer.mode === "focus" ? 1 : 0));
 
-export function TimerModes({ timer, compact }: { timer: TimerState; compact?: boolean }) {
+export function TimerModes({ timer, compact, className }: { timer: TimerState; compact?: boolean; className?: string }) {
   return (
     <div
       role="group"
@@ -56,6 +56,7 @@ export function TimerModes({ timer, compact }: { timer: TimerState; compact?: bo
       className={cx(
         "grid w-full grid-cols-3 gap-1 border p-1",
         compact ? "rounded-[14px] border-[#222] bg-[#0e0e0e]" : "rounded-[16px] border-[#232323] bg-surface",
+        className,
       )}
     >
       {MODES.map((mode) => {
@@ -91,7 +92,7 @@ export function TimerDial({ timer, remaining, compact }: { timer: TimerState; re
     <div
       role="timer"
       aria-label={`${mode.label}, ${Number(mm)} minutes ${Number(ss)} seconds left`}
-      className={cx("relative aspect-square w-full", compact ? "max-w-[220px]" : "max-w-[300px]")}
+      className={cx("relative aspect-square w-full", compact ? "max-w-[220px]" : "max-w-[300px] md:max-w-[360px]")}
     >
       <svg viewBox="0 0 300 300" className="absolute inset-0" aria-hidden>
         {Array.from({ length: 60 }, (_, i) => {
@@ -115,7 +116,7 @@ export function TimerDial({ timer, remaining, compact }: { timer: TimerState; re
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5">
         {!compact && (
-          <span className="text-[0.8125rem] font-medium text-muted">
+          <span className="text-[0.8125rem] font-medium text-muted md:text-sm">
             <SwapText text={mode.label} />
           </span>
         )}
@@ -123,12 +124,12 @@ export function TimerDial({ timer, remaining, compact }: { timer: TimerState; re
           aria-hidden
           className={cx(
             "font-mono leading-none font-[250] tracking-[-0.04em] tabular-nums",
-            compact ? "text-[clamp(2.5rem,15cqw,3.125rem)]" : "text-[clamp(3.25rem,18vw,4.125rem)]",
+            compact ? "text-[clamp(2.5rem,15cqw,3.125rem)]" : "text-[clamp(3.25rem,18vw,4.125rem)] md:text-[5rem] md:tracking-[-0.045em]",
           )}
         >
           {clock}
         </span>
-        <span className={cx("text-faint", compact ? "text-xs" : "text-[0.8125rem]")}>
+        <span className={cx("text-faint", compact ? "text-xs" : "text-[0.8125rem] md:text-sm")}>
           {timer.status === "paused" ? "Paused" : `Session ${sessionInCycle(timer)} of ${timer.settings.longEvery}`}
         </span>
       </div>
@@ -145,116 +146,139 @@ export function TimerView({ onMix }: { onMix(): void }) {
   const hasMix = Object.keys(layers).length > 0;
 
   return (
-    <div className="flex flex-col pb-8 md:max-w-xl">
-      <div className="mt-5">
-        <TimerModes timer={timer} />
-      </div>
-
-      <div className="mt-7 flex justify-center">
-        <TimerDial timer={timer} remaining={remaining} />
-      </div>
-
-      <div aria-hidden className="mt-5 flex justify-center gap-1.5">
-        {Array.from({ length: timer.settings.longEvery }, (_, i) => (
-          <span
-            key={i}
-            className={cx(
-              "h-2 rounded-full transition-all duration-300",
-              i + 1 === session ? "w-6 bg-accent" : "w-2",
-              i + 1 < session ? "bg-faint" : i + 1 > session && "bg-[#2e2e2e]",
-            )}
-          />
-        ))}
-      </div>
-
-      <div className="mt-7 flex items-center justify-center gap-5">
-        <IconButton label="Reset timer" variant="outline" size="lg" round onClick={actions.resetTimer}>
-          <RotateCcw className="size-5" strokeWidth={1.75} />
-        </IconButton>
-        <button
-          type="button"
-          onClick={running ? actions.pauseTimer : actions.startTimer}
-          className="inline-flex h-[60px] w-[168px] cursor-pointer items-center justify-center gap-2.5 rounded-full bg-accent text-[1.0625rem] font-semibold text-accent-ink transition-[filter,scale] hover:brightness-105 active:scale-[0.97]"
-        >
-          {running ? (
-            <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} aria-hidden />
-          ) : (
-            <Play className="size-[18px]" fill="currentColor" strokeWidth={0} aria-hidden />
+    <div className="flex flex-col pb-8 md:mt-7 md:flex-row md:flex-wrap md:items-stretch md:gap-5">
+      {/* On wide screens the dial sits in a lit card, with settings and lengths beside it. */}
+      <section
+        aria-label="Timer"
+        className="relative isolate flex flex-col md:flex-[3_1_440px] md:items-center md:overflow-hidden md:rounded-[28px] md:border md:border-[#2a1f17] md:bg-[#0e0c0b] md:p-7"
+      >
+        <div
+          aria-hidden
+          className={cx(
+            "absolute inset-0 -z-10 bg-[radial-gradient(60%_60%_at_50%_42%,rgba(234,88,12,0.14)_0%,rgba(154,52,18,0.06)_45%,transparent_75%)] transition-opacity duration-700 max-md:hidden",
+            running ? "opacity-100" : "opacity-55",
           )}
-          {running ? "Pause" : timer.status === "paused" ? "Resume" : "Start"}
-        </button>
-        <IconButton label="Skip to next session" variant="outline" size="lg" round onClick={actions.skipTimer}>
-          <SkipForward className="size-5" strokeWidth={1.75} />
-        </IconButton>
-      </div>
-
-      <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-[18px] border border-[#222] bg-raised">
-        <div className="flex flex-col gap-1 border-r border-[#222] px-4 py-3.5">
-          <span className="text-xs text-faint">Today</span>
-          <span className="text-[0.9375rem] font-semibold">
-            <span className="font-mono">{timer.rounds}</span> session{timer.rounds === 1 ? "" : "s"}
-          </span>
+        />
+        <div className="mt-5 md:mt-0 md:w-[min(100%,400px)]">
+          <TimerModes timer={timer} />
         </div>
-        <button type="button" onClick={onMix} className="flex min-w-0 cursor-pointer flex-col gap-1 px-4 py-3.5 text-left">
-          <span className="text-xs text-faint">Sound</span>
-          <span className="flex items-center justify-between gap-2 text-[0.9375rem] font-semibold">
-            <span className="truncate">{hasMix ? mixName(layers) : "Pick a mix"}</span>
-            <ChevronRight className="size-4 shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
+
+        <div className="mt-7 flex justify-center md:mt-8 md:w-full">
+          <TimerDial timer={timer} remaining={remaining} />
+        </div>
+
+        <div aria-hidden className="mt-5 flex justify-center gap-1.5">
+          {Array.from({ length: timer.settings.longEvery }, (_, i) => (
+            <span
+              key={i}
+              className={cx(
+                "h-2 rounded-full transition-all duration-300",
+                i + 1 === session ? "w-6 bg-accent" : "w-2",
+                i + 1 < session ? "bg-faint" : i + 1 > session && "bg-[#2e2e2e]",
+              )}
+            />
+          ))}
+        </div>
+
+        <div className="mt-7 flex items-center justify-center gap-5 md:mt-6 md:gap-4">
+          <IconButton label="Reset timer" variant="outline" size="lg" round onClick={actions.resetTimer}>
+            <RotateCcw className="size-5" strokeWidth={1.75} />
+          </IconButton>
+          <button
+            type="button"
+            onClick={running ? actions.pauseTimer : actions.startTimer}
+            className="inline-flex h-[60px] w-[168px] cursor-pointer items-center justify-center gap-2.5 rounded-full bg-accent text-[1.0625rem] font-semibold text-accent-ink transition-[filter,scale] hover:brightness-105 active:scale-[0.97] md:h-[58px] md:w-[180px]"
+          >
+            {running ? (
+              <Pause className="size-[18px]" fill="currentColor" strokeWidth={0} aria-hidden />
+            ) : (
+              <Play className="size-[18px]" fill="currentColor" strokeWidth={0} aria-hidden />
+            )}
+            {running ? "Pause" : timer.status === "paused" ? "Resume" : "Start"}
+          </button>
+          <IconButton label="Skip to next session" variant="outline" size="lg" round onClick={actions.skipTimer}>
+            <SkipForward className="size-5" strokeWidth={1.75} />
+          </IconButton>
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 overflow-hidden rounded-[18px] border border-[#222] bg-raised md:hidden">
+          <div className="flex flex-col gap-1 border-r border-[#222] px-4 py-3.5">
+            <span className="text-xs text-faint">Today</span>
+            <span className="text-[0.9375rem] font-semibold">
+              <span className="font-mono">{timer.rounds}</span> session{timer.rounds === 1 ? "" : "s"}
+            </span>
+          </div>
+          <button type="button" onClick={onMix} className="flex min-w-0 cursor-pointer flex-col gap-1 px-4 py-3.5 text-left">
+            <span className="text-xs text-faint">Sound</span>
+            <span className="flex items-center justify-between gap-2 text-[0.9375rem] font-semibold">
+              <span className="truncate">{hasMix ? mixName(layers) : "Pick a mix"}</span>
+              <ChevronRight className="size-4 shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
+            </span>
+          </button>
+        </div>
+        <div className="mt-5 flex items-center gap-5 text-[0.8125rem] text-muted max-md:hidden">
+          <span>
+            Today <span className="font-mono text-fg">{timer.rounds}</span> session{timer.rounds === 1 ? "" : "s"}
           </span>
-        </button>
-      </div>
-
-      <TimerSettingsPanel settings={timer.settings} />
-
-      <section aria-labelledby="timer-lengths" className="mt-9 flex flex-col">
-        <h2 id="timer-lengths" className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
-          Choose a length
-        </h2>
-        <p className="mt-1.5 mb-3.5 text-[0.8125rem] leading-[1.45] text-muted">
-          Start with the Pomodoro timer, then try 50/10 or 90/20.
-        </p>
-        <div className="grid grid-cols-2 gap-2.5">
-          {CYCLES.map((cycle) => {
-            const on = timer.settings.focus === cycle.focus && timer.settings.short === cycle.short;
-            return (
-              <button
-                key={cycle.focus}
-                type="button"
-                aria-pressed={on}
-                onClick={() => {
-                  actions.updateTimerSettings({ focus: cycle.focus, short: cycle.short });
-                  if (timer.status === "idle" && timer.mode !== "focus") actions.setTimerMode("focus");
-                }}
-                className={cx(
-                  "flex cursor-pointer flex-col gap-2.5 rounded-[18px] border border-[#222] bg-raised p-3.5 text-left transition-shadow",
-                  on && "shadow-[0_0_0_2px_var(--accent)]",
-                )}
-              >
-                <span className="flex items-baseline justify-between gap-2">
-                  <span className="font-mono text-xl tracking-[-0.02em]">
-                    {cycle.focus}/{cycle.short}
-                  </span>
-                  {cycle.name && <span className="text-[0.72rem] text-faint">{cycle.name}</span>}
-                </span>
-                <span aria-hidden className="flex h-1.5 gap-[3px]">
-                  <span className="rounded-full bg-accent" style={{ flex: `${cycle.focus} 1 0` }} />
-                  <span className="rounded-full bg-[#3a3a3a]" style={{ flex: `${cycle.short} 1 0` }} />
-                </span>
-                <span className="text-xs text-muted">
-                  {cycle.focus} min focus · {cycle.short} min break
-                </span>
-              </button>
-            );
-          })}
+          <button type="button" onClick={onMix} className="min-h-9 cursor-pointer text-soft underline underline-offset-4 hover:text-fg">
+            Sound: {hasMix ? mixName(layers) : "pick a mix"}
+          </button>
         </div>
       </section>
+
+      <div className="flex min-w-0 flex-col md:flex-[2_1_320px] md:gap-4">
+        <TimerSettingsPanel settings={timer.settings} />
+
+        <section aria-labelledby="timer-lengths" className="mt-9 flex flex-col md:mt-0">
+          <h2 id="timer-lengths" className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
+            Choose a length
+          </h2>
+          <p className="mt-1.5 mb-3.5 text-[0.8125rem] leading-[1.45] text-muted md:mt-1 md:mb-3">
+            Start with the Pomodoro timer, then try 50/10 or 90/20.
+          </p>
+          <div className="grid grid-cols-2 gap-2.5">
+            {CYCLES.map((cycle) => {
+              const on = timer.settings.focus === cycle.focus && timer.settings.short === cycle.short;
+              return (
+                <button
+                  key={cycle.focus}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => {
+                    actions.updateTimerSettings({ focus: cycle.focus, short: cycle.short });
+                    if (timer.status === "idle" && timer.mode !== "focus") actions.setTimerMode("focus");
+                  }}
+                  className={cx(
+                    "flex cursor-pointer flex-col gap-2.5 rounded-[18px] border border-[#222] bg-raised p-3.5 text-left transition-shadow md:border-[#232120] md:bg-[#121110]",
+                    on && "shadow-[0_0_0_2px_var(--accent)]",
+                  )}
+                >
+                  <span className="flex items-baseline justify-between gap-2">
+                    <span className="font-mono text-xl tracking-[-0.02em]">
+                      {cycle.focus}/{cycle.short}
+                    </span>
+                    {cycle.name && <span className="text-[0.72rem] text-faint">{cycle.name}</span>}
+                  </span>
+                  <span aria-hidden className="flex h-1.5 gap-[3px]">
+                    <span className="rounded-full bg-accent" style={{ flex: `${cycle.focus} 1 0` }} />
+                    <span className="rounded-full bg-[#3a3a3a]" style={{ flex: `${cycle.short} 1 0` }} />
+                  </span>
+                  <span className="text-xs text-muted md:hidden">
+                    {cycle.focus} min focus · {cycle.short} min break
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
 
 function TimerSettingsPanel({ settings }: { settings: TimerSettings }) {
   const stepper = (key: "focus" | "short" | "long", label: string, min: number, max: number, step: number) => (
-    <div className="flex min-h-[60px] items-center justify-between border-t border-line">
+    <div className="flex min-h-[60px] items-center justify-between border-t border-line md:min-h-14">
       <span className="text-[0.9375rem]">{label}</span>
       <div className="flex items-center gap-1">
         <IconButton
@@ -279,8 +303,11 @@ function TimerSettingsPanel({ settings }: { settings: TimerSettings }) {
   );
 
   return (
-    <section aria-labelledby="timer-settings" className="mt-9 flex flex-col">
-      <h2 id="timer-settings" className="mb-2 text-[0.9375rem] font-semibold tracking-[-0.01em]">
+    <section
+      aria-labelledby="timer-settings"
+      className="mt-9 flex flex-col md:mt-0 md:rounded-[24px] md:border md:border-[#232120] md:bg-[#121110] md:px-5 md:pt-5 md:pb-2"
+    >
+      <h2 id="timer-settings" className="mb-2 text-[0.9375rem] font-semibold tracking-[-0.01em] md:mb-1.5">
         Settings
       </h2>
       {stepper("focus", "Focus", 5, 120, 5)}

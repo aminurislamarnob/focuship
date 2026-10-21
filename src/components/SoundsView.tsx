@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CATEGORIES, SOUNDS, type CategoryId, type Sound } from "@/lib/catalog";
 import { actions, useFocus } from "@/lib/store";
-import { CATEGORY_ICONS, cx } from "./ui";
+import { CATEGORY_ICONS, Kbd, cx } from "./ui";
 
 /** A landing page for one sound, listed under the library. */
 export interface SoundGuide {
@@ -26,8 +26,39 @@ const matches = (sound: Sound, query: string) => {
   return query.split(/\s+/).every((word) => haystack.includes(word));
 };
 
-export function SoundsView({ guides }: { guides: SoundGuide[] }) {
-  const [query, setQuery] = useState("");
+interface SearchProps {
+  query: string;
+  onQuery(query: string): void;
+}
+
+/** The library's search box; rendered under the heading on phones and beside it on wide screens. */
+export function SoundSearch({ query, onQuery, className }: SearchProps & { className?: string }) {
+  return (
+    <label className={cx("flex h-12 items-center gap-2.5 rounded-[14px] border border-edge bg-surface px-3.5 md:h-[46px]", className)}>
+      <Search className="size-[18px] shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
+      <span className="sr-only">Search sounds</span>
+      <input
+        type="search"
+        data-sound-search
+        value={query}
+        onChange={(e) => onQuery(e.target.value)}
+        placeholder={`Search ${SOUNDS.length} sounds`}
+        autoComplete="off"
+        enterKeyHint="search"
+        className="h-11 min-w-0 flex-1 bg-transparent text-base text-fg outline-none placeholder:text-faint md:h-[42px] md:text-[0.9063rem] [&::-webkit-search-cancel-button]:hidden"
+      />
+      {query ? (
+        <button type="button" aria-label="Clear search" onClick={() => onQuery("")} className="-mr-1.5 grid size-8 cursor-pointer place-items-center text-muted">
+          <X className="size-4" />
+        </button>
+      ) : (
+        <Kbd className="max-md:hidden">/</Kbd>
+      )}
+    </label>
+  );
+}
+
+export function SoundsView({ guides, query, onQuery }: { guides: SoundGuide[] } & SearchProps) {
   const [filter, setFilter] = useState<CategoryId | "all">("all");
   const q = query.trim().toLowerCase();
   const groups = useMemo(
@@ -48,30 +79,13 @@ export function SoundsView({ guides }: { guides: SoundGuide[] }) {
 
   return (
     <div className="flex flex-col pb-8">
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-muted md:hidden">
         {RECORDINGS} recordings, {SOUNDS.length - RECORDINGS} generated on your device.
       </p>
 
-      <label className="mt-4 flex h-12 items-center gap-2.5 rounded-[14px] border border-edge bg-surface px-3.5 md:max-w-md">
-        <Search className="size-[18px] shrink-0 text-muted" strokeWidth={1.75} aria-hidden />
-        <span className="sr-only">Search sounds</span>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Search ${SOUNDS.length} sounds`}
-          autoComplete="off"
-          enterKeyHint="search"
-          className="h-11 min-w-0 flex-1 bg-transparent text-base text-fg outline-none placeholder:text-faint md:text-[0.9375rem] [&::-webkit-search-cancel-button]:hidden"
-        />
-        {query && (
-          <button type="button" aria-label="Clear search" onClick={() => setQuery("")} className="-mr-1.5 grid size-8 cursor-pointer place-items-center text-muted">
-            <X className="size-4" />
-          </button>
-        )}
-      </label>
+      <SoundSearch query={query} onQuery={onQuery} className="mt-4 md:hidden" />
 
-      <div role="group" aria-label="Categories" className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 md:mx-0 md:flex-wrap md:px-0">
+      <div role="group" aria-label="Categories" className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 md:mx-0 md:mt-6 md:flex-wrap md:px-0">
         {chips.map((chip) => {
           const on = filter === chip.id;
           return (
@@ -81,7 +95,7 @@ export function SoundsView({ guides }: { guides: SoundGuide[] }) {
               aria-pressed={on}
               onClick={() => setFilter(chip.id)}
               className={cx(
-                "inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-[550] whitespace-nowrap transition-colors",
+                "inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-full border px-4 text-sm font-[550] whitespace-nowrap transition-colors md:h-[38px] md:px-3.5 md:text-[0.84rem]",
                 on ? "border-accent bg-accent text-accent-ink" : "border-edge bg-surface text-soft hover:text-fg",
               )}
             >
@@ -97,20 +111,23 @@ export function SoundsView({ guides }: { guides: SoundGuide[] }) {
       {groups.map(({ category, sounds }) => {
         const Icon = CATEGORY_ICONS[category.id];
         return (
-          <section key={category.id} className="mt-7 flex flex-col gap-3" aria-labelledby={`h-${category.id}`}>
-            <div className="flex h-6 items-center gap-2.5">
-              <Icon className="size-5 text-soft" strokeWidth={1.6} aria-hidden />
-              <h2 id={`h-${category.id}`} className="flex-1 text-[0.9375rem] font-semibold tracking-[-0.01em]">
+          <section key={category.id} className="mt-7 flex flex-col gap-3 md:mt-[30px]" aria-labelledby={`h-${category.id}`}>
+            <div className="flex h-6 items-center gap-2.5 md:items-baseline">
+              <Icon className="size-5 text-soft md:hidden" strokeWidth={1.6} aria-hidden />
+              <h2 id={`h-${category.id}`} className="text-[0.9375rem] font-semibold tracking-[-0.01em] max-md:flex-1 md:text-base">
                 {category.label}
               </h2>
               <span className="label-mono">{sounds.length}</span>
+              {category.id === "generated" && (
+                <span className="text-[0.78rem] text-muted max-md:hidden">Generated on-device · binaural tones need headphones</span>
+              )}
             </div>
             {category.id === "generated" && (
-              <p className="-mt-1 text-[0.78rem] text-muted">
+              <p className="-mt-1 text-[0.78rem] text-muted md:hidden">
                 Generated on-device, nothing to download. Binaural tones need headphones.
               </p>
             )}
-            <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 lg:grid-cols-8">
+            <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-[repeat(auto-fill,minmax(108px,1fr))] md:gap-2">
               {sounds.map((sound) => (
                 <SoundPad key={sound.id} sound={sound} />
               ))}
@@ -120,20 +137,26 @@ export function SoundsView({ guides }: { guides: SoundGuide[] }) {
       })}
 
       {guides.length > 0 && (
-        <section aria-labelledby="sound-guides" className="mt-10 flex flex-col md:max-w-xl">
-          <h2 id="sound-guides" className="text-[0.9375rem] font-semibold tracking-[-0.01em]">
+        <section aria-labelledby="sound-guides" className="mt-10 flex flex-col md:mt-11">
+          <h2 id="sound-guides" className="text-[0.9375rem] font-semibold tracking-[-0.01em] md:text-base">
             Sound guides
           </h2>
-          <p className="mt-1.5 mb-3 text-[0.8125rem] text-muted">What each sound is, and how to use it to focus.</p>
-          {guides.map((guide) => (
-            <Link key={guide.href} href={guide.href} className="flex min-h-16 items-center gap-3 border-t border-line">
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-[0.9375rem] font-[550]">{guide.label}</span>
-                <span className="truncate text-[0.78rem] text-faint">{guide.description}</span>
-              </span>
-              <ChevronRight className="size-[18px] shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
-            </Link>
-          ))}
+          <p className="mt-1.5 mb-3 text-[0.8125rem] text-muted md:mb-3.5">What each sound is, and how to use it to focus.</p>
+          <div className="flex flex-col md:grid md:grid-cols-[repeat(auto-fit,minmax(260px,1fr))] md:gap-2.5">
+            {guides.map((guide) => (
+              <Link
+                key={guide.href}
+                href={guide.href}
+                className="flex min-h-16 items-center gap-3 border-t border-line md:min-h-[72px] md:rounded-[16px] md:border md:border-[#232120] md:bg-[#121110] md:px-4 md:py-3.5 md:transition-colors md:hover:border-edge"
+              >
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="text-[0.9375rem] font-[550]">{guide.label}</span>
+                  <span className="truncate text-[0.78rem] text-faint">{guide.description}</span>
+                </span>
+                <ChevronRight className="size-[18px] shrink-0 text-faint" strokeWidth={1.75} aria-hidden />
+              </Link>
+            ))}
+          </div>
         </section>
       )}
     </div>
@@ -158,7 +181,7 @@ function SoundPad({ sound }: { sound: Sound }) {
       aria-label={`${sound.label}, ${generated ? "generated" : "recording"}${headphones ? ", headphones" : ""}${on ? `, in mix at ${level}` : ""}`}
       onClick={() => actions.toggleSound(sound.id)}
       className={cx(
-        "relative flex h-20 cursor-pointer flex-col justify-between overflow-hidden rounded-[14px] border p-2 pb-[9px] text-left transition-[background-color,border-color,scale] duration-200 active:scale-[0.96]",
+        "relative flex h-20 cursor-pointer flex-col justify-between overflow-hidden rounded-[14px] border p-2 pb-[9px] text-left transition-[background-color,border-color,scale] duration-200 active:scale-[0.96] md:h-[92px] md:rounded-[16px] md:p-2.5 md:pb-[11px]",
         on ? "border-[#3a3a3a] bg-[#1a1a1a]" : "border-line bg-raised hover:border-edge",
       )}
     >
@@ -168,11 +191,11 @@ function SoundPad({ sound }: { sound: Sound }) {
         className={cx("absolute inset-x-0 h-0.5 bg-accent transition-[bottom,opacity] duration-300", !on && "opacity-0")}
         style={{ bottom: `${level}%` }}
       />
-      <span aria-hidden className={cx("relative flex items-center justify-between font-mono text-[0.625rem] leading-none", on ? "text-accent" : "text-faint")}>
+      <span aria-hidden className={cx("relative flex items-center justify-between font-mono text-[0.625rem] leading-none md:text-[0.6563rem]", on ? "text-accent" : "text-faint")}>
         <span>{NUMBERS.get(sound.id)}</span>
         <span>{tag}</span>
       </span>
-      <span className={cx("relative text-xs leading-[1.2] font-[550]", on ? "text-fg" : "text-soft")}>{sound.label}</span>
+      <span className={cx("relative text-xs leading-[1.2] font-[550] md:text-[0.8125rem]", on ? "text-fg" : "text-soft")}>{sound.label}</span>
     </button>
   );
 }

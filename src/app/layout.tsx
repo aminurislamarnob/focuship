@@ -47,6 +47,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="h-full">
+        <noscript>
+          <style>{".await-state{opacity:1!important;animation:none!important}"}</style>
+        </noscript>
         {children}
         {CF_ANALYTICS_TOKEN && (
           <script

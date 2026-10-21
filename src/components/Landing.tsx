@@ -84,16 +84,20 @@ export function Sections({ sections }: { sections: Section[] }) {
   ));
 }
 
-export function RelatedLinks({ paths }: { paths: string[] }) {
+const sideLink =
+  "lg:min-h-11 lg:rounded-none lg:border-0 lg:border-t lg:border-line lg:bg-transparent lg:px-0 lg:text-sm lg:hover:!text-soft";
+
+/** Related pages as cards; `side` turns them into a plain list in a side column on wide screens. */
+export function RelatedLinks({ paths, side }: { paths: string[]; side?: boolean }) {
   return (
     <>
       <h2>Keep exploring</h2>
-      <nav aria-label="Related" className="grid grid-cols-2 gap-2">
+      <nav aria-label="Related" className={`grid grid-cols-2 gap-2 ${side ? "lg:flex lg:flex-col lg:gap-0 lg:border-b lg:border-line" : ""}`}>
         {paths.map((path) => (
           <Link
             key={path}
             href={path}
-            className="flex min-h-[52px] items-center rounded-[14px] border border-[#222] bg-raised px-3.5 py-2.5 text-[0.84rem] leading-[1.3] !text-fg !no-underline transition-colors hover:border-edge"
+            className={`flex min-h-[52px] items-center rounded-[14px] border border-[#222] bg-raised px-3.5 py-2.5 text-[0.84rem] leading-[1.3] !text-fg !no-underline transition-colors hover:border-edge ${side ? sideLink : ""}`}
           >
             {linkLabel(path)}
           </Link>
@@ -109,19 +113,22 @@ export function Landing({ page }: { page: LandingPage }) {
   const path = pagePath(page);
   return (
     <FocusApp heading={page.heading} intro={page.intro} intent={page.intent}>
-      <PageCopy>
-        <nav aria-label="Breadcrumb" className="mb-6 flex gap-1.5 text-[0.78rem] text-faint">
-          <Link href="/" className="!text-muted !no-underline hover:!text-fg">
-            Focuship
-          </Link>
-          <span aria-hidden>/</span>
-          <Link href={hub.path} className="!text-muted !no-underline hover:!text-fg">
-            {hub.label}
-          </Link>
-        </nav>
+      <PageCopy
+        lead={
+          <nav aria-label="Breadcrumb" className="mb-6 flex gap-1.5 text-[0.78rem] text-faint lg:mb-8 lg:text-[0.8125rem]">
+            <Link href="/" className="!text-muted !no-underline hover:!text-fg">
+              Focuship
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href={hub.path} className="!text-muted !no-underline hover:!text-fg">
+              {hub.label}
+            </Link>
+          </nav>
+        }
+        aside={<RelatedLinks paths={page.related} side />}
+      >
         <Sections sections={page.copy} />
         <FaqList faq={page.faq} />
-        <RelatedLinks paths={page.related} />
       </PageCopy>
       <JsonLd
         nodes={[

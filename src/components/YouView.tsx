@@ -7,6 +7,7 @@ import { SOUND_BY_ID, SOUNDS } from "@/lib/catalog";
 import { countCached, downloadSounds, isIos, isStandalone, useInstallPrompt } from "@/lib/pwa";
 import type { CloudUser } from "@/lib/cloud";
 import { actions, matchPreset, presetByRef, useFocus } from "@/lib/store";
+import { REPO_URL } from "@/lib/site";
 import { CLOUD_ENABLED } from "@/lib/supabase";
 import { IconButton, Kbd, cx } from "./ui";
 
@@ -17,6 +18,7 @@ const SHORTCUTS: [string, string[]][] = [
   ["Focus mode", ["V"]],
   ["Full screen", ["F"]],
   ["Mute", ["M"]],
+  ["Search sounds", ["/"]],
   ["Switch tabs", ["1", "2", "3", "4"]],
 ];
 const PERKS = [
@@ -26,8 +28,12 @@ const PERKS = [
   { icon: RefreshCw, label: "Settings sync" },
 ];
 
-const sectionTitle = "text-[0.9375rem] font-semibold tracking-[-0.01em]";
+const sectionTitle = "text-[0.9375rem] font-semibold tracking-[-0.01em] md:text-base";
 const card = "mt-2.5 flex flex-col rounded-[18px] border border-[#222] bg-raised p-4";
+/** On wide screens each section becomes a card in a grid; a card nested inside it flattens. */
+const wideCard = "md:rounded-[24px] md:border md:border-[#232120] md:p-6";
+const wideFilled = `${wideCard} md:bg-[#121110]`;
+const flatten = "md:mt-3.5 md:rounded-none md:border-0 md:bg-transparent md:p-0";
 
 /**
  * Signed in: your profile, presets, favorites and a link to the rest. Signed out (or from that link):
@@ -54,64 +60,128 @@ export function YouView({ nav }: { nav?: ReactNode }) {
   }
 
   return (
-    <div ref={root} className="flex flex-col gap-8 pb-8 md:max-w-xl">
+    <div ref={root} className="flex flex-col gap-8 pb-8 md:gap-7">
       <div className="flex flex-col">
         {signedIn && (
           <button type="button" onClick={() => show(false)} className="-ml-2.5 flex h-11 cursor-pointer items-center gap-0.5 self-start pr-2.5 text-[0.9375rem]">
             <ChevronLeft className="size-[22px]" strokeWidth={1.75} aria-hidden /> You
           </button>
         )}
-        <h2 className="mt-2 text-[2.125rem] leading-[1.1] font-semibold tracking-[-0.04em]">About &amp; offline</h2>
-      </div>
-      {CLOUD_ENABLED && !user && <AccountCard />}
-      {CLOUD_ENABLED && !user && <NoPresets />}
-      <OfflineSounds visible={visible} />
-      <Install />
-      <section aria-labelledby="you-privacy" className="flex flex-col">
-        <h3 id="you-privacy" className={sectionTitle}>
-          Free, private and offline
-        </h3>
-        <p className="mt-2 text-sm leading-[1.55] text-muted">
-          No account is needed for the mixer or the timer, and there are no tracking cookies. Mixes can be shared as links.
+        <h2 className="mt-2 text-[2.125rem] leading-[1.1] font-semibold tracking-[-0.04em] md:mt-0 md:text-[2.25rem] md:leading-[1.08]">
+          About &amp; offline
+        </h2>
+        <p className="mt-2 max-w-[620px] text-[0.9375rem] text-muted max-md:hidden">
+          Focuship layers up to {SOUNDS.length} sounds with their own volume, runs a Pomodoro-style timer with breaks and a chime,
+          and has a Focus mode that keeps the screen awake.
         </p>
-        <Link href="/privacy" className="mt-1 inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">
-          Privacy policy
-        </Link>
-      </section>
-      <section aria-labelledby="you-keys" className="flex flex-col">
-        <div className="flex items-baseline justify-between">
-          <h3 id="you-keys" className={sectionTitle}>
-            Keyboard shortcuts
+      </div>
+      {/* Masonry on wide screens: columns of at least 340px, each card stacked under the last. */}
+      <div className="flex flex-col gap-8 md:block md:columns-[340px] md:gap-4 md:[&>*]:mb-4 md:[&>*]:break-inside-avoid">
+        {CLOUD_ENABLED && !user && <AccountCard />}
+        {CLOUD_ENABLED && !user && <NoPresets />}
+        <OfflineSounds visible={visible} />
+        <Install />
+        <section aria-labelledby="you-privacy" className={cx("flex flex-col", wideCard)}>
+          <h3 id="you-privacy" className={sectionTitle}>
+            Free, private and offline
           </h3>
-          <span className="text-xs text-faint">With a keyboard</span>
-        </div>
-        <dl className="mt-2.5 flex flex-col border-b border-line">
-          {SHORTCUTS.map(([action, keys]) => (
-            <div key={action} className="flex min-h-12 items-center justify-between border-t border-line">
-              <dt className="text-sm">{action}</dt>
-              <dd className="flex gap-1">
-                {keys.map((key) => (
-                  <Kbd key={key} className={key === "Space" ? "min-w-16" : undefined}>
-                    {key}
-                  </Kbd>
-                ))}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-      {nav && (
-        <section aria-label="Explore" className="md:hidden">
-          {nav}
+          <p className="mt-2 text-sm leading-[1.55] text-muted">
+            No account is needed for the mixer or the timer, and there are no tracking cookies. Mixes can be shared as links.
+          </p>
+          <Link href="/privacy" className="mt-1 inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">
+            Privacy policy
+          </Link>
         </section>
-      )}
-      <p className="text-[0.78rem] leading-[1.55] text-faint">
-        Recordings from{" "}
-        <a className="text-soft underline underline-offset-2" href="https://github.com/remvze/moodist" target="_blank" rel="noopener">
-          Moodist
-        </a>{" "}
-        by remvze (MIT). Sounds under the Pixabay Content License or CC0.
-      </p>
+        <section aria-labelledby="you-keys" className={cx("flex flex-col", wideCard)}>
+          <div className="flex items-baseline justify-between">
+            <h3 id="you-keys" className={sectionTitle}>
+              Keyboard shortcuts
+            </h3>
+            <span className="text-xs text-faint">With a keyboard</span>
+          </div>
+          <dl className="mt-2.5 flex flex-col border-b border-line md:grid md:grid-cols-2 md:gap-x-6 md:border-b-0">
+            {SHORTCUTS.map(([action, keys]) => (
+              <div
+                key={action}
+                className={cx(
+                  "flex min-h-12 items-center justify-between gap-3 border-t border-line md:min-h-11",
+                  // Four keys don't fit half a card: that row takes the full width.
+                  keys.length > 2 && "md:col-span-2",
+                )}
+              >
+                <dt className="text-sm whitespace-nowrap">{action}</dt>
+                <dd className="flex gap-1">
+                  {keys.map((key) => (
+                    <Kbd key={key} className={key === "Space" ? "min-w-16" : undefined}>
+                      {key}
+                    </Kbd>
+                  ))}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+        {nav && (
+          <section aria-label="Explore" className="md:hidden">
+            {nav}
+          </section>
+        )}
+        <section aria-labelledby="you-maker" className={cx("flex flex-col", wideCard)}>
+          <h3 id="you-maker" className={sectionTitle}>
+            Made by
+          </h3>
+          <div className="mt-3 flex items-center gap-3">
+            {/* Plain <img>: the static export has no image loader. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/aminur-islam-arnob.webp"
+              alt=""
+              width={44}
+              height={44}
+              loading="lazy"
+              className="size-11 shrink-0 rounded-full border border-line object-cover"
+            />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[0.9375rem] font-semibold">Aminur Islam Arnob</span>
+              <span className="text-[0.8125rem] text-muted">Sr. Software Engineer, Dhaka</span>
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-[1.55] text-muted">
+            Six years of building websites, WordPress themes, plugins and WooCommerce solutions, plus small apps for focus
+            and planning. Focuship is one of them.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-x-4">
+            {[
+              ["aminurislam.me", "https://aminurislam.me/"],
+              ["GitHub", "https://github.com/aminurislamarnob"],
+              ["LinkedIn", "https://www.linkedin.com/in/aminur-islam-arnob"],
+            ].map(([label, href]) => (
+              <a key={href} href={href} target="_blank" rel="noopener" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
+                {label}
+              </a>
+            ))}
+          </div>
+        </section>
+        <section aria-labelledby="you-credits" className={cx("flex flex-col", wideCard)}>
+          <h3 id="you-credits" className={cx(sectionTitle, "max-md:sr-only")}>
+            Credits &amp; stack
+          </h3>
+          <p className="text-[0.78rem] leading-[1.55] text-faint md:mt-2.5 md:text-sm md:text-muted">
+            Recordings from{" "}
+            <a className="text-soft underline underline-offset-2" href="https://github.com/remvze/moodist" target="_blank" rel="noopener">
+              Moodist
+            </a>{" "}
+            by remvze (MIT). Sounds under the Pixabay Content License or CC0.
+          </p>
+          <p className="mt-2 text-[0.78rem] leading-[1.55] text-faint md:text-sm md:text-muted">
+            Hosted on Cloudflare.{CLOUD_ENABLED && " Accounts and sync by Supabase."}{" "}
+            <a className="text-soft underline underline-offset-2" href={REPO_URL} target="_blank" rel="noopener">
+              Source on GitHub
+            </a>{" "}
+            (MIT).
+          </p>
+        </section>
+      </div>
     </div>
   );
 }
@@ -289,12 +359,15 @@ function Favorites() {
 
 function AccountCard() {
   return (
-    <section aria-labelledby="you-account" className="flex flex-col rounded-[22px] border border-[#222] bg-raised p-5">
+    <section aria-labelledby="you-account" className={cx("flex flex-col rounded-[22px] border border-[#222] bg-raised p-5", wideFilled)}>
       <h3 id="you-account" className="text-lg leading-[1.3] font-semibold tracking-[-0.02em]">
         Everything works without an account.
       </h3>
-      <p className="mt-2 text-sm leading-normal text-muted">Signing in adds a few things that follow you between devices.</p>
-      <ul className="mt-4 grid grid-cols-2 gap-2">
+      <p className="mt-2 text-sm leading-normal text-muted md:hidden">Signing in adds a few things that follow you between devices.</p>
+      <p className="mt-2 text-sm leading-normal text-muted max-md:hidden">
+        Signing in adds favorites, your own presets, share links and settings sync across devices.
+      </p>
+      <ul className="mt-4 grid grid-cols-2 gap-2 md:hidden">
         {PERKS.map(({ icon: Icon, label }) => (
           <li key={label} className="flex h-11 items-center gap-2.5 rounded-[12px] bg-[#181818] px-3 text-[0.84rem]">
             <Icon className="size-[18px] text-soft" strokeWidth={1.75} aria-hidden />
@@ -304,7 +377,7 @@ function AccountCard() {
       </ul>
       <Link
         href="/account"
-        className="mt-4 flex h-12 items-center justify-center rounded-[14px] bg-accent text-[0.9375rem] font-semibold text-accent-ink transition-[filter] hover:brightness-105"
+        className="mt-4 flex h-12 items-center justify-center rounded-[14px] bg-accent text-[0.9375rem] font-semibold text-accent-ink transition-[filter] hover:brightness-105 md:mt-[18px] md:h-11 md:self-start md:rounded-[12px] md:px-[22px] md:text-[0.9063rem]"
       >
         Sign in
       </Link>
@@ -314,7 +387,7 @@ function AccountCard() {
 
 function NoPresets() {
   return (
-    <section aria-labelledby="you-presets" className="flex flex-col">
+    <section aria-labelledby="you-presets" className="flex flex-col md:hidden">
       <h3 id="you-presets" className={sectionTitle}>
         Your presets
       </h3>
@@ -366,11 +439,11 @@ function useOfflineSounds(visible: boolean) {
 function OfflineSounds({ visible }: { visible: boolean }) {
   const { saved, all, progress, error, download } = useOfflineSounds(visible);
   return (
-    <section aria-labelledby="you-offline" className="flex flex-col">
+    <section aria-labelledby="you-offline" className={cx("flex flex-col", wideFilled)}>
       <h3 id="you-offline" className={sectionTitle}>
         Offline sounds
       </h3>
-      <div className={card}>
+      <div className={cx(card, flatten)}>
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-sm font-[550]">
             {saved} of {FILE_PATHS.length} recordings saved
@@ -389,7 +462,7 @@ function OfflineSounds({ visible }: { visible: boolean }) {
           type="button"
           onClick={download}
           disabled={all || progress !== null}
-          className="mt-3.5 inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-line-strong bg-surface-2 text-[0.9375rem] font-[550] transition-colors hover:bg-[#222] disabled:cursor-default disabled:hover:bg-surface-2"
+          className="mt-3.5 inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-line-strong bg-surface-2 text-[0.9375rem] font-[550] transition-colors hover:bg-[#222] disabled:cursor-default disabled:hover:bg-surface-2 md:h-11 md:self-start md:rounded-[12px] md:px-[18px] md:text-sm"
         >
           <Download className="size-[18px]" strokeWidth={1.75} aria-hidden />
           {all ? "All sounds saved" : progress !== null ? `Saving ${progress} / ${FILE_PATHS.length}` : "Save all sounds · about 80 MB"}
@@ -414,11 +487,11 @@ function Install() {
   );
 
   return (
-    <section aria-labelledby="you-install" className="flex flex-col">
+    <section aria-labelledby="you-install" className={cx("flex flex-col", wideCard)}>
       <h3 id="you-install" className={sectionTitle}>
         Install the app
       </h3>
-      <div className={cx(card, "gap-3.5")}>
+      <div className={cx(card, "gap-3.5", flatten)}>
         {canPrompt ? (
           <button
             type="button"

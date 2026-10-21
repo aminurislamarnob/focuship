@@ -25,3 +25,8 @@ const GUIDES = PAGES.filter((page) => page.type === "sound" && page.hero && isIn
 export function FocusApp(props: FocusAppProps) {
   return <FocusShell {...props} nav={<SiteNav />} guides={GUIDES} />;
 }
+
+/** A page of its own (guides, privacy) inside the same shell: sidebar, tab bar, mini player and shortcuts. */
+export function SitePage({ children }: { children: ReactNode }) {
+  return <FocusShell heading="" intro="" nav={<SiteNav />} guides={GUIDES} page={children} />;
+}
