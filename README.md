@@ -41,7 +41,6 @@ The site runs on Cloudflare as a static-assets Worker on **https://focuship.app*
 npx wrangler login        # once
 npm run deploy            # next build && wrangler deploy → focuship.app
 npm run deploy:redirect   # the 301 Worker for focus.aminurislam.me, focusship.app and www hosts
-npm run deploy:focus      # temporary: serve the site from focus.aminurislam.me until focuship.app is live
 ```
 
 A second, tiny Worker (`workers/redirect/`) answers every old or alternative hostname with a 301 to the same path and query on `https://focuship.app`.
