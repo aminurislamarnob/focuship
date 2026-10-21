@@ -26,7 +26,6 @@ import { formatClock, TimerCard, useTimerClock } from "./TimerView";
 import {
   EmberBackdrop,
   IconButton,
-  Kbd,
   PauseIcon,
   PlayIcon,
   PresetArt,
@@ -188,20 +187,28 @@ function Player({ onOpenSheet, onTimer }: { onOpenSheet(): void; onTimer(): void
           {!empty && <span className="whitespace-nowrap max-md:hidden"> · {count}</span>}
         </p>
         <div className="mt-6 flex items-center gap-3 max-md:hidden">
-          <IconButton label={playLabel} variant="solid" round className="size-16" onClick={actions.toggle}>
-            {playIcon("size-[26px]")}
-          </IconButton>
+          <button
+            type="button"
+            onClick={actions.toggle}
+            className="inline-flex h-[52px] shrink-0 cursor-pointer items-center gap-2.5 rounded-full bg-accent pr-4 pl-5 text-[0.9375rem] font-semibold whitespace-nowrap text-accent-ink transition-[filter] hover:brightness-105"
+          >
+            {playIcon("size-[18px]")}
+            {playLabel}
+            <kbd
+              aria-hidden
+              className="ml-1 inline-flex h-6 items-center rounded-full bg-[rgba(10,10,10,0.12)] px-2 font-mono text-[0.6875rem] font-medium"
+            >
+              Space
+            </kbd>
+          </button>
           <button
             type="button"
             disabled={empty}
             onClick={onOpenSheet}
-            className="inline-flex h-12 shrink-0 cursor-pointer items-center gap-2 rounded-[14px] border border-[#2a2a2a] bg-[#181818] px-4 text-sm font-medium whitespace-nowrap transition-colors hover:bg-surface-2 disabled:cursor-default disabled:opacity-40"
+            className="inline-flex h-[52px] shrink-0 cursor-pointer items-center gap-2.5 rounded-full border border-[#2a2a2a] bg-[#181818] pr-5 pl-[18px] text-[0.9375rem] font-semibold whitespace-nowrap transition-colors hover:bg-surface-2 disabled:cursor-default disabled:opacity-40"
           >
             <Bookmark className="size-4" strokeWidth={1.75} aria-hidden /> Save preset
           </button>
-          <span className="ml-auto flex items-center gap-1.5 text-xs whitespace-nowrap text-faint max-xl:hidden">
-            <Kbd className="h-6 min-w-0 border-b px-1.5">Space</Kbd> play / pause
-          </span>
         </div>
       </div>
 
