@@ -17,7 +17,7 @@ import {
   type Provider,
 } from "@/lib/cloud";
 import type { PageIntent } from "@/lib/pages";
-import { getCloud } from "@/lib/supabase";
+import { getCloud } from "@/lib/focuship-api";
 
 export type TimerMode = "focus" | "short" | "long";
 
@@ -82,6 +82,12 @@ export interface FocusState {
 export type Tab = "mix" | "sounds" | "timer" | "you";
 
 const STORAGE_KEY = "focuship:v1";
+/**
+ * Which backend wrote the cached account slice. Accounts moved to the Focuship API and
+ * started fresh (ADR 0001), so a cache without this stamp belongs to the old backend and
+ * is quietly dropped. Guest state in the same blob is untouched.
+ */
+const ACCOUNT_BACKEND = "focuship";
 export const NEW_LAYER_VOLUME = 0.5;
 const MAX_SHUFFLE_LAYERS = 3;
 const MAX_RECENTS = 8;
@@ -162,6 +168,7 @@ function persist() {
         timer,
         recents,
         settingsUpdatedAt,
+        accountBackend: ACCOUNT_BACKEND,
         // Cached so favorites and custom presets still render offline; auth re-verifies on load.
         account: { user: account.user, favorites: account.favorites, presets: account.presets },
       }),
@@ -341,7 +348,7 @@ function readyNotice(label: string | undefined, layers: Layers, timerOnly = fals
 }
 
 // Cloud ------------------------------------------------------------------------
-// All Supabase traffic goes through the gateway (lib/cloud via lib/supabase).
+// All account traffic goes through the gateway (lib/cloud, built in lib/focuship-api).
 // Local state updates first; cloud writes follow and roll back on failure.
 
 let watchingAuth = false;
@@ -378,7 +385,7 @@ async function refreshCloud(userId: string) {
     const [favorites, presets, cloudSettings] = await Promise.all([
       cloud.listFavorites(),
       cloud.listPresets(),
-      cloud.getSettings(userId),
+      cloud.getSettings(),
     ]);
     if (state.account.user?.id !== userId) return;
     setAccount({ favorites, presets });
@@ -419,7 +426,7 @@ function pushSettingsSoon() {
     const user = state.account.user;
     if (!user) return;
     cloud
-      .pushSettings(user.id, { timer: state.timer.settings, volume: state.volume, updatedAt: state.settingsUpdatedAt })
+      .pushSettings({ timer: state.timer.settings, volume: state.volume, updatedAt: state.settingsUpdatedAt })
       .catch(() => {});
   }, SETTINGS_PUSH_MS);
 }
@@ -455,7 +462,7 @@ function savePreset(label: string, layers: Layers): boolean {
   const preset: CustomPreset = { id: crypto.randomUUID(), label: trimmed, layers: { ...layers }, isPublic: false };
   setAccount({ presets: [preset, ...state.account.presets] });
   set({ notice: "Saved to your presets." }, false);
-  cloud.createPreset(user.id, preset).catch((e) => {
+  cloud.createPreset(preset).catch((e) => {
     setAccount({ presets: state.account.presets.filter((p) => p.id !== preset.id) });
     actions.showNotice(errorNotice(e, "Couldn’t save your preset."));
   });
@@ -510,7 +517,10 @@ export const actions = {
       timer = { ...timer, settings, mode: "focus", status: "idle", endsAt: null, remaining: minutes(settings, "focus") };
     }
 
-    const cached = (saved as { account?: Partial<AccountState> }).account;
+    // An account cached by the backend Focuship used before the cutover is dropped without
+    // a word: there is nothing the listener has to do but sign in again.
+    const savedAccount = saved as { account?: Partial<AccountState>; accountBackend?: string };
+    const cached = savedAccount.accountBackend === ACCOUNT_BACKEND ? savedAccount.account : undefined;
     const recents = Array.isArray(saved.recents) ? saved.recents.filter((r): r is string => typeof r === "string") : [];
 
     state = {
@@ -758,7 +768,7 @@ export const actions = {
     haptic();
     const had = state.account.favorites.includes(ref);
     setAccount({ favorites: had ? state.account.favorites.filter((r) => r !== ref) : [...state.account.favorites, ref] });
-    (had ? cloud.removeFavorite(user.id, ref) : cloud.addFavorite(user.id, ref)).catch((e) => {
+    (had ? cloud.removeFavorite(ref) : cloud.addFavorite(ref)).catch((e) => {
       setAccount({
         favorites: had ? [...state.account.favorites, ref] : state.account.favorites.filter((r) => r !== ref),
       });
@@ -808,7 +818,7 @@ export const actions = {
       favorites: state.account.favorites.filter((r) => r !== id),
     });
     set({ recents: state.recents.filter((r) => r !== id) }, false);
-    cloud.deletePreset(user.id, id).catch((e) => {
+    cloud.deletePreset(id).catch((e) => {
       setAccount({ presets: [before, ...state.account.presets] });
       actions.showNotice(errorNotice(e, "Couldn’t delete that preset."));
     });

@@ -21,7 +21,7 @@ import { useState, type CSSProperties } from "react";
 import { PRESETS, SOUND_BY_ID, SOUNDS, type Preset } from "@/lib/catalog";
 import type { CustomPreset } from "@/lib/cloud";
 import { actions, matchPreset, mixName, presetByRef, presetShareUrl, useFocus } from "@/lib/store";
-import { CLOUD_ENABLED } from "@/lib/supabase";
+import { CLOUD_ENABLED } from "@/lib/focuship-api";
 import { formatClock, TimerCard, useTimerClock } from "./TimerView";
 import {
   EmberBackdrop,

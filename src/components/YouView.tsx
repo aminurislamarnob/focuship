@@ -8,7 +8,7 @@ import { countCached, downloadSounds, isIos, isStandalone, useInstallPrompt } fr
 import type { CloudUser } from "@/lib/cloud";
 import { actions, matchPreset, presetByRef, useFocus } from "@/lib/store";
 import { REPO_URL } from "@/lib/site";
-import { CLOUD_ENABLED } from "@/lib/supabase";
+import { CLOUD_ENABLED } from "@/lib/focuship-api";
 import { IconButton, Kbd, PauseIcon, PlayIcon, cx } from "./ui";
 
 const noSubscribe = () => () => {};
@@ -90,6 +90,18 @@ export function YouView({ nav }: { nav?: ReactNode }) {
           </p>
           <Link href="/privacy" className="mt-1 inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">
             Privacy policy
+          </Link>
+        </section>
+        <section aria-labelledby="you-mcp" className={cx("flex flex-col", wideCard)}>
+          <h3 id="you-mcp" className={sectionTitle}>
+            Use it from your AI assistant
+          </h3>
+          <p className="mt-2 text-sm leading-[1.55] text-muted">
+            Connect Focuship to Claude, ChatGPT or your editor, and have it design mixes and manage your presets for
+            you. A free account is needed, and you can disconnect it at any time.
+          </p>
+          <Link href="/mcp" className="mt-1 inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">
+            How to connect one
           </Link>
         </section>
         <section aria-labelledby="you-keys" className={cx("flex flex-col", wideCard)}>
@@ -174,7 +186,7 @@ export function YouView({ nav }: { nav?: ReactNode }) {
             by remvze (MIT). Sounds under the Pixabay Content License or CC0.
           </p>
           <p className="mt-2 text-[0.78rem] leading-[1.55] text-faint md:text-sm md:text-muted">
-            Hosted on Cloudflare.{CLOUD_ENABLED && " Accounts and sync by Supabase."}{" "}
+            Hosted on Cloudflare.{CLOUD_ENABLED && " Accounts and sync by the Focuship API."}{" "}
             <a className="text-soft underline underline-offset-2" href={REPO_URL} target="_blank" rel="noopener">
               Source on GitHub
             </a>{" "}

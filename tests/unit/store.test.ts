@@ -13,7 +13,7 @@ vi.mock("@/lib/audio/engine", () => ({
     chime = audio.chime;
   },
 }));
-vi.mock("@/lib/supabase", () => ({ CLOUD_ENABLED: false, getCloud: () => null }));
+vi.mock("@/lib/focuship-api", () => ({ CLOUD_ENABLED: false, getCloud: () => null }));
 
 afterEach(() => {
   vi.useRealTimers();

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { SOUND_BY_ID } from "@/lib/catalog";
 import { actions, mixName, shareUrl, useFocus } from "@/lib/store";
-import { CLOUD_ENABLED } from "@/lib/supabase";
+import { CLOUD_ENABLED } from "@/lib/focuship-api";
 import { inputClass } from "./MixView";
 import { Sheet, cx, useCopied } from "./ui";
 

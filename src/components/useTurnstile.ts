@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
 /**
- * Cloudflare Turnstile, run on demand. Supabase requires a fresh Turnstile token for every
+ * Cloudflare Turnstile, run on demand. The API requires a fresh Turnstile token for every
  * email-code send, so the widget renders once in "execute" mode and `getToken()` runs a new
  * challenge each call. It stays invisible unless Cloudflare needs the visitor to interact,
  * in which case it appears inside the returned `slot` element.

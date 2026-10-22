@@ -4,7 +4,7 @@ import { JsonLd, organization } from "@/components/JsonLd";
 import { pageMetadata } from "@/lib/seo";
 import { REPO_URL, SITE_NAME, SITE_URL, absoluteUrl } from "@/lib/site";
 
-const UPDATED = "21 October 2026";
+const UPDATED = "22 October 2026";
 
 export const metadata = pageMetadata({
   title: "Privacy policy",
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-fg">Privacy policy</h1>
           <p className="mt-3">
             {SITE_NAME} is an ambient sound mixer and focus timer. It works fully without an account, sets no tracking
-            cookies and shows no ads. This page explains the little it does store.
+            or advertising cookies and shows no ads. This page explains the little it does store.
           </p>
         </header>
 
@@ -37,13 +37,16 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="With an account (optional)">
-          <p>When you sign in with Google, GitHub or an emailed code, we receive and store:</p>
+          <p>When you sign in with Google, GitHub, Facebook or an emailed code, we receive and store:</p>
           <ul className="list-disc pl-5">
             <li>
-              your email address, and with Google or GitHub also your name and profile picture from that provider;
+              your email address, and from Google, GitHub or Facebook also your name and profile picture;
             </li>
             <li>the presets you save, the presets you mark as favorites, and whether you share a preset by link;</li>
-            <li>your timer settings and master volume, so they sync across your devices.</li>
+            <li>your timer settings and master volume, so they sync across your devices;</li>
+            <li>
+              which AI assistants you have connected, when you connected each one and when it was last used.
+            </li>
           </ul>
           <p>
             We use this only to run those features. We don&rsquo;t sell it, share it for advertising, or post anything
@@ -52,22 +55,44 @@ export default function PrivacyPage() {
           </p>
         </Section>
 
+        <Section title="Cookies">
+          <p>
+            Signing in sets two cookies on {SITE_NAME}, both strictly necessary and neither used to track you: one
+            holds your sign-in session, which the page&rsquo;s own scripts cannot read, and one carries a token that
+            protects forms from being submitted by another site. Signing out removes them. Without an account,{" "}
+            {SITE_NAME} sets no cookies at all.
+          </p>
+        </Section>
+
+        <Section title="Connecting an AI assistant">
+          <p>
+            You can connect an AI assistant such as Claude or ChatGPT to {SITE_NAME}. You approve it on a consent
+            screen, and it can then read and change your presets, favorites, timer settings and volume on your behalf
+            &mdash; so whatever it reads goes to that assistant, under its own privacy policy. It cannot delete your
+            account or play sound on your devices. We store the app&rsquo;s name, when you connected it and when it
+            last made a request. Disconnect it at any time under <em>Connected apps</em> on{" "}
+            <Link href="/account" className="text-fg underline underline-offset-4">your account</Link>; signing out of{" "}
+            {SITE_NAME} does not disconnect it.
+          </p>
+        </Section>
+
         <Section title="Who processes it">
           <ul className="list-disc pl-5">
             <li>
-              <strong className="text-fg">Supabase</strong> hosts sign-in and the account database.
+              <strong className="text-fg">Our hosting provider (EU/US)</strong> runs the {SITE_NAME} API and the
+              account database.
             </li>
             <li>
-              <strong className="text-fg">Google</strong> and <strong className="text-fg">GitHub</strong> handle the
-              sign-in itself under their own privacy policies.
+              <strong className="text-fg">Google</strong>, <strong className="text-fg">GitHub</strong> and{" "}
+              <strong className="text-fg">Facebook</strong> handle the sign-in itself under their own privacy policies.
             </li>
             <li>
               <strong className="text-fg">Brevo</strong> delivers the sign-in code emails.
             </li>
             <li>
-              <strong className="text-fg">Cloudflare</strong> serves the site, runs the Turnstile security check when
-              you request an email code (to stop bots abusing the form), and may provide cookie-free, aggregate visit
-              statistics.
+              <strong className="text-fg">Cloudflare</strong> serves the site, sits in front of the API to absorb
+              attacks, runs the Turnstile security check when you request an email code (to stop bots abusing the
+              form), and may provide cookie-free, aggregate visit statistics.
             </li>
           </ul>
         </Section>
@@ -75,9 +100,9 @@ export default function PrivacyPage() {
         <Section title="Deleting your data">
           <p>
             Sign in and open <Link href="/account" className="text-fg underline underline-offset-4">your account</Link>,
-            then choose <em>Delete account</em>. Your account, presets, favorites and synced settings are removed
-            permanently and immediately. If you signed in with Google or GitHub, you can also revoke{" "}
-            {SITE_NAME}&rsquo;s access from that account&rsquo;s settings at any time.
+            then choose <em>Delete account</em>. Your account, presets, favorites, synced settings and every connected
+            AI assistant are removed permanently and immediately. If you signed in with Google, GitHub or Facebook, you
+            can also revoke {SITE_NAME}&rsquo;s access from that account&rsquo;s settings at any time.
           </p>
         </Section>
 

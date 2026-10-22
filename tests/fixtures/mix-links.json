@@ -1,0 +1,57 @@
+{
+  "comment": "Share-link encoding cases (ADR 0002). Both the TypeScript store and the PHP MixLink must reproduce these. `query` is what ?mix= carries; `decoded` is what reading it back must give.",
+  "encode": [
+    {
+      "name": "whole percentages, in layer order",
+      "layers": { "rain-on-window": 0.6, "keyboard": 0.25 },
+      "query": "rain-on-window:60,keyboard:25"
+    },
+    {
+      "name": "rounds to the nearest percent",
+      "layers": { "keyboard": 0.254, "campfire": 0.255 },
+      "query": "keyboard:25,campfire:26"
+    },
+    {
+      "name": "the edges of the range",
+      "layers": { "brown-noise": 1, "alpha": 0 },
+      "query": "brown-noise:100,alpha:0"
+    },
+    {
+      "name": "a single layer",
+      "layers": { "cafe": 0.6 },
+      "query": "cafe:60"
+    },
+    {
+      "name": "an empty mix",
+      "layers": {},
+      "query": ""
+    }
+  ],
+  "decode": [
+    {
+      "name": "reads whole percentages back",
+      "query": "rain-on-window:60,keyboard:25",
+      "decoded": { "rain-on-window": 0.6, "keyboard": 0.25 }
+    },
+    {
+      "name": "skips unknown sounds",
+      "query": "nope:40,keyboard:30",
+      "decoded": { "keyboard": 0.3 }
+    },
+    {
+      "name": "clamps out-of-range volumes",
+      "query": "keyboard:250,campfire:-10",
+      "decoded": { "keyboard": 1, "campfire": 0 }
+    },
+    {
+      "name": "defaults a missing volume to half",
+      "query": "campfire",
+      "decoded": { "campfire": 0.5 }
+    },
+    {
+      "name": "an empty query is an empty mix",
+      "query": "",
+      "decoded": {}
+    }
+  ]
+}

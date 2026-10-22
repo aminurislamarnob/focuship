@@ -8,6 +8,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # The Laravel API deploys on its own (api.yml).
+    paths-ignore:
+      - "api/**"
+      - ".github/workflows/api.yml"
   workflow_dispatch:
 
 # One deploy at a time; a newer push waits rather than racing the one in progress.
@@ -22,8 +26,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ vars.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
       NEXT_PUBLIC_AUTH_FACEBOOK: ${{ vars.NEXT_PUBLIC_AUTH_FACEBOOK }}
@@ -35,9 +38,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # The API reads a generated copy of the catalogue (ADR 0002); fail if it is stale.
+      - run: npm run check:catalog
       # Functional and component tests (Vitest, React Testing Library).
       - run: npm run test:unit
-      # Builds the static export into out/ and checks what it contains; the deploy below ships that same out/.
+      # Builds the static export into out/ and checks what it contains. Tests run against a
+      # build with accounts off (no API in CI): these suites are about what a guest receives.
       - run: npm run test:site
       # After the build: it generates the route types (PageProps, LayoutProps) that tsc needs.
       - run: npx tsc --noEmit
@@ -51,6 +57,8 @@ jobs:
           name: playwright-results
           path: test-results/
           retention-days: 7
+      # The tested out/ has accounts off; rebuild with the real API URL for production.
+      - run: npm run build
       - name: Deploy to Cloudflare
         run: npx wrangler deploy
         env:

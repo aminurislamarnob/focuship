@@ -35,6 +35,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# …except the API's template, which its setup and CI both copy.
+!api/.env.example
 
 # vercel
 .vercel

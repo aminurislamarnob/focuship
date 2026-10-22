@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Provider } from "@/lib/cloud";
 import { actions, useFocus } from "@/lib/store";
-import { CLOUD_ENABLED, FACEBOOK_ENABLED, GOOGLE_CLIENT_ID, TURNSTILE_SITE_KEY } from "@/lib/supabase";
+import { ConnectedApps } from "@/components/ConnectedApps";
+import { CLOUD_ENABLED, FACEBOOK_ENABLED, GOOGLE_CLIENT_ID, TURNSTILE_SITE_KEY } from "@/lib/focuship-api";
 import { FacebookIcon, GitHubIcon, GoogleIcon } from "./BrandIcons";
 import { EmailSignIn } from "./EmailSignIn";
 import { GoogleButton } from "./GoogleButton";
@@ -92,7 +93,7 @@ function SetupNote() {
     <section className="rounded-[18px] border border-[#222] bg-raised p-4">
       <h2 className="text-[0.9375rem] font-semibold">Accounts are off in this build</h2>
       <p className="mt-2 text-sm text-muted">
-        This deployment has no Supabase project configured, so sign-in, favorites and preset sync are switched off. The
+        This deployment has no Focuship API configured, so sign-in, favorites and preset sync are switched off. The
         app itself works fully without them.
       </p>
     </section>
@@ -101,7 +102,7 @@ function SetupNote() {
 
 function SignedOut({ reason }: { reason: string | null }) {
   const ready = useFocus((s) => s.account.ready);
-  // Google's own button when configured; the Supabase redirect if its script can't load.
+  // Google's own button when configured; the redirect flow if its script can't load.
   const [googleFallback, setGoogleFallback] = useState(!GOOGLE_CLIENT_ID);
   return (
     <section className="flex flex-col gap-4">
@@ -151,6 +152,14 @@ function SignedOut({ reason }: { reason: string | null }) {
           . One account per email, whichever way you sign in.
         </p>
       </div>
+
+      <p className="text-[0.8125rem] leading-[1.55] text-muted">
+        With an account you can also{" "}
+        <Link href="/mcp" className="text-soft underline underline-offset-4 hover:text-fg">
+          connect an AI assistant
+        </Link>{" "}
+        and have it design mixes and manage your presets for you.
+      </p>
     </section>
   );
 }
@@ -182,7 +191,6 @@ function SignedIn() {
           <p className="truncate text-sm font-medium">{user.name}</p>
           {/* Email-code accounts have no name, so the name already is the address. */}
           {user.email !== user.name && <p className="truncate text-sm text-muted">{user.email}</p>}
-          <p className="label-mono mt-1">via {user.provider}</p>
         </div>
       </section>
 
@@ -202,6 +210,8 @@ function SignedIn() {
           <p className="mt-1 text-xs text-faint">Your presets</p>
         </div>
       </section>
+
+      <ConnectedApps />
 
       <section className="flex flex-col gap-2">
         <button

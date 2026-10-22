@@ -49,7 +49,7 @@ A second, tiny Worker (`workers/redirect/`) answers every old or alternative hos
 
 1. Buy `focuship.app` and `focusship.app` (Cloudflare Registrar puts them in the same account).
 2. On the `focuship.app` zone, turn off **Block AI bots**, **AI Labyrinth** and **Managed robots.txt**; the site ships its own `robots.txt` and `llms.txt`.
-3. `npm run deploy`, then check `https://focuship.app` loads and `curl -A GPTBot -I https://focuship.app` returns 200. Point Supabase's Site URL and Google's consent-screen home page and privacy links back to focuship.app (see `docs/supabase-setup.md`).
+3. `npm run deploy`, then check `https://focuship.app` loads and `curl -A GPTBot -I https://focuship.app` returns 200. Point the API's `FRONTEND_URL` and Google's consent-screen home page and privacy links back to focuship.app.
 4. Delete the temporary `wrangler.focus.jsonc` and `deploy:focus` script, then the old `let-me-focus` Worker (`npx wrangler delete --name let-me-focus`) to free `focus.aminurislam.me`.
 5. `npm run deploy:redirect`, then check `curl -I https://focus.aminurislam.me/timer?x=1` returns a 301 to `https://focuship.app/timer?x=1`.
 6. Verify the site in Google Search Console and Bing Webmaster Tools (DNS TXT records) and submit `https://focuship.app/sitemap.xml`.

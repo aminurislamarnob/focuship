@@ -1,0 +1,107 @@
+# The Laravel API (api/): every push to main that touches it is linted, analysed and tested against MySQL,
+# then deployed to the cPanel host over SSH (https://api.focuship.app).
+# Needs, in the repo's Settings → Secrets and variables → Actions:
+#   secret   API_SSH_KEY   private deploy key whose public half is in the cPanel account's authorized_keys
+#   variable API_SSH_HOST  cPanel SSH host
+#   variable API_SSH_USER  cPanel username
+#   variable API_SSH_PORT  SSH port (cPanel hosts often use a non-22 port)
+#   variable API_PATH      absolute path of the repo checkout on the host (api.focuship.app's document root is <API_PATH>/api/public)
+#   variable API_PHP       optional PHP 8.3+ CLI binary when the host's default `php` is older (CloudLinux: /opt/alt/php83/usr/bin/php)
+name: API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "tests/fixtures/**"
+      - ".github/workflows/api.yml"
+  pull_request:
+    paths:
+      - "api/**"
+      - "tests/fixtures/**"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: api
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: focuship_test
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # The API reads a generated copy of the catalogue (ADR 0002); fail if it is stale.
+      - run: npm ci
+        working-directory: .
+      - run: npm run check:catalog
+        working-directory: .
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, bcmath, pdo_mysql, sodium, openssl
+          coverage: none
+      - uses: actions/cache@v4
+        with:
+          path: api/vendor
+          key: composer-${{ hashFiles('api/composer.lock') }}
+      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.example .env && php artisan key:generate
+      # Passport signs the MCP's OAuth tokens; the keys are per-environment, never committed.
+      - run: php artisan passport:keys
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+      - run: vendor/bin/pest
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.API_SSH_KEY }}
+          HOST: ${{ vars.API_SSH_HOST }}
+          USER: ${{ vars.API_SSH_USER }}
+          PORT: ${{ vars.API_SSH_PORT }}
+          APP_PATH: ${{ vars.API_PATH }}
+          PHP: ${{ vars.API_PHP || 'php' }}
+        working-directory: .
+        run: |
+          install -m 600 /dev/null key && printf '%s\n' "$SSH_KEY" > key
+          ssh -i key -p "${PORT:-22}" -o StrictHostKeyChecking=accept-new "$USER@$HOST" bash -se <<EOF
+            set -euo pipefail
+            cd "$APP_PATH"
+            git pull --ff-only
+            cd api
+            $PHP \$(command -v composer) install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            $PHP artisan passport:keys --no-interaction || true
+            $PHP artisan migrate --force
+            $PHP artisan config:cache
+            $PHP artisan route:cache
+            $PHP artisan view:cache
+          EOF
+          rm -f key
