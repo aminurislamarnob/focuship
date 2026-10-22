@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Who is signed in, and signing out. The site reads this on load, so it answers
@@ -28,6 +29,9 @@ class SessionController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        // The route's own guard (sanctum) still holds the listener until it is forgotten.
+        Auth::forgetGuards();
 
         return response()->noContent();
     }
