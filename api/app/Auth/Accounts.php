@@ -2,6 +2,7 @@
 
 namespace App\Auth;
 
+use App\Models\SocialIdentity;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -17,6 +18,27 @@ class Accounts
     public static function normalizeEmail(string $email): string
     {
         return Str::lower(trim($email));
+    }
+
+    /**
+     * The listener behind a provider sign-in, and a note that this provider now
+     * reaches that account.
+     */
+    public function forProvider(
+        string $provider,
+        string $providerUserId,
+        string $email,
+        ?string $name = null,
+        ?string $avatarUrl = null,
+    ): User {
+        $user = $this->forEmail($email, $name, $avatarUrl);
+
+        SocialIdentity::updateOrCreate(
+            ['provider' => $provider, 'provider_user_id' => $providerUserId],
+            ['user_id' => $user->id],
+        );
+
+        return $user;
     }
 
     public function forEmail(string $email, ?string $name = null, ?string $avatarUrl = null): User
