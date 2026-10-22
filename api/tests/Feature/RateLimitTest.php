@@ -89,3 +89,40 @@ it('stops a flood of the MCP’s refusals too', function (string $method) {
 
     $this->call($method, '/mcp')->assertStatus(429)->assertHeader('Retry-After');
 })->with(['GET', 'DELETE']);
+
+/**
+ * Guests are limited per address, so the address must be one a caller cannot choose.
+ * The origin is also reachable around Cloudflare (ADR 0005): from any peer outside
+ * Cloudflare's ranges, the forwarding headers are the caller's own words.
+ */
+it('keys a caller outside Cloudflare on its own address, whatever headers it sends', function () {
+    $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9']);
+
+    for ($i = 0; $i < 30; $i++) {
+        $this->get('/mcp', ['CF-Connecting-IP' => "198.51.100.{$i}", 'X-Forwarded-For' => "192.0.2.{$i}"])->assertStatus(405);
+    }
+
+    $this->get('/mcp', ['CF-Connecting-IP' => '198.51.100.200', 'X-Forwarded-For' => '192.0.2.200'])
+        ->assertStatus(429);
+});
+
+it('keys each visitor behind a Cloudflare edge on the visitor’s address', function () {
+    $this->withServerVariables(['REMOTE_ADDR' => '173.245.48.1']);
+
+    for ($i = 0; $i < 30; $i++) {
+        $this->get('/mcp', ['X-Forwarded-For' => '198.51.100.1'])->assertStatus(405);
+    }
+
+    $this->get('/mcp', ['X-Forwarded-For' => '198.51.100.1'])->assertStatus(429);
+    $this->get('/mcp', ['X-Forwarded-For' => '198.51.100.2'])->assertStatus(405);
+});
+
+it('believes a forwarded HTTPS only from a Cloudflare edge', function (string $peer, string $scheme) {
+    $this->withServerVariables(['REMOTE_ADDR' => $peer])
+        ->getJson('/.well-known/oauth-protected-resource', ['X-Forwarded-Proto' => 'https'])
+        ->assertOk()
+        ->assertJsonPath('resource', fn (string $resource) => str_starts_with($resource, "{$scheme}://"));
+})->with([
+    'a Cloudflare edge' => ['173.245.48.1', 'https'],
+    'anyone else' => ['203.0.113.9', 'http'],
+]);
