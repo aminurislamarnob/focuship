@@ -39,6 +39,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
+      # The API reads a generated copy of the catalogue (ADR 0002); fail if it is stale.
+      - run: npm run check:catalog
       # Functional and component tests (Vitest, React Testing Library).
       - run: npm run test:unit
       # Builds the static export into out/ and checks what it contains; the deploy below ships that same out/.

@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "npx -y serve@14.2.4 out",
     "lint": "eslint",
+    "export:catalog": "node scripts/export-catalog.mjs",
+    "check:catalog": "node scripts/export-catalog.mjs --check",
     "test": "vitest run --project unit --project components && next build && vitest run --project site && playwright test",
     "test:unit": "vitest run --project unit --project components",
     "test:watch": "vitest --project unit --project components",

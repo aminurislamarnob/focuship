@@ -1,0 +1,1216 @@
+{
+  "categories": [
+    {
+      "id": "rain",
+      "label": "Rain"
+    },
+    {
+      "id": "nature",
+      "label": "Nature"
+    },
+    {
+      "id": "animals",
+      "label": "Animals"
+    },
+    {
+      "id": "places",
+      "label": "Places"
+    },
+    {
+      "id": "transport",
+      "label": "Transport"
+    },
+    {
+      "id": "things",
+      "label": "Things"
+    },
+    {
+      "id": "urban",
+      "label": "Urban"
+    },
+    {
+      "id": "generated",
+      "label": "Noise & tones"
+    }
+  ],
+  "sounds": [
+    {
+      "id": "light-rain",
+      "label": "Light rain",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/light-rain.mp3"
+    },
+    {
+      "id": "heavy-rain",
+      "label": "Heavy rain",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/heavy-rain.mp3"
+    },
+    {
+      "id": "thunder",
+      "label": "Thunder",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/thunder.mp3"
+    },
+    {
+      "id": "rain-on-window",
+      "label": "On the window",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/rain-on-window.mp3"
+    },
+    {
+      "id": "rain-on-car-roof",
+      "label": "On a car roof",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/rain-on-car-roof.mp3"
+    },
+    {
+      "id": "rain-on-umbrella",
+      "label": "On an umbrella",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/rain-on-umbrella.mp3"
+    },
+    {
+      "id": "rain-on-tent",
+      "label": "On a tent",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/rain-on-tent.mp3"
+    },
+    {
+      "id": "rain-on-leaves",
+      "label": "On leaves",
+      "category": "rain",
+      "kind": "file",
+      "path": "/sounds/rain/rain-on-leaves.mp3"
+    },
+    {
+      "id": "river",
+      "label": "River",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/river.mp3"
+    },
+    {
+      "id": "waves",
+      "label": "Waves",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/waves.mp3"
+    },
+    {
+      "id": "waterfall",
+      "label": "Waterfall",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/waterfall.mp3"
+    },
+    {
+      "id": "droplets",
+      "label": "Droplets",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/droplets.mp3"
+    },
+    {
+      "id": "campfire",
+      "label": "Campfire",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/campfire.mp3"
+    },
+    {
+      "id": "wind",
+      "label": "Wind",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/wind.mp3"
+    },
+    {
+      "id": "wind-in-trees",
+      "label": "Wind in trees",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/wind-in-trees.mp3"
+    },
+    {
+      "id": "jungle",
+      "label": "Jungle",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/jungle.mp3"
+    },
+    {
+      "id": "walk-in-snow",
+      "label": "Snow steps",
+      "category": "nature",
+      "kind": "file",
+      "path": "/sounds/nature/walk-in-snow.mp3"
+    },
+    {
+      "id": "birds",
+      "label": "Birds",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/birds.mp3"
+    },
+    {
+      "id": "crickets",
+      "label": "Crickets",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/crickets.mp3"
+    },
+    {
+      "id": "frog",
+      "label": "Frogs",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/frog.mp3"
+    },
+    {
+      "id": "owl",
+      "label": "Owl",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/owl.mp3"
+    },
+    {
+      "id": "seagulls",
+      "label": "Seagulls",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/seagulls.mp3"
+    },
+    {
+      "id": "whale",
+      "label": "Whale song",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/whale.mp3"
+    },
+    {
+      "id": "cat-purring",
+      "label": "Purring cat",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/cat-purring.mp3"
+    },
+    {
+      "id": "beehive",
+      "label": "Beehive",
+      "category": "animals",
+      "kind": "file",
+      "path": "/sounds/animals/beehive.mp3"
+    },
+    {
+      "id": "cafe",
+      "label": "Café",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/cafe.mp3"
+    },
+    {
+      "id": "library",
+      "label": "Library",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/library.mp3"
+    },
+    {
+      "id": "office",
+      "label": "Office",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/office.mp3"
+    },
+    {
+      "id": "restaurant",
+      "label": "Restaurant",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/restaurant.mp3"
+    },
+    {
+      "id": "night-village",
+      "label": "Village at night",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/night-village.mp3"
+    },
+    {
+      "id": "underwater",
+      "label": "Underwater",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/underwater.mp3"
+    },
+    {
+      "id": "laboratory",
+      "label": "Laboratory",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/laboratory.mp3"
+    },
+    {
+      "id": "airport",
+      "label": "Airport",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/airport.mp3"
+    },
+    {
+      "id": "subway-station",
+      "label": "Subway",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/subway-station.mp3"
+    },
+    {
+      "id": "temple",
+      "label": "Temple",
+      "category": "places",
+      "kind": "file",
+      "path": "/sounds/places/temple.mp3"
+    },
+    {
+      "id": "train",
+      "label": "Train",
+      "category": "transport",
+      "kind": "file",
+      "path": "/sounds/transport/train.mp3"
+    },
+    {
+      "id": "inside-a-train",
+      "label": "Train carriage",
+      "category": "transport",
+      "kind": "file",
+      "path": "/sounds/transport/inside-a-train.mp3"
+    },
+    {
+      "id": "airplane",
+      "label": "Cabin hum",
+      "category": "transport",
+      "kind": "file",
+      "path": "/sounds/transport/airplane.mp3"
+    },
+    {
+      "id": "sailboat",
+      "label": "Sailboat",
+      "category": "transport",
+      "kind": "file",
+      "path": "/sounds/transport/sailboat.mp3"
+    },
+    {
+      "id": "rowing-boat",
+      "label": "Rowing boat",
+      "category": "transport",
+      "kind": "file",
+      "path": "/sounds/transport/rowing-boat.mp3"
+    },
+    {
+      "id": "submarine",
+      "label": "Submarine",
+      "category": "transport",
+      "kind": "file",
+      "path": "/sounds/transport/submarine.mp3"
+    },
+    {
+      "id": "keyboard",
+      "label": "Keyboard",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/keyboard.mp3"
+    },
+    {
+      "id": "typewriter",
+      "label": "Typewriter",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/typewriter.mp3"
+    },
+    {
+      "id": "paper",
+      "label": "Paper",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/paper.mp3"
+    },
+    {
+      "id": "clock",
+      "label": "Clock",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/clock.mp3"
+    },
+    {
+      "id": "ceiling-fan",
+      "label": "Ceiling fan",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/ceiling-fan.mp3"
+    },
+    {
+      "id": "wind-chimes",
+      "label": "Wind chimes",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/wind-chimes.mp3"
+    },
+    {
+      "id": "boiling-water",
+      "label": "Kettle",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/boiling-water.mp3"
+    },
+    {
+      "id": "vinyl-effect",
+      "label": "Vinyl",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/vinyl-effect.mp3"
+    },
+    {
+      "id": "singing-bowl",
+      "label": "Singing bowl",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/singing-bowl.mp3"
+    },
+    {
+      "id": "washing-machine",
+      "label": "Washer",
+      "category": "things",
+      "kind": "file",
+      "path": "/sounds/things/washing-machine.mp3"
+    },
+    {
+      "id": "busy-street",
+      "label": "Busy street",
+      "category": "urban",
+      "kind": "file",
+      "path": "/sounds/urban/busy-street.mp3"
+    },
+    {
+      "id": "traffic",
+      "label": "Traffic",
+      "category": "urban",
+      "kind": "file",
+      "path": "/sounds/urban/traffic.mp3"
+    },
+    {
+      "id": "highway",
+      "label": "Highway",
+      "category": "urban",
+      "kind": "file",
+      "path": "/sounds/urban/highway.mp3"
+    },
+    {
+      "id": "road",
+      "label": "Night road",
+      "category": "urban",
+      "kind": "file",
+      "path": "/sounds/urban/road.mp3"
+    },
+    {
+      "id": "crowd",
+      "label": "Crowd",
+      "category": "urban",
+      "kind": "file",
+      "path": "/sounds/urban/crowd.mp3"
+    },
+    {
+      "id": "brown-noise",
+      "label": "Brown noise",
+      "category": "generated",
+      "kind": "noise",
+      "note": "Deep, soft rumble",
+      "color": "brown"
+    },
+    {
+      "id": "pink-noise",
+      "label": "Pink noise",
+      "category": "generated",
+      "kind": "noise",
+      "note": "Even, like steady rain",
+      "color": "pink"
+    },
+    {
+      "id": "white-noise",
+      "label": "White noise",
+      "category": "generated",
+      "kind": "noise",
+      "note": "Bright, masks voices",
+      "color": "white"
+    },
+    {
+      "id": "starship-hum",
+      "label": "Starship hum",
+      "category": "generated",
+      "kind": "drone",
+      "note": "Engine-room drone"
+    },
+    {
+      "id": "theta",
+      "label": "Theta 6 Hz",
+      "category": "generated",
+      "kind": "binaural",
+      "note": "Binaural · headphones",
+      "carrier": 180,
+      "beat": 6
+    },
+    {
+      "id": "alpha",
+      "label": "Alpha 10 Hz",
+      "category": "generated",
+      "kind": "binaural",
+      "note": "Binaural · headphones",
+      "carrier": 200,
+      "beat": 10
+    },
+    {
+      "id": "beta",
+      "label": "Beta 16 Hz",
+      "category": "generated",
+      "kind": "binaural",
+      "note": "Binaural · headphones",
+      "carrier": 220,
+      "beat": 16
+    },
+    {
+      "id": "gamma",
+      "label": "Gamma 40 Hz",
+      "category": "generated",
+      "kind": "binaural",
+      "note": "Binaural · headphones",
+      "carrier": 260,
+      "beat": 40
+    }
+  ],
+  "presets": [
+    {
+      "id": "deep-work",
+      "label": "Deep work",
+      "blurb": "Brown noise with a slow alpha pulse",
+      "layers": {
+        "brown-noise": 0.55,
+        "alpha": 0.4
+      },
+      "page": "/mix/deep-work"
+    },
+    {
+      "id": "rainy-desk",
+      "label": "Rainy desk",
+      "blurb": "Rain on glass and quiet keys",
+      "layers": {
+        "rain-on-window": 0.6,
+        "keyboard": 0.25,
+        "pink-noise": 0.2
+      },
+      "page": "/mix/rainy-desk"
+    },
+    {
+      "id": "corner-cafe",
+      "label": "Corner café",
+      "blurb": "Chatter, cups and a drizzle outside",
+      "layers": {
+        "cafe": 0.6,
+        "light-rain": 0.3
+      },
+      "page": "/mix/corner-cafe"
+    },
+    {
+      "id": "storm-watch",
+      "label": "Storm watch",
+      "blurb": "Heavy rain, rolling thunder",
+      "layers": {
+        "heavy-rain": 0.65,
+        "thunder": 0.45,
+        "wind": 0.2
+      }
+    },
+    {
+      "id": "coastline",
+      "label": "Coastline",
+      "blurb": "Waves, gulls and sea air",
+      "layers": {
+        "waves": 0.65,
+        "seagulls": 0.15,
+        "wind": 0.2
+      },
+      "page": "/mix/coastline"
+    },
+    {
+      "id": "night-camp",
+      "label": "Night camp",
+      "blurb": "Crackling fire under the stars",
+      "layers": {
+        "campfire": 0.6,
+        "crickets": 0.3,
+        "owl": 0.15
+      },
+      "page": "/mix/night-camp"
+    },
+    {
+      "id": "reading-room",
+      "label": "Reading room",
+      "blurb": "Hushed library, turning pages",
+      "layers": {
+        "library": 0.6,
+        "paper": 0.2,
+        "clock": 0.12
+      },
+      "page": "/mix/reading-room"
+    },
+    {
+      "id": "sleeper-car",
+      "label": "Sleeper car",
+      "blurb": "A long train ride through the rain",
+      "layers": {
+        "inside-a-train": 0.6,
+        "rain-on-window": 0.3
+      },
+      "page": "/mix/sleeper-car"
+    },
+    {
+      "id": "morning-trail",
+      "label": "Morning trail",
+      "blurb": "Birdsong over a running stream",
+      "layers": {
+        "birds": 0.45,
+        "river": 0.35,
+        "wind-in-trees": 0.25
+      },
+      "page": "/mix/morning-trail"
+    },
+    {
+      "id": "deep-dive",
+      "label": "Deep dive",
+      "blurb": "Submerged and far from everything",
+      "layers": {
+        "submarine": 0.45,
+        "underwater": 0.4,
+        "brown-noise": 0.2
+      },
+      "page": "/mix/deep-dive"
+    },
+    {
+      "id": "deep-space",
+      "label": "Deep space",
+      "blurb": "The engine hum of a ship between stars",
+      "layers": {
+        "starship-hum": 0.6,
+        "brown-noise": 0.15
+      },
+      "page": "/mix/deep-space"
+    }
+  ],
+  "guides": [
+    {
+      "slug": "brown-vs-white-vs-pink-noise",
+      "title": "Brown vs white vs pink noise: which is best for focus?",
+      "description": "What separates brown, pink and white noise, how each one masks distractions, what the research says about noise and attention, and how to choose one for focus or sleep.",
+      "standfirst": "They are all random noise. What differs is how the energy is spread across pitch, and that changes how they sound, what they mask and how tiring they are to listen to.",
+      "reviewed": false,
+      "sections": [
+        {
+          "heading": "The short answer",
+          "body": [
+            "There is no single best colour. **White noise** masks voices most strongly but can feel harsh. **Pink noise** is a balanced middle ground that sounds like steady rain. **Brown noise** is the deepest and softest, and many people find it the easiest to listen to for hours. The best one is the one that covers your distractions at the lowest volume you can comfortably forget about."
+          ]
+        },
+        {
+          "heading": "What the colours mean",
+          "body": [
+            "All three are random signals: no melody, no rhythm, just a constant wash. The colour describes how the sound’s power is spread across frequencies, borrowing the idea from light.",
+            {
+              "list": [
+                "**White noise** has equal power at every frequency. Because there are far more high frequencies than low ones in each octave, it sounds bright and hissy, like radio static or a strong fan.",
+                "**Pink noise** has equal power in every octave, which means its power falls by about 3 dB each time the pitch doubles. It sounds fuller and calmer, like steady rain or wind through trees.",
+                "**Brown noise** (also called red or Brownian noise) falls by about 6 dB per octave. Most of its energy sits in the lows, so it sounds like a distant waterfall, heavy rain on a roof or the cabin of an aeroplane."
+              ]
+            },
+            "The name “brown” comes from Robert Brown and the random Brownian motion of particles, not from the colour. A simple way to remember the order: from brightest to deepest, it runs white, pink, brown."
+          ]
+        },
+        {
+          "heading": "How each one masks distractions",
+          "body": [
+            "Noise helps focus mainly through masking: a steady sound raises the background level, so sudden sounds no longer stand out from silence. Your brain is wired to notice change, and masking reduces how much changes.",
+            "What you need to mask decides the colour. Speech is easiest to understand in the higher frequencies where consonants live, so **white noise** is the strongest choice against conversation in an open-plan office. **Brown noise** does a better job with low, rumbling sounds such as traffic, a neighbour’s music or an air-conditioning unit, and it has none of the hiss. **Pink noise** covers a bit of both.",
+            "Many people end up mixing them: a bed of brown noise for depth with a little white or pink on top for speech, or noise under a natural sound such as [rain](/mix/rain-sounds) so the texture stays interesting over long sessions."
+          ]
+        },
+        {
+          "heading": "What the research says about noise and attention",
+          "body": [
+            "The evidence is real but narrower than social media suggests. The best-studied group is people with ADHD. A 2007 study found that white noise improved memory performance in children with attention problems while worsening it in children without, which led to the idea that people who are under-stimulated may benefit from extra background noise.",
+            "A 2024 meta-analysis pulled together the research on white and pink noise in young people with ADHD or elevated attention problems. Across 13 studies it found a small, statistically reliable benefit on lab attention tasks, but a small *negative* effect in comparison groups without attention difficulties. The authors called the results encouraging but said more research is needed. Notably, no studies of brown noise met their criteria, so the popular claims about brown noise specifically have not yet been tested in the same way.",
+            "For everyone else, the best-supported benefit is simply masking: a quieter-sounding environment because distracting sounds are covered. If noise makes you feel more focused, that is a reasonable reason to use it, but if you notice it tiring you or making tasks harder, believe that too."
+          ]
+        },
+        {
+          "heading": "Noise and sleep",
+          "body": [
+            "Pink noise has drawn the most interest in sleep research. In laboratory studies, short bursts of pink noise played in time with the slow waves of deep sleep were linked to stronger slow waves and better memory the next morning, including in older adults. Those experiments used carefully timed sound rather than a continuous track, so they don’t show that playing pink noise all night has the same effect.",
+            "Continuous noise is mainly useful for sleep as a mask against traffic, snoring or a noisy building. Keep it quiet. A 2014 study of infant sleep machines found that some could exceed recommended noise limits for infants at full volume when placed close to the cot, a reminder that steady sound still counts toward your noise exposure."
+          ]
+        },
+        {
+          "heading": "How to choose and use one",
+          "body": [
+            {
+              "list": [
+                "**Start with what you need to block.** Voices: try white or pink. Rumbles and traffic: try brown.",
+                "**Listen at the lowest volume that works.** Turn it up only until the distraction stops pulling your attention, which is usually quieter than you expect.",
+                "**Give each colour a full session.** Judge after a [25 minute timer](/timer/25-minutes), not after ten seconds. Most people settle on one quickly.",
+                "**Layer if a single colour feels flat.** Brown noise under light rain or a café is easier to listen to for hours than either alone.",
+                "**Stop if it isn’t helping.** Silence is a perfectly good focus sound too."
+              ]
+            },
+            "Focuship generates all three colours on your device with a seamless loop, so there is no repeating pattern to notice and they work offline. Each has its own page: [brown noise](/sounds/brown-noise), [pink noise](/sounds/pink-noise) and [white noise](/sounds/white-noise)."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "q": "Is brown noise better than white noise for ADHD?",
+          "a": "It might suit some people better because it is softer, but research so far has studied white and pink noise, not brown. A 2024 meta-analysis found a small benefit of white or pink noise for young people with ADHD, and no brown-noise studies met its criteria."
+        },
+        {
+          "q": "Which noise colour is best for sleep?",
+          "a": "Whichever masks the sounds that wake you at a low volume. Many people prefer pink or brown because they are less hissy than white noise."
+        },
+        {
+          "q": "Is it bad to listen to noise all day?",
+          "a": "Steady noise at a low volume is generally fine, but loud sound for long periods can damage hearing. Keep it quiet and take breaks, and if noise makes you feel worse, stop using it."
+        },
+        {
+          "q": "What is the difference between pink and brown noise?",
+          "a": "Pink noise falls by about 3 dB per octave and sounds like steady rain; brown noise falls by about 6 dB per octave and sounds deeper, like a distant waterfall."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Systematic Review and Meta-Analysis: Do White Noise or Pink Noise Help With Task Performance in Youth With Attention-Deficit/Hyperactivity Disorder or With Elevated Attention Problems?",
+          "publication": "Journal of the American Academy of Child & Adolescent Psychiatry",
+          "year": 2024,
+          "url": "https://doi.org/10.1016/j.jaac.2023.12.014"
+        },
+        {
+          "title": "Listen to the noise: noise is beneficial for cognitive performance in ADHD",
+          "publication": "Journal of Child Psychology and Psychiatry",
+          "year": 2007,
+          "url": "https://doi.org/10.1111/j.1469-7610.2007.01749.x"
+        },
+        {
+          "title": "Auditory Closed-Loop Stimulation of the Sleep Slow Oscillation Enhances Memory",
+          "publication": "Neuron",
+          "year": 2013,
+          "url": "https://doi.org/10.1016/j.neuron.2013.03.006"
+        },
+        {
+          "title": "Acoustic Enhancement of Sleep Slow Oscillations and Concomitant Memory Improvement in Older Adults",
+          "publication": "Frontiers in Human Neuroscience",
+          "year": 2017,
+          "url": "https://doi.org/10.3389/fnhum.2017.00109"
+        },
+        {
+          "title": "Infant Sleep Machines and Hazardous Sound Pressure Levels",
+          "publication": "Pediatrics",
+          "year": 2014,
+          "url": "https://doi.org/10.1542/peds.2013-3617"
+        }
+      ]
+    },
+    {
+      "slug": "pomodoro-technique",
+      "title": "The Pomodoro Technique: a practical guide",
+      "description": "How the Pomodoro Technique works, why timed breaks help, what the research says, and how to adapt the 25/5 rhythm to longer work with a free online timer.",
+      "standfirst": "Work for 25 minutes, rest for 5, repeat. It sounds too simple to matter, yet timed rounds and breaks fix two of the hardest parts of focused work: starting, and stopping before you burn out.",
+      "reviewed": false,
+      "sections": [
+        {
+          "heading": "Where it comes from",
+          "body": [
+            "Francesco Cirillo developed the technique as a university student in the late 1980s, using a tomato-shaped kitchen timer (pomodoro is Italian for tomato). He later wrote it up as a method and still teaches it. The core is small enough to fit on an index card, which is a large part of its appeal."
+          ]
+        },
+        {
+          "heading": "The basic method",
+          "body": [
+            {
+              "list": [
+                "**Choose one task.** Write it down so it is concrete.",
+                "**Set a timer for 25 minutes** and work only on that task until it rings.",
+                "**Record the interruptions** that pop into your head on paper instead of acting on them.",
+                "**Take a 5-minute break** when the timer rings, away from the task.",
+                "**After four rounds, take a longer break** of 15 to 30 minutes."
+              ]
+            },
+            "Each 25-minute round is one pomodoro. Counting them turns vague effort into something measurable: a report becomes “about six pomodoros”, which makes planning a day far more realistic."
+          ]
+        },
+        {
+          "heading": "Why it works",
+          "body": [
+            "**It makes starting cheap.** Committing to 25 minutes is much easier than committing to “finish the report”. Once you have started, momentum usually carries you.",
+            "**It protects attention.** For the length of a round you have one job. Writing distractions down rather than acting on them keeps the round intact without losing the thought.",
+            "**It schedules rest before you need it.** Breaks arrive on a timer, not when you are already exhausted, which helps you keep going through a long day.",
+            "There is some research support for that last point. A 2023 study of university students compared taking a 6-minute break after every 24 minutes of study, close to the Pomodoro rhythm, with taking breaks whenever they chose. Students who self-regulated studied and rested for longer stretches, but reported more fatigue and distraction and less concentration and motivation. Both groups got the same amount done, so the systematic breaks achieved it in less time and with a better mood."
+          ]
+        },
+        {
+          "heading": "Adapting the rhythm",
+          "body": [
+            "Twenty-five minutes is a starting point, not a rule. Many people lengthen the rounds once the habit is established:",
+            {
+              "list": [
+                "**[25/5](/pomodoro/25-5):** the classic, best for starting, admin and study.",
+                "**[50/10](/pomodoro/50-10):** the same ratio with deeper rounds, popular with writers and developers.",
+                "**[52/17](/pomodoro/52-17):** from a 2014 analysis by the time-tracking company DeskTime of how its most productive users worked. When DeskTime repeated the analysis in 2021 the pattern had shifted to much longer sessions, a reminder that these are observations, not laws.",
+                "**[90/20](/pomodoro/90-20):** one long, deep block with a proper rest, for the hardest task of the day."
+              ]
+            },
+            "If you are struggling to finish rounds, go shorter; if you keep resenting the timer for interrupting good flow, go longer. The point is regular, protected focus followed by real rest."
+          ]
+        },
+        {
+          "heading": "Making breaks count",
+          "body": [
+            "A break spent scrolling a phone is not much of a break. Stand up, move, drink water and look at something far away. Leave the task genuinely alone: the most common Pomodoro mistake is shortening or skipping breaks, which feels productive for an hour and costs you the afternoon.",
+            "Changing the soundscape helps mark the difference. Play steady sound such as [brown noise](/sounds/brown-noise) or [rain](/mix/rain-sounds) while you work, and pause it for the break, so silence becomes the signal to rest."
+          ]
+        },
+        {
+          "heading": "Using Focuship as a Pomodoro timer",
+          "body": [
+            "Focuship’s [focus timer](/timer) runs the full cycle: focus rounds, short breaks and a long break after every fourth round, with a soft chime at each change. It counts the rounds you complete each day, can auto-start the next phase and can notify you when the tab is in the background. Open focus mode for a large countdown that keeps the screen awake, and every length can be changed in the settings.",
+            "Pomodoro® and Pomodoro Technique® are registered trademarks of Francesco Cirillo. Focuship is not affiliated with him."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "q": "What should I do if I’m interrupted during a pomodoro?",
+          "a": "If the interruption can wait, note it and carry on. If it can’t, stop, deal with it and start a fresh round afterwards rather than counting the broken one."
+        },
+        {
+          "q": "Is 25 minutes too short for deep work?",
+          "a": "For some work it is. Try 50/10 or 90/20 once the habit is in place; the principle of protected focus and planned rest is what matters."
+        },
+        {
+          "q": "Does the Pomodoro Technique work for studying?",
+          "a": "It is widely used for study, and a 2023 study found that students taking regular timed breaks reported less fatigue and better concentration than those taking breaks whenever they liked, while getting the same amount done."
+        },
+        {
+          "q": "Can I listen to music during a pomodoro?",
+          "a": "Many people do. Wordless sound such as noise, rain or ambient tends to distract less than songs with lyrics, especially for reading and writing."
+        }
+      ],
+      "sources": [
+        {
+          "title": "What is the Pomodoro® Technique",
+          "publication": "Francesco Cirillo, pomodorotechnique.com",
+          "year": 2026,
+          "url": "https://www.pomodorotechnique.com/what-is-the-pomodoro-technique.php"
+        },
+        {
+          "title": "Understanding effort regulation: Comparing ‘Pomodoro’ breaks and self-regulated breaks",
+          "publication": "British Journal of Educational Psychology",
+          "year": 2023,
+          "url": "https://doi.org/10.1111/bjep.12593"
+        },
+        {
+          "title": "Productivity research, experiments and statistics: DeskTime’s best findings",
+          "publication": "DeskTime",
+          "year": 2021,
+          "url": "https://desktime.com/blog/productivity-research"
+        }
+      ]
+    },
+    {
+      "slug": "background-sounds-for-coding",
+      "title": "Best background sounds for coding and deep work",
+      "description": "Why lyrics get in the way of programming, which background sounds help developers focus (brown noise, rain, café, binaural beats) and how to build a deep work setup.",
+      "standfirst": "Headphones on is the universal developer sign for “in the zone”. What plays through them matters more than you might think, and the research points in a surprisingly clear direction.",
+      "reviewed": false,
+      "sections": [
+        {
+          "heading": "What coding asks of your brain",
+          "body": [
+            "Programming is working-memory work. While you write a function you are holding the shape of the data, the names in scope, the edge case you just remembered and the next two steps, all at once. Working memory is small, and anything that competes for it makes the juggling harder.",
+            "That is why interruptions are so costly for developers: one Slack ping can drop the whole structure you were holding, and rebuilding it takes minutes. Good background sound protects that structure in two ways. It masks the unpredictable noises that pull your attention, and it does so without adding anything your brain wants to process."
+          ]
+        },
+        {
+          "heading": "Why lyrics are the problem",
+          "body": [
+            "Decades of research on the “irrelevant speech effect” show that background speech disrupts verbal working memory even when people are told to ignore it. In a classic 1982 experiment, unattended speech impaired people’s memory for sequences of digits while background noise at the same level did not. Your brain can’t stop processing language it hears.",
+            "Sung lyrics count. A 2014 study found that reading comprehension was worse with music that had lyrics, whether people liked the music or not, than in quiet or with music without lyrics. Code is read far more than it is written, so for the hardest stretches of the day, wordless sound is the safer choice.",
+            "Instrumental music, including lo-fi, sits in between: no words, but melody and rhythm can still draw attention. Many developers find it fine for routine work and switch to ambient sound or noise when the problem gets hard."
+          ]
+        },
+        {
+          "heading": "Sounds that work well",
+          "body": [
+            {
+              "list": [
+                "**[Brown noise](/sounds/brown-noise):** a deep, constant rumble that masks traffic and office hum without hiss. The most popular choice for long sessions.",
+                "**[White noise](/sounds/white-noise):** the strongest mask against nearby conversation, at the cost of a brighter sound.",
+                "**[Rain](/mix/rain-sounds):** natural noise with gentle variation, so it doesn’t feel artificial over hours.",
+                "**[Coffee shop](/sounds/coffee-shop):** blurred chatter for lighter work such as code review or writing docs. A 2012 study linked moderate ambient noise to better creative thinking, though it may distract during detailed debugging.",
+                "**[Binaural beats](/sounds/binaural-beats):** popular with developers, with mixed evidence. A gentle alpha or beta beat under noise is pleasant even if the brainwave claims are unproven."
+              ]
+            },
+            "Layering is where it gets good. The [coding mix](/sounds-for/coding) combines brown noise, rain on a window and a quiet alpha beat, which gives depth, texture and masking without anything to follow."
+          ]
+        },
+        {
+          "heading": "A deep work setup",
+          "body": [
+            {
+              "list": [
+                "**Use one mix as a ritual.** The same sound every session becomes a cue: press play and your brain knows it is time to focus.",
+                "**Time-box the work.** Pair the sound with a [50/10 Pomodoro](/pomodoro/50-10), or a [90/20 block](/pomodoro/90-20) for the hardest problem of the day.",
+                "**Make the state visible.** A full-screen countdown on a second monitor tells you, and anyone walking past, that you are heads-down.",
+                "**Keep the volume low.** Loud enough to mask the room, no louder. You should still hear someone say your name.",
+                "**Silence notifications** for the length of the block. Sound can mask a noisy office; it can’t mask a phone buzzing on the desk."
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Why Focuship suits developers",
+          "body": [
+            "Focuship is keyboard-first: Space plays and pauses, M mutes, V opens focus mode, F goes full screen and 1 to 3 switch tabs. It installs as an app, keeps playing in the background with media-key controls, and generates its noises and tones on your device so they loop seamlessly and work offline. No account is needed and there is no tracking, and the code is MIT-licensed on GitHub, so you can read exactly how the gapless loops and generated noise work."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "q": "Is it better to code in silence?",
+          "a": "If your environment is quiet, silence is excellent. Background sound earns its place when there are distractions to mask, or when it helps you start and stay in a session."
+        },
+        {
+          "q": "Is lo-fi good for programming?",
+          "a": "Instrumental music is far less disruptive than songs with lyrics, so lo-fi works for many people. For the hardest work, steady ambient sound or noise distracts even less."
+        },
+        {
+          "q": "Brown noise or white noise for coding?",
+          "a": "Brown noise is softer and better against low rumbles; white noise is better at masking nearby conversation. Many developers use brown noise with a little white or pink on top."
+        },
+        {
+          "q": "Do binaural beats help with programming?",
+          "a": "The evidence is mixed: reviews find inconsistent effects. They are harmless at a low volume and some people enjoy working to them, so they are worth a try under other sounds."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Disruption of short-term memory by unattended speech: Implications for the structure of working memory",
+          "publication": "Journal of Verbal Learning and Verbal Behavior",
+          "year": 1982,
+          "url": "https://doi.org/10.1016/S0022-5371(82)90521-7"
+        },
+        {
+          "title": "Does listening to preferred music improve reading comprehension performance?",
+          "publication": "Applied Cognitive Psychology",
+          "year": 2014,
+          "url": "https://doi.org/10.1002/acp.2994"
+        },
+        {
+          "title": "Is Noise Always Bad? Exploring the Effects of Ambient Noise on Creative Cognition",
+          "publication": "Journal of Consumer Research",
+          "year": 2012,
+          "url": "https://doi.org/10.1086/665048"
+        },
+        {
+          "title": "Binaural beats to entrain the brain? A systematic review of the effects of binaural beat stimulation on brain oscillatory activity",
+          "publication": "PLOS ONE",
+          "year": 2023,
+          "url": "https://doi.org/10.1371/journal.pone.0286023"
+        }
+      ]
+    },
+    {
+      "slug": "do-binaural-beats-help-focus",
+      "title": "Do binaural beats help you focus? What the research says",
+      "description": "How binaural beats work, what the alpha, beta, theta and gamma bands are, and what meta-analyses and systematic reviews actually found about focus, memory and anxiety.",
+      "standfirst": "Binaural beats are sold as a way to tune your brainwaves for focus, calm or sleep. The research is more interesting, and more mixed, than either the enthusiasts or the sceptics suggest.",
+      "reviewed": false,
+      "sections": [
+        {
+          "heading": "How a binaural beat works",
+          "body": [
+            "Play a 200 Hz tone into your left ear and a 210 Hz tone into your right, and you will hear something neither ear is receiving: a slow pulse at 10 Hz, the difference between the two. The beat is created inside the brain, in the auditory pathways where signals from both ears meet. The phenomenon was described in the 19th century and popularised by a 1973 article in *Scientific American*.",
+            "Because each ear must receive its own tone, **binaural beats only work through headphones**. On speakers the two tones mix in the air before they reach you, producing an ordinary acoustic beat instead."
+          ]
+        },
+        {
+          "heading": "The brainwave bands",
+          "body": [
+            "Beats are usually named after the bands of electrical activity measured in EEG studies. The names describe states the bands are associated with, not states a beat is proven to produce:",
+            {
+              "list": [
+                "**Theta (4–8 Hz):** drowsiness, daydreaming and the edge of sleep.",
+                "**Alpha (8–12 Hz):** relaxed, calm wakefulness.",
+                "**Beta (13–30 Hz):** active, engaged thinking.",
+                "**Gamma (above 30 Hz, often 40 Hz):** high-level processing and attention."
+              ]
+            },
+            "Focuship offers one beat in each band: theta at 6 Hz, alpha at 10 Hz, beta at 16 Hz and gamma at 40 Hz."
+          ]
+        },
+        {
+          "heading": "What the research found",
+          "body": [
+            "The popular explanation is entrainment: listen to a 10 Hz beat and your brain activity drifts toward 10 Hz. That specific claim has weak support. A 2023 systematic review of EEG studies found 14 that met its criteria: five reported results consistent with entrainment, eight reported results that contradicted it and one was mixed. The studies used very different methods, which makes them hard to compare.",
+            "The behavioural evidence looks better. A 2019 meta-analysis pooled 22 studies of binaural beats and memory, attention, anxiety and pain, and found a medium-sized overall benefit. It also found that listening before a task, or before and during it, worked better than listening only during it, and that longer exposure helped.",
+            "Put together, the fairest summary is this: binaural beats may produce small-to-moderate benefits for some outcomes, but probably not through the simple brainwave-tuning mechanism usually advertised, and results vary a lot between studies. Placebo and expectation are hard to rule out in research like this."
+          ]
+        },
+        {
+          "heading": "Should you use them for focus?",
+          "body": [
+            "If you enjoy them, there is little downside. At a low volume through headphones, binaural beats are a gentle, steady sound that many people find pleasant to work to, and that alone can help you settle into a session.",
+            {
+              "list": [
+                "**Try alpha or beta for focus**, and theta for winding down.",
+                "**Start a few minutes before you begin work** and keep it going; the 2019 analysis found pre-task exposure worked best.",
+                "**Layer it under other sounds.** A beat on its own can feel clinical; under [brown noise](/sounds/brown-noise) or rain it fades into the texture. The Deep work preset pairs alpha with brown noise.",
+                "**Judge it over a full session**, such as a [25 minute timer](/timer/25-minutes), and keep it only if you notice a difference."
+              ]
+            },
+            "Treat any claims of dramatic effects, such as instant learning, IQ boosts or replacing medication, with heavy scepticism."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "q": "Do binaural beats really work?",
+          "a": "Partly. A 2019 meta-analysis found a medium overall benefit for memory, attention, anxiety and pain, but a 2023 review found inconsistent evidence that they change brainwaves the way they are marketed. Expect modest, individual effects."
+        },
+        {
+          "q": "Which binaural beat is best for studying?",
+          "a": "Alpha (around 10 Hz) and beta (around 16 Hz) are the usual choices for study and focus. No single band has strong evidence, so try each for a session."
+        },
+        {
+          "q": "Can I listen to binaural beats on speakers?",
+          "a": "No. Each ear needs its own tone for the brain to create the beat, so they only work with headphones or earbuds."
+        },
+        {
+          "q": "Are binaural beats safe?",
+          "a": "At a comfortable volume they are generally considered safe. People with epilepsy or a seizure disorder should talk to a doctor before using rhythmic audio, and anyone who feels unwell while listening should stop."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis",
+          "publication": "Psychological Research",
+          "year": 2019,
+          "url": "https://doi.org/10.1007/s00426-018-1066-8"
+        },
+        {
+          "title": "Binaural beats to entrain the brain? A systematic review of the effects of binaural beat stimulation on brain oscillatory activity",
+          "publication": "PLOS ONE",
+          "year": 2023,
+          "url": "https://doi.org/10.1371/journal.pone.0286023"
+        },
+        {
+          "title": "Auditory Beats in the Brain",
+          "publication": "Scientific American",
+          "year": 1973,
+          "url": "https://doi.org/10.1038/scientificamerican1073-94"
+        }
+      ]
+    },
+    {
+      "slug": "why-cafe-noise-helps-creativity",
+      "title": "Why café noise helps creative work: the 70 dB study",
+      "description": "The 2012 study that found moderate ambient noise, around the level of a busy café, boosts creative thinking, why it might work, its limits, and how to recreate it at home.",
+      "standfirst": "Writers have worked in cafés for centuries. A well-known 2012 study suggests the background hum is part of the reason, but only at the right volume and for the right kind of task.",
+      "reviewed": false,
+      "sections": [
+        {
+          "heading": "The study",
+          "body": [
+            "In 2012 researchers Ravi Mehta, Rui Zhu and Amar Cheema published a series of experiments in the *Journal of Consumer Research* asking a simple question: is noise always bad for thinking? Participants worked on creative tasks, such as finding a word that links three others or coming up with creative ideas, while background noise played at different levels.",
+            "The results formed an inverted U. At a **moderate level of about 70 decibels**, roughly the hum of a busy café, people performed better on creative tasks than at a low level of about 50 decibels. At a high level of about 85 decibels, closer to heavy traffic or a loud restaurant, performance dropped."
+          ]
+        },
+        {
+          "heading": "Why moderate noise might help",
+          "body": [
+            "The researchers’ explanation centres on processing difficulty. Moderate noise makes thinking slightly harder, and that mild difficulty seems to nudge people toward more abstract, big-picture processing, the kind that helps when you need to connect distant ideas. Too much noise overwhelms you, and too little lets you stay in narrow, concrete detail.",
+            "There are other likely ingredients that the study didn’t isolate. A café’s murmur masks sudden, specific sounds that would grab attention, it gives a sense of company without anyone needing you, and going to a café is a ritual that marks the start of work."
+          ]
+        },
+        {
+          "heading": "The limits",
+          "body": [
+            "It is one set of experiments, on short lab tasks, and it measured creativity, not every kind of work. Some points to keep in mind:",
+            {
+              "list": [
+                "**Detailed work may suffer.** The same abstract-thinking shift that helps brainstorming can hurt tasks that need precise attention, such as proofreading, accounting or debugging.",
+                "**Intelligible speech is different.** The study used a blended, indistinct hum. A conversation you can follow is distracting, because the brain automatically processes language it hears.",
+                "**Volume matters a lot.** The benefit appeared at a moderate level and disappeared when it got loud."
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "Recreating the café effect at home",
+          "body": [
+            {
+              "list": [
+                "**Use a blurred café recording**, not a podcast or a video with clear voices. Focuship’s [coffee shop sound](/sounds/coffee-shop) is a murmur of chatter and cups with no conversation to follow.",
+                "**Set the level to fill the room, not your head.** You can’t measure decibels easily, but aim for a lively background that you could still talk over comfortably.",
+                "**Save it for idea work.** Brainstorming, outlining, writing first drafts and design exploration are the best fit. Switch to steadier sound such as [brown noise](/sounds/brown-noise) for detailed work.",
+                "**Add weather for comfort.** Café chatter with light rain outside (the Corner café preset) is one of the most popular combinations.",
+                "**Give it structure.** Pair it with a [Pomodoro timer](/pomodoro/25-5) so the creative session has a clear start and end."
+              ]
+            }
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "q": "How loud is 70 decibels?",
+          "a": "Roughly the level of a busy café or restaurant: lively, but you can still talk over it comfortably."
+        },
+        {
+          "q": "Does café noise help with studying?",
+          "a": "For creative and conceptual study it may. For memorising or detailed problem solving, the abstract-thinking shift can work against you, so steadier noise or quiet may be better."
+        },
+        {
+          "q": "Is a café recording as good as a real café?",
+          "a": "For the sound, it can be better: no sudden laughter beside you or milk steamer in your ear. You lose the change of scenery and the ritual of going out, which also help some people."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Is Noise Always Bad? Exploring the Effects of Ambient Noise on Creative Cognition",
+          "publication": "Journal of Consumer Research",
+          "year": 2012,
+          "url": "https://doi.org/10.1086/665048"
+        },
+        {
+          "title": "Disruption of short-term memory by unattended speech: Implications for the structure of working memory",
+          "publication": "Journal of Verbal Learning and Verbal Behavior",
+          "year": 1982,
+          "url": "https://doi.org/10.1016/S0022-5371(82)90521-7"
+        }
+      ]
+    },
+    {
+      "slug": "brown-noise-for-adhd",
+      "title": "Brown noise for ADHD: what we know",
+      "description": "Why brown noise became popular for ADHD, what research on white and pink noise actually shows, the gaps in the evidence for brown noise, and how to try it safely.",
+      "standfirst": "Brown noise went viral as an ADHD focus hack. The research behind it is real but narrower than the hype: most of it studied white and pink noise, mostly in children, and the effects are small.",
+      "reviewed": false,
+      "sections": [
+        {
+          "heading": "Why noise might help some people with ADHD",
+          "body": [
+            "The leading idea comes from the moderate brain arousal model, proposed by Swedish researchers in 2007. It suggests that people with ADHD may be under-aroused in some brain systems, and that adding a moderate amount of external stimulation, such as background noise, can bring arousal closer to the level where attention works best. The same noise could push someone who is already well aroused past that level, making their performance worse.",
+            "That second half matters: the model predicts noise helps some people and hinders others, which is what several studies have found."
+          ]
+        },
+        {
+          "heading": "What the studies found",
+          "body": [
+            "A 2007 study found that white noise improved memory performance in children with attention problems while worsening it in children without. A 2010 study of inattentive schoolchildren found a similar pattern, and a 2016 study reported benefits from white noise on some neuropsychological measures.",
+            "The strongest summary so far is a 2024 meta-analysis in the *Journal of the American Academy of Child & Adolescent Psychiatry*. It combined 13 studies of white and pink noise in young people with ADHD or elevated attention problems and found:",
+            {
+              "list": [
+                "**A small benefit** on attention and task performance for the ADHD groups (an effect size of about 0.25).",
+                "**A small negative effect** for comparison groups without attention problems.",
+                "**No eligible studies of brown noise.** The research that exists is on white and pink noise.",
+                "**Moderate certainty**, with the authors calling the findings encouraging but not yet enough for clinical recommendations."
+              ]
+            }
+          ]
+        },
+        {
+          "heading": "What this means for brown noise",
+          "body": [
+            "Brown noise is a close relative of white and pink noise. It has the same random structure, with more energy in the low frequencies, so it is plausible that it works in a similar way. But plausible is not proven: no controlled study included in that meta-analysis tested it, and the viral claims run well ahead of the evidence.",
+            "Most research has also been done in children and teenagers in lab tasks. Adults with ADHD report finding brown noise helpful, and personal experience is a reasonable guide for something low-risk, but it is not the same as evidence that it improves day-to-day functioning."
+          ]
+        },
+        {
+          "heading": "How to try it sensibly",
+          "body": [
+            {
+              "list": [
+                "**Treat it as an experiment.** Try a week with noise and a week without on similar tasks, and note how focused you felt and how much you got done.",
+                "**Compare colours.** Since the research is on white and pink noise, try [pink noise](/sounds/pink-noise) and [white noise](/sounds/white-noise) as well as [brown noise](/sounds/brown-noise); the [guide to noise colours](/guides/brown-vs-white-vs-pink-noise) explains the differences.",
+                "**Keep the volume low.** Moderate stimulation is the point; louder isn’t better, and long exposure to loud sound harms hearing.",
+                "**Pair it with structure.** Noise works best alongside other supports such as short, timed work blocks. A [25 minute timer](/timer/25-minutes) is a good place to start.",
+                "**Stop if it makes things worse.** The research shows noise can hurt performance for some people."
+              ]
+            },
+            "Background noise is a low-cost, low-risk tool that may help some people a little. It isn’t a treatment for ADHD, and it doesn’t replace assessment, therapy, coaching or medication where those are appropriate."
+          ]
+        }
+      ],
+      "faq": [
+        {
+          "q": "Does brown noise help ADHD?",
+          "a": "It might help some people, but it hasn’t been properly tested yet. Research on the closely related white and pink noise shows a small benefit for young people with ADHD and a small cost for people without attention difficulties."
+        },
+        {
+          "q": "Is brown noise better than white noise for ADHD?",
+          "a": "Nobody knows yet. The studies that show benefits used white or pink noise. Brown noise is softer, so some people find it easier to listen to; try each and see what works for you."
+        },
+        {
+          "q": "Can noise replace ADHD medication?",
+          "a": "No. The benefits found in research are small, and noise is not a treatment. Talk to your clinician before changing any treatment."
+        },
+        {
+          "q": "Is it safe for children to listen to noise?",
+          "a": "At a low volume, generally yes. Keep speakers away from a child’s head, avoid high volumes, and check with your child’s clinician if you have concerns."
+        }
+      ],
+      "sources": [
+        {
+          "title": "Systematic Review and Meta-Analysis: Do White Noise or Pink Noise Help With Task Performance in Youth With Attention-Deficit/Hyperactivity Disorder or With Elevated Attention Problems?",
+          "publication": "Journal of the American Academy of Child & Adolescent Psychiatry",
+          "year": 2024,
+          "url": "https://doi.org/10.1016/j.jaac.2023.12.014"
+        },
+        {
+          "title": "Stimulus-dependent dopamine release in attention-deficit/hyperactivity disorder",
+          "publication": "Psychological Review",
+          "year": 2007,
+          "url": "https://doi.org/10.1037/0033-295X.114.4.1047"
+        },
+        {
+          "title": "Listen to the noise: noise is beneficial for cognitive performance in ADHD",
+          "publication": "Journal of Child Psychology and Psychiatry",
+          "year": 2007,
+          "url": "https://doi.org/10.1111/j.1469-7610.2007.01749.x"
+        },
+        {
+          "title": "The effects of background white noise on memory performance in inattentive school children",
+          "publication": "Behavioral and Brain Functions",
+          "year": 2010,
+          "url": "https://doi.org/10.1186/1744-9081-6-55"
+        },
+        {
+          "title": "Neuropsychological and neurophysiological benefits from white noise in children with and without ADHD",
+          "publication": "Behavioral and Brain Functions",
+          "year": 2016,
+          "url": "https://doi.org/10.1186/s12993-016-0095-y"
+        }
+      ]
+    }
+  ]
+}

@@ -49,6 +49,15 @@ jobs:
       DB_PASSWORD: root
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # The API reads a generated copy of the catalogue (ADR 0002); fail if it is stale.
+      - run: npm ci
+        working-directory: .
+      - run: npm run check:catalog
+        working-directory: .
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
