@@ -90,6 +90,53 @@ it('leaves a revoked app no way to refresh its way back in', function () {
     ])->assertStatus(400);
 });
 
+it('still lists and cuts off an app that has been idle past its access token', function () {
+    $ada = listener();
+    $token = connectMcpClient($ada, 'Claude');
+    $client = Client::firstOrFail();
+
+    // The access token is an hour old; the refresh token behind it lives for a month.
+    $this->travel(2)->hours();
+
+    $this->actingAs($ada)
+        ->getJson('/account/connected-apps', fromSite())
+        ->assertJsonPath('apps.0.name', 'Claude');
+
+    $this->actingAs($ada)
+        ->deleteJson("/account/connected-apps/{$client->getKey()}", [], fromSite())
+        ->assertNoContent();
+
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'refresh_token',
+        'refresh_token' => $token['refresh_token'],
+        'client_id' => $client->getKey(),
+    ])->assertStatus(400);
+});
+
+it('leaves a revoked app no unused sign-in code to trade in', function () {
+    $ada = listener();
+    connectMcpClient($ada, 'Claude');
+    $client = Client::firstOrFail();
+    $verifier = 'focuship-test-code-verifier-long-enough-for-rfc-7636';
+
+    // An app the listener already approved is handed a fresh code without asking again.
+    $location = (string) $this->actingAs($ada)->get(authorizeUrl($client, $verifier))->headers->get('Location');
+    parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
+    expect($query)->toHaveKey('code');
+
+    $this->actingAs($ada)
+        ->deleteJson("/account/connected-apps/{$client->getKey()}", [], fromSite())
+        ->assertNoContent();
+
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->getKey(),
+        'redirect_uri' => MCP_REDIRECT_URI,
+        'code_verifier' => $verifier,
+        'code' => $query['code'],
+    ])->assertStatus(400);
+});
+
 it('cannot revoke an app connected by someone else', function () {
     connectMcpClient(listener(), 'Theirs');
     $client = Client::firstOrFail();

@@ -27,41 +27,21 @@ class UpdateSettings extends LibraryTool
         $timer = TimerSettings::withDefaults($current['timer'] ?? []);
         $volume = $current['volume'] ?? TimerSettings::DEFAULT_VOLUME;
 
-        $changed = [];
+        // Passed on as sent, never cast: Library refuses 25.5 minutes or a volume of
+        // "loud" where a cast would quietly save 25 or silence.
+        $asked = array_filter(
+            $request->only(['focus', 'short', 'long', 'longEvery', 'autoStart', 'notify', 'volume']),
+            fn ($value) => $value !== null,
+        );
 
-        foreach (['focus', 'short', 'long'] as $field) {
-            if ($request->get($field) === null) {
-                continue;
-            }
-
-            $minutes = (int) $request->get($field);
-            $timer[$field] = $minutes;
-            $changed[] = "{$field} {$minutes} min";
-        }
-
-        if ($request->get('longEvery') !== null) {
-            $rounds = (int) $request->get('longEvery');
-            $timer['longEvery'] = $rounds;
-            $changed[] = "a long break every {$rounds} rounds";
-        }
-
-        foreach (['autoStart', 'notify'] as $flag) {
-            if ($request->get($flag) !== null) {
-                $timer[$flag] = (bool) $request->get($flag);
-                $changed[] = $flag.' '.($timer[$flag] ? 'on' : 'off');
-            }
-        }
-
-        if ($request->get('volume') !== null) {
-            $volume = (float) $request->get('volume');
-            $changed[] = "volume {$volume}";
-        }
-
-        if ($changed === []) {
+        if ($asked === []) {
             return Response::error(
                 'Nothing to change. Pass at least one of focus, short, long, longEvery, autoStart, notify or volume.'
             );
         }
+
+        $timer = array_merge($timer, array_diff_key($asked, ['volume' => true]));
+        $volume = $asked['volume'] ?? $volume;
 
         try {
             // The bounds live in Library, shared with the site's own settings sync.
@@ -70,8 +50,43 @@ class UpdateSettings extends LibraryTool
             return Response::error($e->getMessage());
         }
 
-        return Response::make(Response::text('Updated: '.implode(', ', $changed).'.'))
+        $volume = (float) $volume;
+
+        return Response::make(Response::text('Updated: '.implode(', ', self::describe($asked, $volume)).'.'))
             ->withStructuredContent(['timer' => $timer, 'volume' => $volume]);
+    }
+
+    /**
+     * What changed, in words, once Library has accepted it.
+     *
+     * @param  array<string, mixed>  $asked
+     * @return list<string>
+     */
+    private static function describe(array $asked, float $volume): array
+    {
+        $changed = [];
+
+        foreach (['focus', 'short', 'long'] as $field) {
+            if (isset($asked[$field])) {
+                $changed[] = "{$field} {$asked[$field]} min";
+            }
+        }
+
+        if (isset($asked['longEvery'])) {
+            $changed[] = "a long break every {$asked['longEvery']} rounds";
+        }
+
+        foreach (['autoStart', 'notify'] as $flag) {
+            if (isset($asked[$flag])) {
+                $changed[] = $flag.' '.($asked[$flag] ? 'on' : 'off');
+            }
+        }
+
+        if (isset($asked['volume'])) {
+            $changed[] = "volume {$volume}";
+        }
+
+        return $changed;
     }
 
     /** @return array<string, Type> */

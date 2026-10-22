@@ -188,6 +188,11 @@ it('refuses a timer nobody could work with', function (array $arguments) {
     'a whole day of focus' => [['focus' => 1000]],
     'volume past the top' => [['volume' => 3]],
     'nothing at all' => [[]],
+    // Read as sent, not coerced: these would otherwise save as 25 minutes, "on" and silence.
+    'part of a minute' => [['focus' => 25.5]],
+    'a switch that is neither on nor off' => [['autoStart' => 'maybe']],
+    'a volume that is not a number' => [['volume' => 'loud']],
+    'minutes given as a list' => [['focus' => [25, 50]]],
 ]);
 
 it('never shows one listener another’s library', function () {

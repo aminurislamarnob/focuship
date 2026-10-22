@@ -55,8 +55,10 @@ class ConnectedApps
 
         $appTokens = Token::where('user_id', $this->user->getKey())->where('client_id', $clientId);
 
-        // The refresh tokens too, or the app would simply mint itself a new access token.
+        // The refresh tokens and any unused sign-in code too, or the app would simply
+        // trade one of them for a new access token.
         RefreshToken::whereIn('access_token_id', $appTokens->clone()->select('id'))->update(['revoked' => true]);
+        AuthCode::where('user_id', $this->user->getKey())->where('client_id', $clientId)->update(['revoked' => true]);
         $appTokens->update(['revoked' => true]);
 
         return true;
@@ -72,13 +74,23 @@ class ConnectedApps
         AuthCode::where('user_id', $this->user->getKey())->delete();
     }
 
-    /** Every token still worth anything: not revoked, not expired. */
-    /** @return Collection<int, Token> */
+    /**
+     * Every token still worth anything: not revoked, and either unexpired or backed by a
+     * refresh token that can mint the next one. An assistant idle past its hour-long
+     * access token is still connected for as long as that refresh token lives.
+     *
+     * @return Collection<int, Token>
+     */
     private function liveTokens(): Collection
     {
         return Token::where('user_id', $this->user->getKey())
             ->where('revoked', false)
-            ->where(fn ($query) => $query->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->where(fn ($query) => $query
+                ->whereNull('expires_at')
+                ->orWhere('expires_at', '>', now())
+                ->orWhereHas('refreshToken', fn ($refresh) => $refresh
+                    ->where('revoked', false)
+                    ->where('expires_at', '>', now())))
             ->get();
     }
 }

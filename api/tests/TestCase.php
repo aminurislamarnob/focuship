@@ -55,9 +55,15 @@ abstract class TestCase extends BaseTestCase
         return self::payload($response)['result'] ?? [];
     }
 
+    /** Calls one tool that must refuse, and returns what it told the assistant. */
     protected function mcpError(User $user, string $tool, array $arguments = []): string
     {
-        return self::textOf($this->mcp($user, 'tools/call', ['name' => $tool, 'arguments' => $arguments]));
+        $response = $this->mcp($user, 'tools/call', ['name' => $tool, 'arguments' => $arguments]);
+
+        expect(self::payload($response)['result']['isError'] ?? false)
+            ->toBeTrue("{$tool} answered without an error: ".self::textOf($response));
+
+        return self::textOf($response);
     }
 
     /** Every content block of a tool result, joined: what the assistant sees. */

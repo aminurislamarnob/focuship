@@ -153,11 +153,11 @@ class Library
      *
      * @throws ValidationException when the timer or volume is one the app cannot use
      */
-    public function saveSettings(array $timer, float $volume, int $updatedAt): void
+    public function saveSettings(array $timer, mixed $volume, int $updatedAt): void
     {
         TimerSettings::check($timer);
 
-        if ($volume < 0 || $volume > 1) {
+        if (! is_numeric($volume) || $volume < 0 || $volume > 1) {
             throw ValidationException::withMessages([
                 'volume' => 'Volume must be a number between 0 (silent) and 1 (full).',
             ]);
@@ -171,7 +171,7 @@ class Library
 
         UserSettings::updateOrCreate(
             ['user_id' => $this->user->id],
-            ['timer' => $timer, 'volume' => $volume, 'updated_at' => Carbon::createFromTimestampMs($updatedAt)],
+            ['timer' => $timer, 'volume' => (float) $volume, 'updated_at' => Carbon::createFromTimestampMs($updatedAt)],
         );
 
         $this->user->unsetRelation('settings');

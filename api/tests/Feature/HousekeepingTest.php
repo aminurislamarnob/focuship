@@ -3,6 +3,7 @@
 use App\Models\SignInCode;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
+use Laravel\Passport\AuthCode;
 use Laravel\Passport\Client;
 use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
@@ -74,6 +75,14 @@ it('clears out the refresh tokens of an app the listener cut off', function () {
     $this->artisan('focuship:prune')->assertSuccessful();
 
     expect(RefreshToken::count())->toBe(0);
+});
+
+it('clears out sign-in codes an AI app already traded in', function () {
+    connectMcpClient(listener());
+
+    $this->artisan('focuship:prune')->assertSuccessful();
+
+    expect(AuthCode::count())->toBe(0);
 });
 
 it('leaves a live connection alone', function () {

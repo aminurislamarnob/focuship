@@ -24,7 +24,7 @@ class SettingsController extends AccountController
             'updatedAt' => ['required', 'integer', 'min:0'],
         ]);
 
-        $this->library($request)->saveSettings($fields['timer'], (float) $fields['volume'], (int) $fields['updatedAt']);
+        $this->library($request)->saveSettings($fields['timer'], $fields['volume'], (int) $fields['updatedAt']);
 
         return response()->noContent();
     }
