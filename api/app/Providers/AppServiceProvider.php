@@ -7,6 +7,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -18,6 +19,23 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->rateLimits();
+        $this->oauth();
+    }
+
+    /**
+     * How long an AI assistant's connection lasts (ADR 0004): short access tokens so a
+     * leaked one dies quickly, rotating refresh tokens so an unused connection lapses
+     * about a month after the listener last used it.
+     */
+    private function oauth(): void
+    {
+        Passport::tokensExpireIn(now()->addHour());
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(now()->addDays(30));
+
+        Passport::authorizationView(
+            fn (array $parameters) => response()->view('vendor.mcp.authorize', $parameters)
+        );
     }
 
     /**

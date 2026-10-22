@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\LimitBodySize;
 use App\Http\Middleware\UseCloudflareClientIp;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prepend(HandleCors::class);
         $middleware->trustProxies(at: '*');
         $middleware->statefulApi();
+        $middleware->alias(['mcp.body-size' => LimitBodySize::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -49,8 +49,15 @@ return [
     */
 
     'guards' => [
+        // The site: a Sanctum cookie session on .focuship.app (ADR 0003).
         'web' => [
             'driver' => 'session',
+            'provider' => 'users',
+        ],
+
+        // The MCP: OAuth 2.1 bearer tokens issued by Passport (ADR 0004).
+        'api' => [
+            'driver' => 'passport',
             'provider' => 'users',
         ],
     ],

@@ -14,6 +14,7 @@ return [
 
     'turnstile' => [
         'secret' => env('TURNSTILE_SECRET'),
+        'site_key' => env('TURNSTILE_SITE_KEY'),
     ],
 
     'google' => [

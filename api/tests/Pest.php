@@ -7,6 +7,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Testing\TestResponse;
+use Laravel\Passport\Client;
 use Laravel\Socialite\Contracts\Provider as SocialiteProvider;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
@@ -158,4 +160,103 @@ function fakeSocialite(string $provider, array $attributes): void
     $driver->shouldReceive('user')->andReturn($user);
 
     Socialite::shouldReceive('driver')->with($provider)->andReturn($driver);
+}
+
+// The MCP ---------------------------------------------------------------------
+// Tests drive it the way a real client does: JSON-RPC over HTTP with a Passport
+// token, never by reaching into the server's tool classes.
+
+/** An AI client that has registered itself, as the MCP spec lets any client do. */
+function registerMcpClient(string $name = 'Claude'): Client
+{
+    $response = test()->postJson('/oauth/register', [
+        'client_name' => $name,
+        'redirect_uris' => ['https://claude.ai/api/mcp/auth_callback'],
+        'grant_types' => ['authorization_code', 'refresh_token'],
+    ])->assertCreated();
+
+    return Client::findOrFail($response->json('client_id'));
+}
+
+function authorizeUrl(Client $client, string $verifier = 'focuship-test-code-verifier-long-enough-for-rfc-7636', string $state = 'test-state'): string
+{
+    return '/oauth/authorize?'.http_build_query([
+        'client_id' => $client->getKey(),
+        'redirect_uri' => MCP_REDIRECT_URI,
+        'response_type' => 'code',
+        'scope' => 'mcp:use',
+        'state' => $state,
+        'code_challenge' => rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '='),
+        'code_challenge_method' => 'S256',
+    ]);
+}
+
+const MCP_REDIRECT_URI = 'https://claude.ai/api/mcp/auth_callback';
+
+/**
+ * The access token an AI client holds after the listener approved it: registration,
+ * consent and the PKCE exchange, run for real. Cached per listener so a test that
+ * makes many calls does the dance once.
+ *
+ * @return array{access_token: string, refresh_token: string, expires_in: int}
+ */
+function connectMcpClient(User $user, string $name = 'Claude'): array
+{
+    $verifier = 'focuship-test-code-verifier-long-enough-for-rfc-7636';
+    $client = registerMcpClient($name);
+
+    // The listener sees the consent screen, then presses Allow.
+    test()->actingAs($user)->get(authorizeUrl($client, $verifier))->assertOk();
+
+    $approved = test()->actingAs($user)->post('/oauth/authorize', [
+        'client_id' => $client->getKey(),
+        'auth_token' => session('authToken'),
+        'state' => 'test-state',
+    ]);
+
+    parse_str((string) parse_url((string) $approved->headers->get('Location'), PHP_URL_QUERY), $query);
+
+    $token = test()->postJson('/oauth/token', [
+        'grant_type' => 'authorization_code',
+        'client_id' => $client->getKey(),
+        'redirect_uri' => MCP_REDIRECT_URI,
+        'code_verifier' => $verifier,
+        'code' => $query['code'] ?? '',
+    ])->assertOk()->json();
+
+    return $token;
+}
+
+/** @var array<int, string> */
+$GLOBALS['mcpTokens'] = [];
+
+function mcpToken(User $user): string
+{
+    return $GLOBALS['mcpTokens'][$user->id] ??= connectMcpClient($user)['access_token'];
+}
+
+/** The tool names a connected client is offered. */
+function mcpToolNames(User $user): array
+{
+    $response = test()->mcp($user, 'tools/list');
+
+    return collect(TestCase::class)->pipe(
+        fn () => collect(json_decode(json_encode(mcpPayload($response)), true)['result']['tools'] ?? [])
+            ->pluck('name')
+            ->all()
+    );
+}
+
+function mcpPayload(TestResponse $response): array
+{
+    $body = $response->getContent() ?: '';
+
+    if (str_contains($body, 'data: ')) {
+        $body = collect(explode("\n", $body))
+            ->filter(fn (string $line) => str_starts_with($line, 'data: '))
+            ->map(fn (string $line) => substr($line, 6))
+            ->implode('');
+    }
+
+    return json_decode($body, true) ?: [];
 }

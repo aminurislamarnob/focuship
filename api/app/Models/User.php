@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\Contracts\OAuthenticatable;
+use Laravel\Passport\HasApiTokens;
 
 /**
  * A Focuship listener. Accounts are passwordless (ADR 0001).
@@ -22,10 +24,10 @@ use Illuminate\Notifications\Notifiable;
  */
 #[Fillable(['name', 'email', 'avatar_url', 'email_verified_at'])]
 #[Hidden(['remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements OAuthenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /** @return array<string, string> */
     protected function casts(): array

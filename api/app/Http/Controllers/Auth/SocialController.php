@@ -72,12 +72,20 @@ class SocialController extends Controller
         abort_if($provider === 'facebook' && ! config('auth.facebook_enabled'), 404);
     }
 
-    /** Only ever back to the site: an open redirect here would be a phishing hole. */
+    /**
+     * Only ever back into Focuship — the site, or this API's own OAuth flow. An open
+     * redirect here would be a phishing hole.
+     */
     private function safeReturn(mixed $url): string
     {
         $site = $this->site();
+        $api = rtrim((string) config('app.url'), '/');
 
-        return is_string($url) && Str::startsWith($url, $site.'/') ? $url : $site.'/account';
+        if (is_string($url) && (Str::startsWith($url, $site.'/') || Str::startsWith($url, $api.'/'))) {
+            return $url;
+        }
+
+        return $site.'/account';
     }
 
     private function withError(string $url, string $error): string
