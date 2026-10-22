@@ -77,20 +77,20 @@ export interface Cloud {
   deleteAccount(): Promise<void>;
 
   listFavorites(): Promise<string[]>;
-  addFavorite(userId: string, ref: string): Promise<void>;
-  removeFavorite(userId: string, ref: string): Promise<void>;
+  addFavorite(ref: string): Promise<void>;
+  removeFavorite(ref: string): Promise<void>;
 
   listPresets(): Promise<CustomPreset[]>;
-  createPreset(userId: string, preset: { id: string; label: string; layers: Layers }): Promise<void>;
+  createPreset(preset: { id: string; label: string; layers: Layers }): Promise<void>;
   renamePreset(id: string, label: string): Promise<void>;
   setPresetPublic(id: string, isPublic: boolean): Promise<void>;
   /** Deletes the preset and the owner's favorite pointing at it. */
-  deletePreset(userId: string, id: string): Promise<void>;
+  deletePreset(id: string): Promise<void>;
   /** A preset by share link: only rows the owner made public; null when private or missing. */
   fetchSharedPreset(id: string): Promise<{ id: string; label: string; layers: Layers } | null>;
 
-  getSettings(userId: string): Promise<CloudSettings | null>;
-  pushSettings(userId: string, settings: CloudSettings): Promise<void>;
+  getSettings(): Promise<CloudSettings | null>;
+  pushSettings(settings: CloudSettings): Promise<void>;
 
   /** The AI assistants this listener has connected, most recently used first. */
   listConnectedApps(): Promise<ConnectedApp[]>;

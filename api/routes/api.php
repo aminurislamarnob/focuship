@@ -10,19 +10,21 @@ use App\Http\Controllers\Auth\GoogleTokenController;
 use App\Http\Controllers\Auth\SessionController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/health', fn () => ['status' => 'ok']);
+Route::get('/health', fn () => ['status' => 'ok'])->middleware('throttle:api');
 
 // Sign-in. Public by necessity, so every route here is throttled (see AppServiceProvider).
 Route::post('/auth/email/code', [EmailCodeController::class, 'send'])->middleware('throttle:email-code');
 Route::post('/auth/email/verify', [EmailCodeController::class, 'verify'])->middleware('throttle:email-verify');
 
-Route::post('/auth/google/token', GoogleTokenController::class)->middleware('throttle:email-verify');
+Route::post('/auth/google/token', GoogleTokenController::class)->middleware('throttle:google-token');
 
-Route::get('/auth/me', [SessionController::class, 'show']);
-Route::post('/auth/sign-out', [SessionController::class, 'destroy']);
+Route::middleware('throttle:api')->group(function () {
+    Route::get('/auth/me', [SessionController::class, 'show']);
+    Route::post('/auth/sign-out', [SessionController::class, 'destroy']);
+});
 
 // A preset someone shared: public by its owner's choice, so no account needed.
-Route::get('/presets/{id}', [PresetController::class, 'shared']);
+Route::get('/presets/{id}', [PresetController::class, 'shared'])->middleware('throttle:api');
 
 // The listener's own library. Everything here is theirs alone.
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {

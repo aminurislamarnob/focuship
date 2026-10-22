@@ -20,6 +20,9 @@ class TimerSettings
         'notify' => false,
     ];
 
+    /** Where the master volume starts, matching the app's own default. */
+    public const DEFAULT_VOLUME = 0.8;
+
     /** Minutes a session may last: long enough to matter, short enough to be a session. */
     public const MIN_MINUTES = 1;
 

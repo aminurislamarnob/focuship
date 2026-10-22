@@ -24,7 +24,7 @@ class UpdateSettings extends LibraryTool
         $library = $this->library($request);
         $current = $library->settings();
         $timer = TimerSettings::withDefaults($current['timer'] ?? []);
-        $volume = $current['volume'] ?? 0.8;
+        $volume = $current['volume'] ?? TimerSettings::DEFAULT_VOLUME;
 
         $changed = [];
 

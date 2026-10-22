@@ -3,6 +3,7 @@
 use App\Models\Preset;
 use App\Models\SocialIdentity;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 it('needs an account', function () {
     $this->deleteJson('/account', [], fromSite())->assertUnauthorized();
@@ -40,4 +41,18 @@ it('leaves everyone else untouched', function () {
 
     expect(User::find($other->id))->not->toBeNull();
     $this->assertDatabaseCount('presets', 1);
+});
+
+it('signs the listener out of their other devices too', function () {
+    $ada = listener();
+    DB::table('sessions')->insert([
+        'id' => 'another-device',
+        'user_id' => $ada->id,
+        'payload' => '',
+        'last_activity' => now()->timestamp,
+    ]);
+
+    $this->actingAs($ada)->deleteJson('/account', [], fromSite())->assertNoContent();
+
+    expect(DB::table('sessions')->where('user_id', $ada->id)->count())->toBe(0);
 });

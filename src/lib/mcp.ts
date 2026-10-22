@@ -1,3 +1,4 @@
+import { SOUNDS } from "@/lib/catalog";
 import { API_ORIGIN } from "@/lib/focuship-api";
 import { SITE_NAME } from "@/lib/site";
 
@@ -72,7 +73,7 @@ export const MCP_CLIENTS: McpStep[] = [
 /** What an assistant can do once it is connected, in the listener's words. */
 export const MCP_CAPABILITIES = [
   "Turn a description like “rainy café, low brown noise” into a mix, and hand you a link that opens it ready to play.",
-  "Search all 64 sounds and the built-in presets, and explain what is in any of them.",
+  `Search all ${SOUNDS.length} sounds and the built-in presets, and explain what is in any of them.`,
   "Save, rename, share and delete your presets, and keep your favorites tidy.",
   "Read and change your focus timer lengths and volume, which sync to the app.",
 ];

@@ -22,7 +22,7 @@ class GetSettings extends LibraryTool
     {
         $settings = $this->library($request)->settings();
         $timer = TimerSettings::withDefaults($settings['timer'] ?? []);
-        $volume = $settings['volume'] ?? 0.8;
+        $volume = $settings['volume'] ?? TimerSettings::DEFAULT_VOLUME;
 
         $text = sprintf(
             "Focus %d min · short break %d min · long break %d min, every %d rounds.\n".

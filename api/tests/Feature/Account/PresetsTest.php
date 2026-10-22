@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\Catalog;
 use App\Models\Preset;
 use Illuminate\Support\Str;
 
@@ -71,7 +72,35 @@ it('refuses a label nobody could read', function (string $label) {
         ], fromSite())
         ->assertStatus(422)
         ->assertJsonValidationErrors('label');
-})->with(['', '   ', 'x']);
+})->with([
+    'empty' => [''],
+    'only spaces' => ['   '],
+    'longer than the field holds' => [str_repeat('x', 61)],
+]);
+
+it('clamps a volume outside what the mixer can play, rather than refusing', function () {
+    $this->actingAs($ada = listener())
+        ->postJson('/account/presets', [
+            'id' => (string) Str::uuid(),
+            'label' => 'Loud',
+            'layers' => ['cafe' => 4, 'keyboard' => -1],
+        ], fromSite())
+        ->assertCreated()
+        ->assertJsonPath('preset.layers', ['cafe' => 1, 'keyboard' => 0]);
+
+    expect($ada->library()->presets())->toHaveCount(1);
+});
+
+it('refuses a mix with more sounds than anyone could hear at once', function () {
+    $tooMany = Catalog::sounds()->take(21)
+        ->mapWithKeys(fn (array $sound) => [$sound['id'] => 0.5])
+        ->all();
+
+    $this->actingAs(listener())
+        ->postJson('/account/presets', ['id' => (string) Str::uuid(), 'label' => 'Everything', 'layers' => $tooMany], fromSite())
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('layers');
+});
 
 it('stops at fifty saved presets and says why', function () {
     $ada = listener();

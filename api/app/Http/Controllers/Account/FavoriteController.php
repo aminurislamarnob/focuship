@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers\Account;
 
-use App\Account\Library;
-use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
 /** Presets the listener starred: built-in ones and their own. */
-class FavoriteController extends Controller
+class FavoriteController extends AccountController
 {
     public function index(Request $request): JsonResponse
     {
@@ -37,13 +34,5 @@ class FavoriteController extends Controller
         $this->library($request)->removeFavorite($ref);
 
         return response()->noContent();
-    }
-
-    private function library(Request $request): Library
-    {
-        /** @var User $user */
-        $user = $request->user();
-
-        return $user->library();
     }
 }

@@ -19,6 +19,13 @@ use Illuminate\Validation\ValidationException;
  */
 class Library
 {
+    /** A mix nobody could hear all of at once is a mistake, not a preset. */
+    public const MAX_LAYERS = 20;
+
+    public const MIN_LABEL = 1;
+
+    public const MAX_LABEL = 60;
+
     public function __construct(private readonly User $user) {}
 
     // Presets -----------------------------------------------------------------
@@ -37,10 +44,13 @@ class Library
     /**
      * @param  array<string, float|int>  $layers
      *
-     * @throws ValidationException when the listener is already at the cap
+     * @throws ValidationException when the label, the mix or the cap says no
      */
     public function savePreset(string $id, string $label, array $layers): Preset
     {
+        $label = self::checkLabel($label);
+        $layers = self::checkLayers($layers);
+
         if ($this->user->presets()->count() >= Preset::LIMIT) {
             throw ValidationException::withMessages([
                 'label' => "You've reached ".Preset::LIMIT.' saved presets. Delete one to save another.',
@@ -49,15 +59,16 @@ class Library
 
         return $this->user->presets()->create([
             'id' => $id,
-            'label' => trim($label),
-            'layers' => self::cleanLayers($layers),
+            'label' => $label,
+            'layers' => $layers,
             'is_public' => false,
         ]);
     }
 
+    /** @throws ValidationException when the label is one nobody could read */
     public function renamePreset(Preset $preset, string $label): Preset
     {
-        $preset->update(['label' => trim($label)]);
+        $preset->update(['label' => self::checkLabel($label)]);
 
         return $preset;
     }
@@ -159,12 +170,67 @@ class Library
     // ---------------------------------------------------------------------------
 
     /**
+     * A name the listener will recognise in their library.
+     *
+     * @throws ValidationException
+     */
+    public static function checkLabel(string $label): string
+    {
+        $label = trim($label);
+        $length = mb_strlen($label);
+
+        if ($length < self::MIN_LABEL || $length > self::MAX_LABEL) {
+            throw ValidationException::withMessages([
+                'label' => 'A preset name needs to be between '.self::MIN_LABEL.' and '.self::MAX_LABEL.' characters.',
+            ]);
+        }
+
+        return $label;
+    }
+
+    /**
+     * A mix Focuship can actually play. Unknown sounds are refused by name — guessing
+     * one would hand the listener a preset that opens to silence — while volumes are
+     * clamped, because an over-eager 1.4 still means "as loud as it goes".
+     *
+     * @param  array<string, float|int>  $layers
+     * @return array<string, float>
+     *
+     * @throws ValidationException
+     */
+    public static function checkLayers(array $layers): array
+    {
+        if ($layers === [] || count($layers) > self::MAX_LAYERS) {
+            throw ValidationException::withMessages([
+                'layers' => 'A mix needs between 1 and '.self::MAX_LAYERS.' sounds.',
+            ]);
+        }
+
+        $unknown = array_values(array_filter(
+            array_keys($layers),
+            fn ($id) => ! Catalog::hasSound((string) $id)
+        ));
+
+        if ($unknown !== []) {
+            throw ValidationException::withMessages(['layers' => self::unknownSounds($unknown)]);
+        }
+
+        return self::clampLayers($layers);
+    }
+
+    /** @param list<array-key> $ids */
+    public static function unknownSounds(array $ids): string
+    {
+        return 'Focuship has no sound called '.implode(', ', array_map(strval(...), $ids)).'.';
+    }
+
+    /**
      * Volumes the app can actually play: known sounds, each between silence and full.
      *
      * @param  array<string, float|int>  $layers
      * @return array<string, float>
      */
-    public static function cleanLayers(array $layers): array
+    public static function clampLayers(array $layers): array
     {
         $clean = [];
 

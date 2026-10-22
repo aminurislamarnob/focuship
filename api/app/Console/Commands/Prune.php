@@ -22,13 +22,15 @@ class Prune extends Command
     /** How long a client has to finish the consent flow before it is forgotten. */
     private const ABANDONED_AFTER_HOURS = 24;
 
-    /** How long a dead token is kept, in case a listener asks what happened. */
-    private const TOKENS_KEPT_DAYS = 30;
+    /** How long an expired token is kept before the row goes too. */
+    private const EXPIRED_TOKENS_KEPT_DAYS = 30;
 
     public function handle(EmailCodes $codes): int
     {
+        // Revoked tokens are dead the moment the listener said so; expired ones linger
+        // briefly in case they ask what happened.
         $tokens = Token::where('revoked', true)
-            ->orWhere('expires_at', '<', now()->subDays(self::TOKENS_KEPT_DAYS))
+            ->orWhere('expires_at', '<', now()->subDays(self::EXPIRED_TOKENS_KEPT_DAYS))
             ->delete();
 
         $clients = Client::where('created_at', '<', now()->subHours(self::ABANDONED_AFTER_HOURS))

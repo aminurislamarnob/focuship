@@ -55,6 +55,9 @@ class AppServiceProvider extends ServiceProvider
             Limit::perHour(30)->by('email-verify-ip:'.$request->ip()),
         ]);
 
+        // A Google ID token carries no address to key on, so this is per caller.
+        RateLimiter::for('google-token', fn (Request $request) => Limit::perMinute(20)->by('google-token:'.$request->ip()));
+
         // Dynamic client registration is public by design (MCP spec / RFC 7591) and each
         // call writes a row, so it is the tightest limit on the API.
         RateLimiter::for('oauth-register', fn (Request $request) => [

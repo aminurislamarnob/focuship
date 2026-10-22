@@ -2,10 +2,11 @@
 
 namespace App\Mcp\Tools;
 
+use App\Account\Library;
 use App\Mcp\LibraryTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
@@ -19,19 +20,17 @@ class RenamePreset extends LibraryTool
     public function handle(Request $request): ResponseFactory|Response
     {
         $id = (string) $request->get('id');
-        $label = trim((string) $request->get('label'));
-
-        if (Str::length($label) < 2 || Str::length($label) > 60) {
-            return Response::error('A preset name needs to be between 2 and 60 characters.');
-        }
-
         $preset = $this->ownPreset($request, $id);
 
         if ($preset === null) {
             return Response::error(self::noSuchPreset($id));
         }
 
-        $preset = $this->library($request)->renamePreset($preset, $label);
+        try {
+            $preset = $this->library($request)->renamePreset($preset, (string) $request->get('label'));
+        } catch (ValidationException $e) {
+            return Response::error($e->getMessage());
+        }
 
         return Response::make(Response::text("Renamed to \"{$preset->label}\"."))
             ->withStructuredContent($preset->toCloudPreset());
@@ -42,7 +41,9 @@ class RenamePreset extends LibraryTool
     {
         return [
             'id' => $schema->string()->description('The preset UUID from list-my-presets.')->required(),
-            'label' => $schema->string()->description('The new name, 2 to 60 characters.')->required(),
+            'label' => $schema->string()
+                ->description('The new name, up to '.Library::MAX_LABEL.' characters.')
+                ->required(),
         ];
     }
 }

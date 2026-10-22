@@ -1,5 +1,6 @@
 <?php
 
+use App\Catalog\Catalog;
 use App\Models\Preset;
 
 /** Browsing the catalogue and designing a mix, through a connected assistant. */
@@ -88,9 +89,16 @@ it('refuses a sound that does not exist, and says which', function () {
         ->toContain('rain-on-moon');
 });
 
-it('keeps volumes inside what the mixer can play', function () {
-    expect($this->mcpError(listener(), 'build-mix', ['layers' => ['cafe' => 4]]))
-        ->toContain('between 0 and 1');
+it('clamps a volume an over-eager assistant set too high, rather than refusing', function () {
+    // 1.4 still means "as loud as it goes": the listener gets a mix, not an error.
+    expect($this->mcpTool(listener(), 'build-mix', ['layers' => ['cafe' => 1.4]]))
+        ->toContain('/?mix=cafe:100')
+        ->toContain('at 100%');
+});
+
+it('clamps a negative volume to silence', function () {
+    expect($this->mcpTool(listener(), 'build-mix', ['layers' => ['cafe' => -2]]))
+        ->toContain('/?mix=cafe:0');
 });
 
 it('refuses a mix with nothing in it', function () {
@@ -98,11 +106,11 @@ it('refuses a mix with nothing in it', function () {
 });
 
 it('refuses a mix nobody could hear all of at once', function () {
-    $tooMany = collect(range(1, 25))
-        ->mapWithKeys(fn (int $i) => ['sound-'.$i => 0.5])
+    $tooMany = Catalog::sounds()->take(21)
+        ->mapWithKeys(fn (array $sound) => [$sound['id'] => 0.5])
         ->all();
 
-    expect($this->mcpError(listener(), 'build-mix', ['layers' => $tooMany]))->not->toBe('');
+    expect($this->mcpError(listener(), 'build-mix', ['layers' => $tooMany]))->toContain('1 and 20 sounds');
 });
 
 it('publishes the catalogue and the guides to read', function () {

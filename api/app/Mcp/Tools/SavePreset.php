@@ -2,8 +2,7 @@
 
 namespace App\Mcp\Tools;
 
-use App\Catalog\Catalog;
-use App\Http\Controllers\Account\PresetController;
+use App\Account\Library;
 use App\Mcp\Describe;
 use App\Mcp\LibraryTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -20,26 +19,15 @@ class SavePreset extends LibraryTool
 {
     public function handle(Request $request): ResponseFactory|Response
     {
-        $label = trim((string) $request->get('label'));
         /** @var array<string, float|int> $layers */
         $layers = (array) $request->get('layers', []);
 
-        if (Str::length($label) < 2 || Str::length($label) > 60) {
-            return Response::error('A preset name needs to be between 2 and 60 characters.');
-        }
-
-        if ($layers === [] || count($layers) > PresetController::MAX_LAYERS) {
-            return Response::error('A preset needs between 1 and '.PresetController::MAX_LAYERS.' sounds.');
-        }
-
-        $unknown = array_values(array_filter(array_keys($layers), fn ($id) => ! Catalog::hasSound((string) $id)));
-
-        if ($unknown !== []) {
-            return Response::error('Focuship has no sound called '.implode(', ', array_map(strval(...), $unknown)).'.');
-        }
-
         try {
-            $preset = $this->library($request)->savePreset((string) Str::uuid(), $label, $layers);
+            $preset = $this->library($request)->savePreset(
+                (string) Str::uuid(),
+                (string) $request->get('label'),
+                $layers,
+            );
         } catch (ValidationException $e) {
             return Response::error($e->getMessage());
         }
@@ -56,7 +44,9 @@ class SavePreset extends LibraryTool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'label' => $schema->string()->description('What to call it, 2 to 60 characters.')->required(),
+            'label' => $schema->string()
+                ->description('What to call it, up to '.Library::MAX_LABEL.' characters.')
+                ->required(),
             'layers' => $schema->object()
                 ->description('The mix: sound id to volume between 0 and 1.')
                 ->required(),

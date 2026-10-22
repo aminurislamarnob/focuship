@@ -204,3 +204,17 @@ test("disconnects an AI assistant", async () => {
     ["DELETE"],
   );
 });
+
+test("a share link to a preset that is gone reads as empty, not broken", async () => {
+  const { cloud } = cloudFor({
+    "GET /presets/abc": { status: 404, body: { message: "That shared preset is no longer available." } },
+  });
+
+  assert.equal(await cloud.fetchSharedPreset("abc"), null);
+});
+
+test("a share link that fails for any other reason still raises", async () => {
+  const { cloud } = cloudFor({ "GET /presets/abc": { status: 500, body: { message: "Server Error" } } });
+
+  await assert.rejects(cloud.fetchSharedPreset("abc"), { message: "Server Error" });
+});

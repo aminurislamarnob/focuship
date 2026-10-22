@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers\Account;
 
-use App\Account\Library;
-use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /** The synced slice of settings: timer preferences and master volume. */
-class SettingsController extends Controller
+class SettingsController extends AccountController
 {
     public function show(Request $request): JsonResponse
     {
@@ -28,13 +25,5 @@ class SettingsController extends Controller
         $this->library($request)->saveSettings($fields['timer'], (float) $fields['volume'], (int) $fields['updatedAt']);
 
         return response()->noContent();
-    }
-
-    private function library(Request $request): Library
-    {
-        /** @var User $user */
-        $user = $request->user();
-
-        return $user->library();
     }
 }

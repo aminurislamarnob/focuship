@@ -69,6 +69,8 @@ jobs:
           key: composer-${{ hashFiles('api/composer.lock') }}
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env && php artisan key:generate
+      # Passport signs the MCP's OAuth tokens; the keys are per-environment, never committed.
+      - run: php artisan passport:keys
       - run: vendor/bin/pint --test
       - run: vendor/bin/phpstan analyse --no-progress --memory-limit=1G
       - run: vendor/bin/pest
@@ -94,6 +96,7 @@ jobs:
             git pull --ff-only
             cd api
             composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            php artisan passport:keys --no-interaction || true
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache

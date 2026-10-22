@@ -3,10 +3,7 @@
 namespace App\Http\Controllers\Account;
 
 use App\Account\Library;
-use App\Http\Controllers\Controller;
 use App\Models\Preset;
-use App\Models\User;
-use App\Rules\KnownSounds;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -15,7 +12,7 @@ use Illuminate\Validation\Rule;
 /**
  * The listener's saved presets, and the public read behind a `?p=` share link.
  */
-class PresetController extends Controller
+class PresetController extends AccountController
 {
     public function index(Request $request): JsonResponse
     {
@@ -26,11 +23,13 @@ class PresetController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        // Shape only: what counts as a usable label or mix lives in Library, so the
+        // MCP cannot drift from this.
         $fields = $request->validate([
             'id' => ['required', 'uuid', Rule::unique('presets', 'id')],
-            'label' => ['required', 'string', 'min:2', 'max:60'],
-            'layers' => ['required', 'array', 'min:1', 'max:'.self::MAX_LAYERS, new KnownSounds],
-            'layers.*' => ['required', 'numeric', 'between:0,1'],
+            'label' => ['required', 'string'],
+            'layers' => ['required', 'array'],
+            'layers.*' => ['required', 'numeric'],
         ]);
 
         $preset = $this->library($request)->savePreset($fields['id'], $fields['label'], $fields['layers']);
@@ -43,7 +42,7 @@ class PresetController extends Controller
         $preset = $this->find($request, $id);
 
         $fields = $request->validate([
-            'label' => ['sometimes', 'string', 'min:2', 'max:60'],
+            'label' => ['sometimes', 'string'],
             'isPublic' => ['sometimes', 'boolean'],
         ]);
 
@@ -79,9 +78,6 @@ class PresetController extends Controller
         ]);
     }
 
-    /** A mix nobody could hear all of at once is a mistake, not a preset. */
-    public const MAX_LAYERS = 20;
-
     private function find(Request $request, string $id): Preset
     {
         $preset = $this->library($request)->preset($id);
@@ -90,13 +86,5 @@ class PresetController extends Controller
         abort_if($preset === null, 404);
 
         return $preset;
-    }
-
-    private function library(Request $request): Library
-    {
-        /** @var User $user */
-        $user = $request->user();
-
-        return $user->library();
     }
 }

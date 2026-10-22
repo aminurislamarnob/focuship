@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Laravel\Passport\AuthCode;
 use Laravel\Passport\Token;
 
@@ -31,6 +32,9 @@ class DeleteAccountController extends Controller
         // Every AI assistant the listener connected loses access with the account.
         Token::where('user_id', $user->getKey())->delete();
         AuthCode::where('user_id', $user->getKey())->delete();
+
+        // And every other device they are still signed in on.
+        DB::table('sessions')->where('user_id', $user->getKey())->delete();
 
         // Presets, favorites, settings and identities all cascade from the user row.
         $user->delete();

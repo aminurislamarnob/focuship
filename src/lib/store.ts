@@ -385,7 +385,7 @@ async function refreshCloud(userId: string) {
     const [favorites, presets, cloudSettings] = await Promise.all([
       cloud.listFavorites(),
       cloud.listPresets(),
-      cloud.getSettings(userId),
+      cloud.getSettings(),
     ]);
     if (state.account.user?.id !== userId) return;
     setAccount({ favorites, presets });
@@ -426,7 +426,7 @@ function pushSettingsSoon() {
     const user = state.account.user;
     if (!user) return;
     cloud
-      .pushSettings(user.id, { timer: state.timer.settings, volume: state.volume, updatedAt: state.settingsUpdatedAt })
+      .pushSettings({ timer: state.timer.settings, volume: state.volume, updatedAt: state.settingsUpdatedAt })
       .catch(() => {});
   }, SETTINGS_PUSH_MS);
 }
@@ -462,7 +462,7 @@ function savePreset(label: string, layers: Layers): boolean {
   const preset: CustomPreset = { id: crypto.randomUUID(), label: trimmed, layers: { ...layers }, isPublic: false };
   setAccount({ presets: [preset, ...state.account.presets] });
   set({ notice: "Saved to your presets." }, false);
-  cloud.createPreset(user.id, preset).catch((e) => {
+  cloud.createPreset(preset).catch((e) => {
     setAccount({ presets: state.account.presets.filter((p) => p.id !== preset.id) });
     actions.showNotice(errorNotice(e, "Couldn’t save your preset."));
   });
@@ -768,7 +768,7 @@ export const actions = {
     haptic();
     const had = state.account.favorites.includes(ref);
     setAccount({ favorites: had ? state.account.favorites.filter((r) => r !== ref) : [...state.account.favorites, ref] });
-    (had ? cloud.removeFavorite(user.id, ref) : cloud.addFavorite(user.id, ref)).catch((e) => {
+    (had ? cloud.removeFavorite(ref) : cloud.addFavorite(ref)).catch((e) => {
       setAccount({
         favorites: had ? [...state.account.favorites, ref] : state.account.favorites.filter((r) => r !== ref),
       });
@@ -818,7 +818,7 @@ export const actions = {
       favorites: state.account.favorites.filter((r) => r !== id),
     });
     set({ recents: state.recents.filter((r) => r !== id) }, false);
-    cloud.deletePreset(user.id, id).catch((e) => {
+    cloud.deletePreset(id).catch((e) => {
       setAccount({ presets: [before, ...state.account.presets] });
       actions.showNotice(errorNotice(e, "Couldn’t delete that preset."));
     });

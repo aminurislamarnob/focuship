@@ -1,5 +1,9 @@
 <?php
 
+use Laravel\Passport\Client;
+use Laravel\Passport\RefreshToken;
+use Laravel\Passport\Token;
+
 /**
  * What an AI client meets at api.focuship.app/mcp before it has a token.
  *
@@ -84,4 +88,43 @@ it('shows a signed-in listener what the AI app is asking for', function () {
         ->assertOk()
         ->assertSee('Claude')
         ->assertSee('Focuship', false);
+});
+
+it('lets a connected client refresh its token, and retires the old one', function () {
+    $ada = listener();
+    $first = connectMcpClient($ada);
+    $client = Client::firstOrFail();
+
+    $refreshed = $this->postJson('/oauth/token', [
+        'grant_type' => 'refresh_token',
+        'refresh_token' => $first['refresh_token'],
+        'client_id' => $client->getKey(),
+    ])->assertOk()->json();
+
+    expect($refreshed['access_token'])->not->toBe($first['access_token']);
+
+    // The new token works...
+    $this->withToken($refreshed['access_token'])
+        ->withHeaders(['Accept' => 'application/json, text/event-stream'])
+        ->postJson('/mcp', ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/list'])
+        ->assertOk();
+
+    // ...and the refresh token it came from cannot be used twice.
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'refresh_token',
+        'refresh_token' => $first['refresh_token'],
+        'client_id' => $client->getKey(),
+    ])->assertStatus(400);
+});
+
+it('lets a connection lapse about a month after it was last used', function () {
+    // The access token is short-lived (asserted above); this is the clock that decides
+    // when an assistant nobody has used stops being able to get a new one.
+    connectMcpClient(listener());
+
+    expect(now()->diffInDays(RefreshToken::firstOrFail()->expires_at))
+        ->toBeGreaterThanOrEqual(29)
+        ->toBeLessThanOrEqual(30);
+
+    expect(now()->diffInDays(Token::firstOrFail()->expires_at))->toBeLessThan(1);
 });

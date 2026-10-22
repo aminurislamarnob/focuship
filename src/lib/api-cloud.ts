@@ -31,12 +31,23 @@ export interface ApiCloudOptions {
   navigate?: (url: string) => void;
 }
 
-interface ApiError {
+/** The body Laravel sends with a 4xx: a message, and per-field messages when it validated. */
+interface ErrorBody {
   message?: string;
   errors?: Record<string, string[]>;
 }
 
 const DEFAULT_MESSAGE = "Something went wrong. Check your connection and try again.";
+
+/** A CloudError that remembers the status, so callers can tell "gone" from "broken". */
+class ApiError extends CloudError {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
 
 const browserCookie = (name: string): string | null => {
   if (typeof document === "undefined") return null;
@@ -45,7 +56,7 @@ const browserCookie = (name: string): string | null => {
 };
 
 /** The first message the API gave, which is the one worth showing. */
-function messageFrom(body: ApiError | null, fallback: string): string {
+function messageFrom(body: ErrorBody | null, fallback: string): string {
   const firstField = Object.values(body?.errors ?? {})[0]?.[0];
   return firstField ?? body?.message ?? fallback;
 }
@@ -103,13 +114,13 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
 
     if (response.status === 204) return undefined as T;
 
-    const payload = (await response.json().catch(() => null)) as (T & ApiError) | null;
+    const payload = (await response.json().catch(() => null)) as (T & ErrorBody) | null;
 
     if (!response.ok) {
       if (response.status === 429) {
         throw new CloudError("Too many tries. Wait a minute, then try again.");
       }
-      throw new CloudError(messageFrom(payload, fallback));
+      throw new ApiError(messageFrom(payload, fallback), response.status);
     }
 
     return payload as T;
@@ -194,11 +205,11 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
       return favorites;
     },
 
-    async addFavorite(_userId, ref) {
+    async addFavorite(ref) {
       await request("POST", "/account/favorites", { ref }, "Couldn’t save that favorite.");
     },
 
-    async removeFavorite(_userId, ref) {
+    async removeFavorite(ref) {
       await request(
         "DELETE",
         `/account/favorites/${encodeURIComponent(ref)}`,
@@ -217,7 +228,7 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
       return presets.map(toPreset);
     },
 
-    async createPreset(_userId, preset) {
+    async createPreset(preset) {
       await request(
         "POST",
         "/account/presets",
@@ -244,7 +255,7 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
       );
     },
 
-    async deletePreset(_userId, id) {
+    async deletePreset(id) {
       await request(
         "DELETE",
         `/account/presets/${encodeURIComponent(id)}`,
@@ -261,7 +272,7 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
         return preset;
       } catch (error) {
         // A link to a preset that was deleted or made private is "gone", not a failure.
-        if (error instanceof CloudError && error.message === NOT_FOUND) return null;
+        if (error instanceof ApiError && error.status === 404) return null;
         throw error;
       }
     },
@@ -276,7 +287,7 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
       return settings;
     },
 
-    async pushSettings(_userId, settings) {
+    async pushSettings(settings) {
       await request("PUT", "/account/settings", settings, "Couldn’t sync your settings.");
     },
 
@@ -301,5 +312,4 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
   };
 }
 
-/** The API's wording for a share link that no longer resolves. */
-const NOT_FOUND = "That shared preset is no longer available.";
+
