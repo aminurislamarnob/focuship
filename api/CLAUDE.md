@@ -24,8 +24,7 @@ and `php artisan passport:keys`.
 
 - **`app/Account/Library.php`** is the deep module: one listener's presets, favorites
   and settings. Both surfaces go through it — the site's account API and the MCP's
-  tools — so a rule like the fifty-preset cap cannot differ between them. Put domain
-  rules here, not in a controller or a tool.
+  tools — so a rule like the fifty-preset cap cannot differ between them.
 - **`app/Auth/`** holds sign-in: `Accounts` (find or create a listener, linked by
   verified email), `EmailCodes`, `GoogleIdToken`, `Turnstile`.
 - **`app/Catalog/`** reads the generated `resources/catalog.json` and builds share
@@ -45,10 +44,9 @@ and `php artisan passport:keys`.
 - **Never trust a cached relation** for data a second request may have changed: query
   it (`$user->settings()->first()`, not `$user->settings`).
 - **Rate limit every public route.** Limiters live in `AppServiceProvider`.
-- **Tool and endpoint errors are read by people and by models**: say what went wrong
-  and what to do instead, and name the tool that helps.
 - `updated_at` on `user_settings` is the last-write-wins clock and keeps
   milliseconds; do not let Eloquent overwrite it.
+- **Judgement** for domain checks, uncast input, and error wording: `CODING_STANDARDS.md`.
 
 ## Tests
 
