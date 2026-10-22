@@ -4,7 +4,17 @@ import { test as base, expect, type Page } from "@playwright/test";
  * Every page test fails on an uncaught error or a console error, which is where React reports
  * hydration mismatches in a production build.
  */
-export const test = base.extend<{ errors: string[] }>({
+export const test = base.extend<{ errors: string[]; noAnalytics: void }>({
+  // Tests don't count as visits: the analytics beacon is replaced with an empty script.
+  noAnalytics: [
+    async ({ page }, use) => {
+      await page.route("https://static.cloudflareinsights.com/**", (route) =>
+        route.fulfill({ contentType: "text/javascript", body: "" }),
+      );
+      await use();
+    },
+    { auto: true },
+  ],
   errors: [
     async ({ page }, use) => {
       const errors: string[] = [];

@@ -23,6 +23,6 @@ export const REPO_URL = "https://github.com/aminurislamarnob/focuship";
  * Cloudflare Web Analytics site token (cookie-free). Create the site in the Cloudflare dashboard
  * (Analytics & Logs → Web Analytics) and paste its token here; the beacon is omitted while empty.
  */
-export const CF_ANALYTICS_TOKEN = "";
+export const CF_ANALYTICS_TOKEN = "f2d0d0f51d2c4baeb906e917e2417cc8";
 
 export const absoluteUrl = (path: string) => new URL(path, SITE_URL).toString();
