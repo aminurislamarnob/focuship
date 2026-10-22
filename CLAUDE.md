@@ -100,3 +100,17 @@ Goal: real traffic from traditional search and AI assistants. Decisions settled 
 - **Before launch:** ship the sci-fi drone (original, fits the spaceship theme), random first mix and category counts. Photo scene backgrounds wait until after launch (lazy-loaded so they don't hurt first paint).
 
 Build order: rename → domain + redirects → SEO foundation (metadata, canonical, OG images, sitemap, robots, llms.txt, JSON-LD, analytics, Search Console/Bing verification) → pSEO templates (wave 1) → 6 guides (owner reviews) → pre-launch features → launch kit (copy for each channel).
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues on aminurislamarnob/focuship (via `gh`). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
