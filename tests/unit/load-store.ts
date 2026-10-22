@@ -4,8 +4,8 @@ import type { FocusState } from "@/lib/store";
 
 /**
  * A fresh copy of the store (it keeps module-level state), loaded at `url` with `saved` in
- * localStorage, as a visitor's browser would have it. The audio engine and Supabase are stubbed
- * by the calling test file's vi.mock calls.
+ * localStorage, as a visitor's browser would have it. The audio engine and the Laravel gateway
+ * are stubbed by the calling test file's vi.mock calls.
  */
 export async function loadStore(url = "/", saved?: object) {
   vi.resetModules();
