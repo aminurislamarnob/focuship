@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account\ConnectedAppController;
 use App\Http\Controllers\Account\DeleteAccountController;
 use App\Http\Controllers\Account\FavoriteController;
 use App\Http\Controllers\Account\PresetController;
@@ -36,6 +37,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     Route::get('/account/settings', [SettingsController::class, 'show']);
     Route::put('/account/settings', [SettingsController::class, 'update']);
+
+    Route::get('/account/connected-apps', [ConnectedAppController::class, 'index']);
+    Route::delete('/account/connected-apps/{client}', [ConnectedAppController::class, 'destroy']);
 
     Route::delete('/account', DeleteAccountController::class);
 });
