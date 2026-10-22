@@ -27,6 +27,14 @@ export interface CustomPreset {
   isPublic: boolean;
 }
 
+/** An AI assistant the listener connected to their account (ADR 0004). */
+export interface ConnectedApp {
+  id: string;
+  name: string;
+  connectedAt: string | null;
+  lastUsedAt: string | null;
+}
+
 /** The synced slice of settings: timer preferences and master volume, last write wins. */
 export interface CloudSettings<T = unknown> {
   timer: T;
@@ -83,4 +91,9 @@ export interface Cloud {
 
   getSettings(userId: string): Promise<CloudSettings | null>;
   pushSettings(userId: string, settings: CloudSettings): Promise<void>;
+
+  /** The AI assistants this listener has connected, most recently used first. */
+  listConnectedApps(): Promise<ConnectedApp[]>;
+  /** Cuts an assistant off at once; its tokens stop working. */
+  revokeConnectedApp(id: string): Promise<void>;
 }

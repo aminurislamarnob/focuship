@@ -186,3 +186,21 @@ test("signing out leaves nobody signed in", async () => {
 
   assert.deepEqual(seen, [ADA, null]);
 });
+
+test("lists the AI assistants the listener connected", async () => {
+  const app = { id: "c-1", name: "Claude", connectedAt: "2026-10-20T10:00:00+00:00", lastUsedAt: "2026-10-22T08:00:00+00:00" };
+  const { cloud } = cloudFor({ "GET /account/connected-apps": { body: { apps: [app] } } });
+
+  assert.deepEqual(await cloud.listConnectedApps(), [app]);
+});
+
+test("disconnects an AI assistant", async () => {
+  const { api, cloud } = cloudFor({});
+
+  await cloud.revokeConnectedApp("c-1");
+
+  assert.deepEqual(
+    api.calls.filter((c) => c.path === "/account/connected-apps/c-1").map((c) => c.method),
+    ["DELETE"],
+  );
+});

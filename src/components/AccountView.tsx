@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import type { Provider } from "@/lib/cloud";
 import { actions, useFocus } from "@/lib/store";
+import { ConnectedApps } from "@/components/ConnectedApps";
 import { CLOUD_ENABLED, FACEBOOK_ENABLED, GOOGLE_CLIENT_ID, TURNSTILE_SITE_KEY } from "@/lib/focuship-api";
 import { FacebookIcon, GitHubIcon, GoogleIcon } from "./BrandIcons";
 import { EmailSignIn } from "./EmailSignIn";
@@ -151,6 +152,14 @@ function SignedOut({ reason }: { reason: string | null }) {
           . One account per email, whichever way you sign in.
         </p>
       </div>
+
+      <p className="text-[0.8125rem] leading-[1.55] text-muted">
+        With an account you can also{" "}
+        <Link href="/mcp" className="text-soft underline underline-offset-4 hover:text-fg">
+          connect an AI assistant
+        </Link>{" "}
+        and have it design mixes and manage your presets for you.
+      </p>
     </section>
   );
 }
@@ -201,6 +210,8 @@ function SignedIn() {
           <p className="mt-1 text-xs text-faint">Your presets</p>
         </div>
       </section>
+
+      <ConnectedApps />
 
       <section className="flex flex-col gap-2">
         <button

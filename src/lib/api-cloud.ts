@@ -4,6 +4,7 @@ import {
   PRESET_LIMIT,
   type Cloud,
   type CloudSettings,
+  type ConnectedApp,
   type CloudUser,
   type CustomPreset,
   type Provider,
@@ -277,6 +278,25 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
 
     async pushSettings(_userId, settings) {
       await request("PUT", "/account/settings", settings, "Couldn’t sync your settings.");
+    },
+
+    async listConnectedApps() {
+      const { apps } = await request<{ apps: ConnectedApp[] }>(
+        "GET",
+        "/account/connected-apps",
+        undefined,
+        "Couldn’t load your connected apps.",
+      );
+      return apps;
+    },
+
+    async revokeConnectedApp(id) {
+      await request(
+        "DELETE",
+        `/account/connected-apps/${encodeURIComponent(id)}`,
+        undefined,
+        "Couldn’t disconnect that app.",
+      );
     },
   };
 }

@@ -16,6 +16,7 @@ const PAGES = [
   "/pomodoro/25-5",
   "/sounds-for/coding",
   "/privacy",
+  "/mcp",
   "/account",
 ];
 

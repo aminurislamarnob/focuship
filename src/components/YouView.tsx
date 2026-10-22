@@ -92,6 +92,18 @@ export function YouView({ nav }: { nav?: ReactNode }) {
             Privacy policy
           </Link>
         </section>
+        <section aria-labelledby="you-mcp" className={cx("flex flex-col", wideCard)}>
+          <h3 id="you-mcp" className={sectionTitle}>
+            Use it from your AI assistant
+          </h3>
+          <p className="mt-2 text-sm leading-[1.55] text-muted">
+            Connect Focuship to Claude, ChatGPT or your editor, and have it design mixes and manage your presets for
+            you. A free account is needed, and you can disconnect it at any time.
+          </p>
+          <Link href="/mcp" className="mt-1 inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">
+            How to connect one
+          </Link>
+        </section>
         <section aria-labelledby="you-keys" className={cx("flex flex-col", wideCard)}>
           <div className="flex items-baseline justify-between">
             <h3 id="you-keys" className={sectionTitle}>

@@ -1,6 +1,7 @@
 import { PRESETS, SOUNDS } from "@/lib/catalog";
 import { GUIDES, GUIDES_HUB, guidePath, isGuideIndexable } from "@/lib/guides";
 import { liveHubs, pagePath, pagesInHub, isIndexable } from "@/lib/pages";
+import { MCP_DESCRIPTION, MCP_URL } from "@/lib/mcp";
 import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
@@ -23,6 +24,13 @@ ${SITE_NAME} is a free web app (installable as a PWA) that mixes ambient sounds 
 ## App
 
 - [${SITE_NAME}](${absoluteUrl("/")}): the sound mixer and focus timer
+
+## For AI assistants
+
+${SITE_NAME} has an MCP server, so an assistant can design mixes and manage a listener's presets, favorites and focus timer on their behalf. It cannot play sound: it returns a link that opens the mix ready to play. A free ${SITE_NAME} account and OAuth sign-in are required.
+
+- Connector URL: ${MCP_URL}
+- [How to connect one](${absoluteUrl("/mcp")}): ${MCP_DESCRIPTION}
 ${liveHubs()
   .map(
     (hub) => `
