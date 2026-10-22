@@ -68,6 +68,12 @@ class MixLink
         return $site.'/?mix='.self::encode($layers);
     }
 
+    /** The link that opens a shared preset by its id. */
+    public static function shareLink(string $presetId): string
+    {
+        return rtrim((string) config('app.frontend_url'), '/').'/?p='.$presetId;
+    }
+
     /** Whole percentages in 0..1, the only volumes a share link can carry. */
     public static function clamp(float $volume): float
     {

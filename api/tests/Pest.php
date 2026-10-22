@@ -238,13 +238,17 @@ function mcpToken(User $user): string
 /** The tool names a connected client is offered. */
 function mcpToolNames(User $user): array
 {
-    $response = test()->mcp($user, 'tools/list');
+    $names = [];
+    $cursor = null;
 
-    return collect(TestCase::class)->pipe(
-        fn () => collect(json_decode(json_encode(mcpPayload($response)), true)['result']['tools'] ?? [])
-            ->pluck('name')
-            ->all()
-    );
+    // The list is paginated; a client that stopped at page one would miss tools.
+    do {
+        $result = mcpPayload(test()->mcp($user, 'tools/list', $cursor === null ? [] : ['cursor' => $cursor]))['result'] ?? [];
+        $names = array_merge($names, collect($result['tools'] ?? [])->pluck('name')->all());
+        $cursor = $result['nextCursor'] ?? null;
+    } while ($cursor !== null);
+
+    return $names;
 }
 
 function mcpPayload(TestResponse $response): array
@@ -259,4 +263,23 @@ function mcpPayload(TestResponse $response): array
     }
 
     return json_decode($body, true) ?: [];
+}
+
+/** One tool's advertised description, schema and annotations. */
+function mcpTool(User $user, string $name): array
+{
+    $cursor = null;
+
+    do {
+        $result = mcpPayload(test()->mcp($user, 'tools/list', $cursor === null ? [] : ['cursor' => $cursor]))['result'] ?? [];
+        $tool = collect($result['tools'] ?? [])->firstWhere('name', $name);
+
+        if ($tool !== null) {
+            return $tool;
+        }
+
+        $cursor = $result['nextCursor'] ?? null;
+    } while ($cursor !== null);
+
+    return [];
 }

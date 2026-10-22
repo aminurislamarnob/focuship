@@ -2,6 +2,24 @@
 
 namespace App\Mcp\Servers;
 
+use App\Mcp\Prompts\DesignAMix;
+use App\Mcp\Resources\CatalogResource;
+use App\Mcp\Resources\GuidesResource;
+use App\Mcp\Tools\AddFavorite;
+use App\Mcp\Tools\BuildMix;
+use App\Mcp\Tools\DeletePreset;
+use App\Mcp\Tools\GetPreset;
+use App\Mcp\Tools\GetSettings;
+use App\Mcp\Tools\ListCategories;
+use App\Mcp\Tools\ListFavorites;
+use App\Mcp\Tools\ListMyPresets;
+use App\Mcp\Tools\ListPresets;
+use App\Mcp\Tools\RemoveFavorite;
+use App\Mcp\Tools\RenamePreset;
+use App\Mcp\Tools\SavePreset;
+use App\Mcp\Tools\SearchSounds;
+use App\Mcp\Tools\SetPresetPublic;
+use App\Mcp\Tools\UpdateSettings;
 use App\Mcp\Tools\Whoami;
 use Laravel\Mcp\Server;
 use Laravel\Mcp\Server\Attributes\Instructions;
@@ -38,11 +56,35 @@ class FocushipServer extends Server
     /** @var array<int, class-string<Tool>> */
     protected array $tools = [
         Whoami::class,
+
+        // The catalogue, and turning a mood into a mix.
+        ListCategories::class,
+        SearchSounds::class,
+        ListPresets::class,
+        GetPreset::class,
+        BuildMix::class,
+
+        // The listener's own library.
+        ListMyPresets::class,
+        SavePreset::class,
+        RenamePreset::class,
+        SetPresetPublic::class,
+        DeletePreset::class,
+        ListFavorites::class,
+        AddFavorite::class,
+        RemoveFavorite::class,
+        GetSettings::class,
+        UpdateSettings::class,
     ];
 
     /** @var array<int, class-string<Server\Resource>> */
-    protected array $resources = [];
+    protected array $resources = [
+        CatalogResource::class,
+        GuidesResource::class,
+    ];
 
     /** @var array<int, class-string<Prompt>> */
-    protected array $prompts = [];
+    protected array $prompts = [
+        DesignAMix::class,
+    ];
 }
