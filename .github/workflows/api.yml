@@ -6,6 +6,7 @@
 #   variable API_SSH_USER  cPanel username
 #   variable API_SSH_PORT  SSH port (cPanel hosts often use a non-22 port)
 #   variable API_PATH      absolute path of the repo checkout on the host (api.focuship.app's document root is <API_PATH>/api/public)
+#   variable API_PHP       optional PHP 8.3+ CLI binary when the host's default `php` is older (CloudLinux: /opt/alt/php83/usr/bin/php)
 name: API
 
 on:
@@ -87,6 +88,7 @@ jobs:
           USER: ${{ vars.API_SSH_USER }}
           PORT: ${{ vars.API_SSH_PORT }}
           APP_PATH: ${{ vars.API_PATH }}
+          PHP: ${{ vars.API_PHP || 'php' }}
         working-directory: .
         run: |
           install -m 600 /dev/null key && printf '%s\n' "$SSH_KEY" > key
@@ -95,11 +97,11 @@ jobs:
             cd "$APP_PATH"
             git pull --ff-only
             cd api
-            composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
-            php artisan passport:keys --no-interaction || true
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+            $PHP \$(command -v composer) install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+            $PHP artisan passport:keys --no-interaction || true
+            $PHP artisan migrate --force
+            $PHP artisan config:cache
+            $PHP artisan route:cache
+            $PHP artisan view:cache
           EOF
           rm -f key
