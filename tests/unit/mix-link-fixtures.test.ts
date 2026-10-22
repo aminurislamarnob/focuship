@@ -2,7 +2,13 @@
 // The share-link format is shared with the Laravel API (ADR 0002): both sides must
 // reproduce tests/fixtures/mix-links.json exactly, or links from the MCP open the wrong mix.
 import { describe, expect, it, vi } from "vitest";
-import fixtures from "../fixtures/mix-links.json";
+import fixturesJson from "../fixtures/mix-links.json";
+import type { Layers } from "@/lib/catalog";
+
+const fixtures = fixturesJson as unknown as {
+  encode: { name: string; layers: Layers; query: string }[];
+  decode: { name: string; query: string; decoded: Layers }[];
+};
 import { loadStore } from "./load-store";
 
 vi.mock("@/lib/audio/engine", () => ({
