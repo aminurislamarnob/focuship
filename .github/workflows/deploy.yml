@@ -8,6 +8,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # The Laravel API deploys on its own (api.yml).
+    paths-ignore:
+      - "api/**"
+      - ".github/workflows/api.yml"
   workflow_dispatch:
 
 # One deploy at a time; a newer push waits rather than racing the one in progress.
