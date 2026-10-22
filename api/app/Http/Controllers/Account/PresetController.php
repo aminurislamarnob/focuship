@@ -29,7 +29,6 @@ class PresetController extends AccountController
             'id' => ['required', 'uuid', Rule::unique('presets', 'id')],
             'label' => ['required', 'string'],
             'layers' => ['required', 'array'],
-            'layers.*' => ['required', 'numeric'],
         ]);
 
         $preset = $this->library($request)->savePreset($fields['id'], $fields['label'], $fields['layers']);

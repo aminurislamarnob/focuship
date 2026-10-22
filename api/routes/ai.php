@@ -19,5 +19,10 @@ Route::middleware('throttle:oauth-register')->group(function () {
     Mcp::oauthRoutes();
 });
 
-Mcp::web('/mcp', FocushipServer::class)
-    ->middleware(['auth:api', 'throttle:mcp', 'mcp.body-size']);
+// The group reaches the GET and DELETE that only ever answer 405, which the package
+// registers alongside the server. Auth still runs before the throttle (middleware
+// priority), so a connected client is limited per listener, not per IP.
+Route::middleware('throttle:mcp')->group(function () {
+    Mcp::web('/mcp', FocushipServer::class)
+        ->middleware(['auth:api', 'mcp.body-size']);
+});

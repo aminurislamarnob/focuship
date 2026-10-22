@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Auth\EmailCodes;
 use Illuminate\Console\Command;
 use Laravel\Passport\Client;
+use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 
 /**
@@ -28,7 +29,11 @@ class Prune extends Command
     public function handle(EmailCodes $codes): int
     {
         // Revoked tokens are dead the moment the listener said so; expired ones linger
-        // briefly in case they ask what happened.
+        // briefly in case they ask what happened. The same goes for refresh tokens.
+        RefreshToken::where('revoked', true)
+            ->orWhere('expires_at', '<', now()->subDays(self::EXPIRED_TOKENS_KEPT_DAYS))
+            ->delete();
+
         $tokens = Token::where('revoked', true)
             ->orWhere('expires_at', '<', now()->subDays(self::EXPIRED_TOKENS_KEPT_DAYS))
             ->delete();

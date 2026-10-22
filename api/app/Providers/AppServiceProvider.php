@@ -69,6 +69,10 @@ class AppServiceProvider extends ServiceProvider
             ? Limit::perMinute(120)->by('mcp:'.$request->user()->getAuthIdentifier())
             : Limit::perMinute(30)->by('mcp-ip:'.$request->ip()));
 
+        RateLimiter::for('web', fn (Request $request) => $request->user()
+            ? Limit::perMinute(120)->by('web:'.$request->user()->getAuthIdentifier())
+            : Limit::perMinute(120)->by('web-ip:'.$request->ip()));
+
         RateLimiter::for('api', fn (Request $request) => $request->user()
             ? Limit::perMinute(120)->by('api:'.$request->user()->getAuthIdentifier())
             : Limit::perMinute(120)->by('api-ip:'.$request->ip()));

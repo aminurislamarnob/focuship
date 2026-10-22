@@ -14,7 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         apiPrefix: '',
         commands: __DIR__.'/../routes/console.php',
-        health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Behind Cloudflare: request()->ip() is the visitor (CF-Connecting-IP); trust the proxy for HTTPS detection.
@@ -23,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->statefulApi();
         $middleware->alias(['mcp.body-size' => LimitBodySize::class]);
+        // Every browser page — ours, Passport's consent screens, Sanctum's CSRF cookie —
+        // shares one limit, so a page added later cannot ship unthrottled.
+        $middleware->web(append: ['throttle:web']);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

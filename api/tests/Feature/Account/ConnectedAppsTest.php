@@ -74,6 +74,22 @@ it('cuts off an app the listener revokes', function () {
     $this->actingAs($ada)->getJson('/account/connected-apps', fromSite())->assertJsonPath('apps', []);
 });
 
+it('leaves a revoked app no way to refresh its way back in', function () {
+    $ada = listener();
+    $token = connectMcpClient($ada, 'Claude');
+    $client = Client::firstOrFail();
+
+    $this->actingAs($ada)
+        ->deleteJson("/account/connected-apps/{$client->getKey()}", [], fromSite())
+        ->assertNoContent();
+
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'refresh_token',
+        'refresh_token' => $token['refresh_token'],
+        'client_id' => $client->getKey(),
+    ])->assertStatus(400);
+});
+
 it('cannot revoke an app connected by someone else', function () {
     connectMcpClient(listener(), 'Theirs');
     $client = Client::firstOrFail();

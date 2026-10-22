@@ -84,9 +84,10 @@ it('shares a built-in preset by its own page when the mix is untouched', functio
     expect($result)->toContain(config('app.frontend_url').'/mix/corner-cafe');
 });
 
-it('refuses a sound that does not exist, and says which', function () {
+it('refuses a sound that does not exist, says which, and how to find the right one', function () {
     expect($this->mcpError(listener(), 'build-mix', ['layers' => ['rain-on-moon' => 0.5]]))
-        ->toContain('rain-on-moon');
+        ->toContain('rain-on-moon')
+        ->toContain('search-sounds');
 });
 
 it('clamps a volume an over-eager assistant set too high, rather than refusing', function () {
@@ -101,8 +102,22 @@ it('clamps a negative volume to silence', function () {
         ->toContain('/?mix=cafe:0');
 });
 
-it('refuses a mix with nothing in it', function () {
-    expect($this->mcpError(listener(), 'build-mix', ['layers' => []]))->not->toBe('');
+it('refuses a volume that is not a number, rather than muting the sound', function () {
+    expect($this->mcpError(listener(), 'build-mix', ['layers' => ['cafe' => 'loud']]))
+        ->toContain('cafe')
+        ->toContain('between 0 and 1');
+});
+
+it('reads a volume sent as text the way it was meant', function () {
+    expect($this->mcpTool(listener(), 'build-mix', ['layers' => ['cafe' => '0.5']]))
+        ->toContain('/?mix=cafe:50');
+});
+
+it('refuses a mix with nothing in it, without sending the assistant off to search', function () {
+    // The ids were never the problem, so pointing at search-sounds would mislead.
+    expect($this->mcpError(listener(), 'build-mix', ['layers' => []]))
+        ->toContain('1 and 20 sounds')
+        ->not->toContain('search-sounds');
 });
 
 it('refuses a mix nobody could hear all of at once', function () {

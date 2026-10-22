@@ -16,9 +16,11 @@ class SettingsController extends AccountController
 
     public function update(Request $request): Response
     {
+        // Shape only: what counts as a usable timer or volume lives in Library, so the
+        // MCP cannot drift from this.
         $fields = $request->validate([
             'timer' => ['required', 'array'],
-            'volume' => ['required', 'numeric', 'between:0,1'],
+            'volume' => ['required', 'numeric'],
             'updatedAt' => ['required', 'integer', 'min:0'],
         ]);
 

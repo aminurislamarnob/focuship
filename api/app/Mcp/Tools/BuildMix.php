@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Account\Library;
+use App\Account\UnknownSounds;
 use App\Catalog\MixLink;
 use App\Mcp\Describe;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -27,15 +28,14 @@ class BuildMix extends Tool
 {
     public function handle(Request $request): ResponseFactory|Response
     {
-        /** @var array<string, float|int> $layers */
         $layers = (array) $request->get('layers', []);
 
         try {
-            // Unknown ids are refused by name; volumes are clamped, because an
-            // over-eager 1.4 still means "as loud as it goes".
             $volumes = Library::checkLayers($layers);
-        } catch (ValidationException $e) {
+        } catch (UnknownSounds $e) {
             return Response::error($e->getMessage().' Use search-sounds to find the right ids.');
+        } catch (ValidationException $e) {
+            return Response::error($e->getMessage());
         }
 
         $url = MixLink::url($volumes);

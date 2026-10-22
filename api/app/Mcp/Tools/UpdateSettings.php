@@ -6,6 +6,7 @@ use App\Account\TimerSettings;
 use App\Mcp\LibraryTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Validation\ValidationException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 use Laravel\Mcp\ResponseFactory;
@@ -34,27 +35,12 @@ class UpdateSettings extends LibraryTool
             }
 
             $minutes = (int) $request->get($field);
-
-            if ($minutes < TimerSettings::MIN_MINUTES || $minutes > TimerSettings::MAX_MINUTES) {
-                return Response::error(sprintf(
-                    'The %s length must be between %d and %d minutes.',
-                    $field,
-                    TimerSettings::MIN_MINUTES,
-                    TimerSettings::MAX_MINUTES,
-                ));
-            }
-
             $timer[$field] = $minutes;
             $changed[] = "{$field} {$minutes} min";
         }
 
         if ($request->get('longEvery') !== null) {
             $rounds = (int) $request->get('longEvery');
-
-            if ($rounds < 1 || $rounds > TimerSettings::MAX_ROUNDS) {
-                return Response::error('Long breaks must come every 1 to '.TimerSettings::MAX_ROUNDS.' rounds.');
-            }
-
             $timer['longEvery'] = $rounds;
             $changed[] = "a long break every {$rounds} rounds";
         }
@@ -67,13 +53,7 @@ class UpdateSettings extends LibraryTool
         }
 
         if ($request->get('volume') !== null) {
-            $wanted = (float) $request->get('volume');
-
-            if ($wanted < 0 || $wanted > 1) {
-                return Response::error('Volume must be a number between 0 (silent) and 1 (full).');
-            }
-
-            $volume = $wanted;
+            $volume = (float) $request->get('volume');
             $changed[] = "volume {$volume}";
         }
 
@@ -83,7 +63,12 @@ class UpdateSettings extends LibraryTool
             );
         }
 
-        $library->saveSettings($timer, $volume, now()->getTimestampMs());
+        try {
+            // The bounds live in Library, shared with the site's own settings sync.
+            $library->saveSettings($timer, $volume, now()->getTimestampMs());
+        } catch (ValidationException $e) {
+            return Response::error($e->getMessage());
+        }
 
         return Response::make(Response::text('Updated: '.implode(', ', $changed).'.'))
             ->withStructuredContent(['timer' => $timer, 'volume' => $volume]);

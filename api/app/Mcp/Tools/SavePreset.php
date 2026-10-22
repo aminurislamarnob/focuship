@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools;
 
 use App\Account\Library;
+use App\Account\UnknownSounds;
 use App\Mcp\Describe;
 use App\Mcp\LibraryTool;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -19,7 +20,6 @@ class SavePreset extends LibraryTool
 {
     public function handle(Request $request): ResponseFactory|Response
     {
-        /** @var array<string, float|int> $layers */
         $layers = (array) $request->get('layers', []);
 
         try {
@@ -28,6 +28,8 @@ class SavePreset extends LibraryTool
                 (string) $request->get('label'),
                 $layers,
             );
+        } catch (UnknownSounds $e) {
+            return Response::error($e->getMessage().' Use search-sounds to find the right ids.');
         } catch (ValidationException $e) {
             return Response::error($e->getMessage());
         }

@@ -91,6 +91,17 @@ it('clamps a volume outside what the mixer can play, rather than refusing', func
     expect($ada->library()->presets())->toHaveCount(1);
 });
 
+it('refuses a volume that is not a number, rather than saving a silent sound', function () {
+    $this->actingAs(listener())
+        ->postJson('/account/presets', [
+            'id' => (string) Str::uuid(),
+            'label' => 'Loud',
+            'layers' => ['cafe' => 'loud'],
+        ], fromSite())
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('layers');
+});
+
 it('refuses a mix with more sounds than anyone could hear at once', function () {
     $tooMany = Catalog::sounds()->take(21)
         ->mapWithKeys(fn (array $sound) => [$sound['id'] => 0.5])

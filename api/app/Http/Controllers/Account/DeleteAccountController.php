@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Account;
 
+use App\Account\ConnectedApps;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Laravel\Passport\AuthCode;
-use Laravel\Passport\Token;
 
 /**
  * Deleting the account: the listener, everything they saved, and every way back in.
@@ -30,8 +29,7 @@ class DeleteAccountController extends Controller
         Auth::forgetGuards();
 
         // Every AI assistant the listener connected loses access with the account.
-        Token::where('user_id', $user->getKey())->delete();
-        AuthCode::where('user_id', $user->getKey())->delete();
+        (new ConnectedApps($user))->forgetAll();
 
         // And every other device they are still signed in on.
         DB::table('sessions')->where('user_id', $user->getKey())->delete();

@@ -4,7 +4,9 @@ namespace App\Account;
 
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Laravel\Passport\AuthCode;
 use Laravel\Passport\Client;
+use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 
 /**
@@ -51,11 +53,23 @@ class ConnectedApps
             return false;
         }
 
-        Token::where('user_id', $this->user->getKey())
-            ->where('client_id', $clientId)
-            ->update(['revoked' => true]);
+        $appTokens = Token::where('user_id', $this->user->getKey())->where('client_id', $clientId);
+
+        // The refresh tokens too, or the app would simply mint itself a new access token.
+        RefreshToken::whereIn('access_token_id', $appTokens->clone()->select('id'))->update(['revoked' => true]);
+        $appTokens->update(['revoked' => true]);
 
         return true;
+    }
+
+    /** Every app loses access for good: the account is going. */
+    public function forgetAll(): void
+    {
+        $tokens = Token::where('user_id', $this->user->getKey());
+
+        RefreshToken::whereIn('access_token_id', $tokens->clone()->select('id'))->delete();
+        $tokens->delete();
+        AuthCode::where('user_id', $this->user->getKey())->delete();
     }
 
     /** Every token still worth anything: not revoked, not expired. */

@@ -2,6 +2,8 @@
 
 namespace App\Account;
 
+use Illuminate\Validation\ValidationException;
+
 /**
  * The timer preferences the app keeps, and their defaults.
  *
@@ -31,6 +33,39 @@ class TimerSettings
     public const MAX_ROUNDS = 12;
 
     /**
+     * A timer the app can actually run, whichever surface it came from.
+     *
+     * @param  array<string, mixed>  $timer
+     *
+     * @throws ValidationException
+     */
+    public static function check(array $timer): void
+    {
+        foreach (['focus', 'short', 'long'] as $field) {
+            if (array_key_exists($field, $timer) && ! self::isWholeNumber($timer[$field], self::MIN_MINUTES, self::MAX_MINUTES)) {
+                throw ValidationException::withMessages(['timer' => sprintf(
+                    'The %s length must be between %d and %d minutes.',
+                    $field,
+                    self::MIN_MINUTES,
+                    self::MAX_MINUTES,
+                )]);
+            }
+        }
+
+        if (array_key_exists('longEvery', $timer) && ! self::isWholeNumber($timer['longEvery'], 1, self::MAX_ROUNDS)) {
+            throw ValidationException::withMessages([
+                'timer' => 'Long breaks must come every 1 to '.self::MAX_ROUNDS.' rounds.',
+            ]);
+        }
+
+        foreach (['autoStart', 'notify'] as $flag) {
+            if (array_key_exists($flag, $timer) && ! is_bool($timer[$flag])) {
+                throw ValidationException::withMessages(['timer' => "{$flag} must be true or false."]);
+            }
+        }
+    }
+
+    /**
      * @param  array<string, mixed>  $stored
      * @return array<string, int|bool>
      */
@@ -40,5 +75,10 @@ class TimerSettings
         $merged = array_merge(self::DEFAULTS, array_intersect_key($stored, self::DEFAULTS));
 
         return $merged;
+    }
+
+    private static function isWholeNumber(mixed $value, int $min, int $max): bool
+    {
+        return is_int($value) && $value >= $min && $value <= $max;
     }
 }

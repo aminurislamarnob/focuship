@@ -42,7 +42,7 @@ class Library
     }
 
     /**
-     * @param  array<string, float|int>  $layers
+     * @param  array<array-key, mixed>  $layers
      *
      * @throws ValidationException when the label, the mix or the cap says no
      */
@@ -150,9 +150,19 @@ class Library
      * Last write wins: a device that was offline must not undo a newer change.
      *
      * @param  array<string, mixed>  $timer
+     *
+     * @throws ValidationException when the timer or volume is one the app cannot use
      */
     public function saveSettings(array $timer, float $volume, int $updatedAt): void
     {
+        TimerSettings::check($timer);
+
+        if ($volume < 0 || $volume > 1) {
+            throw ValidationException::withMessages([
+                'volume' => 'Volume must be a number between 0 (silent) and 1 (full).',
+            ]);
+        }
+
         $existing = $this->user->settings()->first();
 
         if ($existing !== null && $existing->updated_at->getTimestampMs() > $updatedAt) {
@@ -190,13 +200,15 @@ class Library
 
     /**
      * A mix Focuship can actually play. Unknown sounds are refused by name — guessing
-     * one would hand the listener a preset that opens to silence — while volumes are
-     * clamped, because an over-eager 1.4 still means "as loud as it goes".
+     * one would hand the listener a preset that opens to silence — and so are volumes
+     * that are not numbers, for the same reason. Numbers out of range are clamped,
+     * because an over-eager 1.4 still means "as loud as it goes".
      *
-     * @param  array<string, float|int>  $layers
+     * @param  array<array-key, mixed>  $layers
      * @return array<string, float>
      *
-     * @throws ValidationException
+     * @throws UnknownSounds when the mix names a sound Focuship does not have
+     * @throws ValidationException when the mix is empty, too big or not in volumes
      */
     public static function checkLayers(array $layers): array
     {
@@ -212,32 +224,19 @@ class Library
         ));
 
         if ($unknown !== []) {
-            throw ValidationException::withMessages(['layers' => self::unknownSounds($unknown)]);
+            throw UnknownSounds::named($unknown);
         }
 
-        return self::clampLayers($layers);
-    }
-
-    /** @param list<array-key> $ids */
-    public static function unknownSounds(array $ids): string
-    {
-        return 'Focuship has no sound called '.implode(', ', array_map(strval(...), $ids)).'.';
-    }
-
-    /**
-     * Volumes the app can actually play: known sounds, each between silence and full.
-     *
-     * @param  array<string, float|int>  $layers
-     * @return array<string, float>
-     */
-    public static function clampLayers(array $layers): array
-    {
         $clean = [];
 
         foreach ($layers as $id => $volume) {
-            if (Catalog::hasSound((string) $id)) {
-                $clean[(string) $id] = round(max(0.0, min(1.0, (float) $volume)), 3);
+            if (! is_numeric($volume)) {
+                throw ValidationException::withMessages([
+                    'layers' => "The volume for {$id} must be a number between 0 and 1.",
+                ]);
             }
+
+            $clean[(string) $id] = round(max(0.0, min(1.0, (float) $volume)), 3);
         }
 
         return $clean;

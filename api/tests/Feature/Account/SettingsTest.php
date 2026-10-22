@@ -61,6 +61,21 @@ it('refuses settings it cannot make sense of', function (array $body) {
     'no clock' => [['timer' => [], 'volume' => 0.5]],
 ]);
 
+// The same bounds the MCP's update-settings tool holds an assistant to.
+it('refuses a timer the app could never run', function (array $timer) {
+    $this->actingAs(listener())
+        ->putJson('/account/settings', ['timer' => $timer, 'volume' => 0.5, 'updatedAt' => now()->getTimestampMs()], fromSite())
+        ->assertStatus(422)
+        ->assertJsonValidationErrors('timer');
+})->with([
+    'a week-long focus session' => [['focus' => 10_000]],
+    'a zero-minute break' => [['short' => 0]],
+    'minutes that are not a number' => [['long' => 'forever']],
+    'no rounds before a long break' => [['longEvery' => 0]],
+    'more rounds than the timer shows' => [['longEvery' => 13]],
+    'a switch that is neither on nor off' => [['autoStart' => 'maybe']],
+]);
+
 it('never shows another listener’s settings', function () use ($timer) {
     $other = listener();
     $this->actingAs($other)->putJson('/account/settings', [

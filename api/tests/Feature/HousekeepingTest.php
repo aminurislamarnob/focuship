@@ -4,6 +4,7 @@ use App\Models\SignInCode;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
 use Laravel\Passport\Client;
+use Laravel\Passport\RefreshToken;
 use Laravel\Passport\Token;
 
 /**
@@ -63,6 +64,18 @@ it('clears out tokens that expired long ago', function () {
     expect(Token::count())->toBe(0);
 });
 
+it('clears out the refresh tokens of an app the listener cut off', function () {
+    $ada = listener();
+    connectMcpClient($ada);
+    $this->actingAs($ada)
+        ->deleteJson('/account/connected-apps/'.Client::firstOrFail()->getKey(), [], fromSite())
+        ->assertNoContent();
+
+    $this->artisan('focuship:prune')->assertSuccessful();
+
+    expect(RefreshToken::count())->toBe(0);
+});
+
 it('leaves a live connection alone', function () {
     $ada = listener();
     connectMcpClient($ada);
@@ -70,6 +83,7 @@ it('leaves a live connection alone', function () {
     $this->artisan('focuship:prune')->assertSuccessful();
 
     expect(Token::where('user_id', $ada->id)->count())->toBeGreaterThan(0);
+    expect(RefreshToken::count())->toBe(1);
 });
 
 it('clears out sign-in codes that can no longer be used', function () {

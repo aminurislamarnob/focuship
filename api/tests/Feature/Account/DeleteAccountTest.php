@@ -4,6 +4,7 @@ use App\Models\Preset;
 use App\Models\SocialIdentity;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Laravel\Passport\Client;
 
 it('needs an account', function () {
     $this->deleteJson('/account', [], fromSite())->assertUnauthorized();
@@ -55,4 +56,18 @@ it('signs the listener out of their other devices too', function () {
     $this->actingAs($ada)->deleteJson('/account', [], fromSite())->assertNoContent();
 
     expect(DB::table('sessions')->where('user_id', $ada->id)->count())->toBe(0);
+});
+
+it('leaves no AI assistant a way back in', function () {
+    $ada = listener();
+    $connection = connectMcpClient($ada);
+
+    $this->actingAs($ada)->deleteJson('/account', [], fromSite())->assertNoContent();
+
+    // The assistant still holds its refresh token; it must not mint a new access token.
+    $this->postJson('/oauth/token', [
+        'grant_type' => 'refresh_token',
+        'refresh_token' => $connection['refresh_token'],
+        'client_id' => Client::firstOrFail()->getKey(),
+    ])->assertStatus(400);
 });

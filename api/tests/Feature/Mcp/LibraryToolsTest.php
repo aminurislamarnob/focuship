@@ -53,6 +53,23 @@ it('tells the assistant when the library is full', function () {
         ->toContain('50 saved presets');
 });
 
+it('refuses to save a sound that does not exist, and says how to find the right one', function () {
+    $ada = listener();
+
+    expect($this->mcpError($ada, 'save-preset', ['label' => 'Moon', 'layers' => ['rain-on-moon' => 0.5]]))
+        ->toContain('rain-on-moon')
+        ->toContain('search-sounds');
+    expect($ada->library()->presets())->toBeEmpty();
+});
+
+it('refuses to save a volume that is not a number, rather than a silent preset', function () {
+    $ada = listener();
+
+    expect($this->mcpError($ada, 'save-preset', ['label' => 'Loud café', 'layers' => ['cafe' => 'loud']]))
+        ->toContain('between 0 and 1');
+    expect($ada->library()->presets())->toBeEmpty();
+});
+
 it('renames a preset', function () {
     $preset = Preset::factory()->for($ada = listener())->create(['label' => 'Old']);
 
