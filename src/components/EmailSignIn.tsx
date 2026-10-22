@@ -9,11 +9,11 @@ import { cx } from "./ui";
 /**
  * "Continue with email": send a 6-digit code, then type it in. One flow for sign-up and
  * sign-in — a new address creates the account. Every send (and resend) runs a fresh,
- * usually invisible Turnstile check, which Supabase verifies server-side.
+ * usually invisible Turnstile check, which the API verifies server-side.
  */
 
 const CODE_LENGTH = 6;
-/** Matches Supabase's minimum interval between emails to one address. */
+/** Matches the API's minimum interval between emails to one address. */
 const RESEND_AFTER_S = 60;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

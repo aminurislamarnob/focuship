@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // The Laravel API has its own tooling (Pint, Larastan); its vendor tree is not ours to lint.
+    "api/**",
   ]),
 ]);
 

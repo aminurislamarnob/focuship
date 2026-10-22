@@ -130,7 +130,7 @@ export function createApiCloud(options: ApiCloudOptions): Cloud {
     onAuthChange(callback) {
       listeners.add(callback);
 
-      // Fires with the current session, like the Supabase gateway did: the API is
+      // Fires with the current session: the API is
       // the authority, and the app shows its cached copy until this answers.
       request<{ user: CloudUser | null }>("GET", "/auth/me")
         .then(({ user }) => announce(user))

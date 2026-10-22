@@ -5,8 +5,8 @@ import { actions } from "@/lib/store";
 
 /**
  * Google's own "Sign in with Google" button (Google Identity Services). Google talks to
- * this origin directly and hands back an ID token, which Supabase verifies — so Google's
- * consent names focuship.app, not the Supabase project domain the redirect flow shows.
+ * this origin directly and hands back an ID token, which the API verifies — so Google's
+ * consent names focuship.app, not whatever domain the redirect flow would show.
  *
  * Google draws its button in an iframe we can't style, so the caller's `children` (a face
  * matching the other provider buttons) is shown, and Google's real button is laid over it
@@ -80,7 +80,7 @@ function loadGoogle(): Promise<GoogleId> {
   return loading;
 }
 
-/** A raw nonce for Supabase and its SHA-256 (hex) for Google, which embeds it in the ID token. */
+/** A raw nonce for the API and its SHA-256 (hex) for Google, which embeds it in the ID token. */
 async function makeNonce(): Promise<{ raw: string; hashed: string }> {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const raw = btoa(String.fromCharCode(...bytes));

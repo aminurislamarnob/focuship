@@ -11,7 +11,7 @@ vi.mock("@/lib/audio/engine", () => ({
     chime() {}
   },
 }));
-vi.mock("@/lib/supabase", () => ({ CLOUD_ENABLED: false, getCloud: () => null }));
+vi.mock("@/lib/focuship-api", () => ({ CLOUD_ENABLED: false, getCloud: () => null }));
 
 const rainyDesk = PRESETS.find((p) => p.id === "rainy-desk")!;
 

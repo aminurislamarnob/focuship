@@ -8,7 +8,7 @@ import { SOUND_BY_ID } from "@/lib/catalog";
 import type { PageIntent } from "@/lib/pages";
 import { startPwa } from "@/lib/pwa";
 import { actions, matchPreset, mixName, useFocus, type Tab } from "@/lib/store";
-import { CLOUD_ENABLED } from "@/lib/supabase";
+import { CLOUD_ENABLED } from "@/lib/focuship-api";
 import { FocusMode, useClock } from "./FocusMode";
 import { Logo } from "./Logo";
 import { MixSheet } from "./MixSheet";

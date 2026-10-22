@@ -17,7 +17,7 @@ import {
   type Provider,
 } from "@/lib/cloud";
 import type { PageIntent } from "@/lib/pages";
-import { getCloud } from "@/lib/supabase";
+import { getCloud } from "@/lib/focuship-api";
 
 export type TimerMode = "focus" | "short" | "long";
 
@@ -82,6 +82,12 @@ export interface FocusState {
 export type Tab = "mix" | "sounds" | "timer" | "you";
 
 const STORAGE_KEY = "focuship:v1";
+/**
+ * Which backend wrote the cached account slice. Accounts moved to the Focuship API and
+ * started fresh (ADR 0001), so a cache without this stamp belongs to the old backend and
+ * is quietly dropped. Guest state in the same blob is untouched.
+ */
+const ACCOUNT_BACKEND = "focuship";
 export const NEW_LAYER_VOLUME = 0.5;
 const MAX_SHUFFLE_LAYERS = 3;
 const MAX_RECENTS = 8;
@@ -162,6 +168,7 @@ function persist() {
         timer,
         recents,
         settingsUpdatedAt,
+        accountBackend: ACCOUNT_BACKEND,
         // Cached so favorites and custom presets still render offline; auth re-verifies on load.
         account: { user: account.user, favorites: account.favorites, presets: account.presets },
       }),
@@ -341,7 +348,7 @@ function readyNotice(label: string | undefined, layers: Layers, timerOnly = fals
 }
 
 // Cloud ------------------------------------------------------------------------
-// All Supabase traffic goes through the gateway (lib/cloud via lib/supabase).
+// All account traffic goes through the gateway (lib/cloud, built in lib/focuship-api).
 // Local state updates first; cloud writes follow and roll back on failure.
 
 let watchingAuth = false;
@@ -510,7 +517,10 @@ export const actions = {
       timer = { ...timer, settings, mode: "focus", status: "idle", endsAt: null, remaining: minutes(settings, "focus") };
     }
 
-    const cached = (saved as { account?: Partial<AccountState> }).account;
+    // An account cached by the backend Focuship used before the cutover is dropped without
+    // a word: there is nothing the listener has to do but sign in again.
+    const savedAccount = saved as { account?: Partial<AccountState>; accountBackend?: string };
+    const cached = savedAccount.accountBackend === ACCOUNT_BACKEND ? savedAccount.account : undefined;
     const recents = Array.isArray(saved.recents) ? saved.recents.filter((r): r is string => typeof r === "string") : [];
 
     state = {

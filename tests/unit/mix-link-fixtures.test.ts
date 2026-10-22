@@ -18,7 +18,7 @@ vi.mock("@/lib/audio/engine", () => ({
     chime() {}
   },
 }));
-vi.mock("@/lib/supabase", () => ({ CLOUD_ENABLED: false, getCloud: () => null }));
+vi.mock("@/lib/focuship-api", () => ({ CLOUD_ENABLED: false, getCloud: () => null }));
 
 describe("the shared share-link fixtures", () => {
   it.each(fixtures.encode)("encodes $name", async ({ layers, query }) => {

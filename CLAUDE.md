@@ -11,26 +11,40 @@ npm run dev        # next dev on :3000 (service worker is NOT registered in dev)
 npm run build      # static export to out/ (output: "export")
 npm start          # serve out/ locally (npx serve) — `next start` does not work with a static export
 npm run lint       # eslint (includes react-hooks/set-state-in-effect)
-npm test           # every layer: unit + components, next build, built-site checks, Playwright
+npm test           # every layer: unit + components, a test build, built-site checks, Playwright
 npm run test:unit  # Vitest: functional (tests/unit) and React Testing Library (tests/components); fast, no build
 npm run test:watch # the same, re-running on change
-npm run test:site  # next build, then Vitest checks of the export in out/ (tests/site)
+npm run test:site  # test build, then Vitest checks of the export in out/ (tests/site)
+npm run build:test # the build the test suites run against: accounts off (no API), guest behaviour only
 npm run test:e2e   # Playwright against out/ served on :4173, desktop + Pixel 7 (tests/e2e); needs a build first
                    # (builds share .next with `next dev`: restart a running dev server afterwards, or it serves stale CSS)
 npx tsc --noEmit   # typecheck
 npm run deploy     # next build && wrangler deploy → https://focuship.app (manual; pushes to main deploy on their own)
 npm run deploy:redirect  # 301 Worker (workers/redirect) for focus.aminurislam.me, focusship.app, www hosts
 npm run icons      # regenerate app icons (public/icons, src/app/icon.png) from scripts/generate-icons.mjs
+npm run export:catalog  # regenerate api/resources/catalog.json from src/lib/catalog.ts + guides.ts
+npm run check:catalog   # fail if that generated copy is stale (CI runs this)
+```
+
+The Laravel API lives in `api/` and has its own commands and agent doc (`api/CLAUDE.md`):
+
+```bash
+cd api
+php artisan serve             # the API on :8000
+vendor/bin/pest               # feature + unit tests (MySQL: focuship_test)
+vendor/bin/pint               # formatting
+vendor/bin/phpstan analyse    # static analysis (larastan, level 6)
+php artisan mcp:inspector mcp # drive the MCP by hand
 ```
 
 Tests live in `tests/`, one folder per layer, and test behaviour at public seams, not internals:
 
-- `tests/unit/` (Vitest, Node or jsdom per file): the store through its actions and `useFocus` (`load-store.ts` loads a fresh copy at a given URL with saved localStorage; files stub `@/lib/audio/engine` and `@/lib/supabase` with `vi.mock`), share links, the catalogue and page-registry rules, and the cloud gateway against a fake driver.
+- `tests/unit/` (Vitest, Node or jsdom per file): the store through its actions and `useFocus` (`load-store.ts` loads a fresh copy at a given URL with saved localStorage; files stub `@/lib/audio/engine` and `@/lib/focuship-api` with `vi.mock`), share links, the catalogue and page-registry rules, and the Laravel driver against a faked `fetch`.
 - `tests/components/` (Vitest + React Testing Library, jsdom): components queried by role and name as a user finds them; `setup.ts` stubs the audio engine and adds jest-dom matchers. Mock `next/navigation` per file when a component reads the path or router.
 - `tests/site/` (Vitest, Node): the built export in `out/` — what a crawler or visitor receives (titles, canonicals, JSON-LD, sitemap, brand); `helpers.mjs` has the HTML helpers.
 - `tests/e2e/` (Playwright, Chromium): whole pages of the production build, desktop and phone. `fixtures.ts` fails any test that logs a page or console error (where production React reports hydration mismatches) and has `returningVisitor()` to seed saved state.
 
-CI (`.github/workflows/deploy.yml`) runs all four before deploying. Audio output, offline/PWA install and redirects are still verified by hand: drive the production build in a browser (PWA and offline behaviour only work against a production build served over HTTPS or localhost) and `curl` deployed URLs.
+CI (`.github/workflows/deploy.yml`) runs all four before deploying, then rebuilds with the real `NEXT_PUBLIC_API_URL` for production. Audio output, offline/PWA install and redirects are still verified by hand: drive the production build in a browser (PWA and offline behaviour only work against a production build served over HTTPS or localhost) and `curl` deployed URLs.
 
 ## Architecture
 
@@ -46,6 +60,8 @@ A single-route (`/`), fully client-driven ambient sound mixer + focus timer, pre
 
 **Guides — `src/lib/guides.ts`** lists the evergreen articles (copy in `src/content/guides/`), rendered at `/guides/<slug>` by `GuideArticle` inside `GuideLayout` (a reading column inside the app shell via `SitePage`: same sidebar, tab bar, mini player and shortcuts, no app views; Space scrolls there instead of playing; the privacy policy uses it too) with a byline, dates, "play" links to landing pages, FAQ, sources and Article JSON-LD. A guide stays `noindex` and out of the sitemap/`llms.txt` until its `reviewed` flag is set by the owner. Cite only sources whose DOI/URL you have verified.
 
+**Accounts and the MCP — `api/`** is a Laravel app at `api.focuship.app` (ADRs 0001–0005). The site reaches it through the one gateway, `src/lib/cloud.ts` (the `Cloud` contract), fulfilled by `src/lib/api-cloud.ts` (the Laravel driver over `fetch`) and built in `src/lib/focuship-api.ts`; `NEXT_PUBLIC_API_URL` unset means accounts are off. Auth is a Sanctum cookie session on `.focuship.app`. The same `App\Account\Library` backs both the site's account API and the MCP server at `api.focuship.app/mcp`, which is OAuth-only via Passport. The catalogue is exported from `src/lib/catalog.ts` to `api/resources/catalog.json`; CI fails when it is stale.
+
 **PWA** — `src/app/manifest.ts` (must stay `dynamic = "force-static"` for the export), `public/sw.js` (hand-written), `src/lib/pwa.ts` (registration in production only, install prompt, "save all sounds" into the `focuship-sounds-v1` cache). When changing what the app shell caches, bump `VERSION` in `sw.js`; the sounds cache name is versioned separately so it survives app updates.
 
 ## Constraints from the static export + Cloudflare deployment
@@ -54,13 +70,14 @@ A single-route (`/`), fully client-driven ambient sound mixer + focus timer, pre
 - Don't read `Date.now()`, `Math.random()`, `window`, `localStorage` etc. during render — the page is prerendered at build time. Read them in effects or event handlers (the build fails on `Date.now()` in render).
 - Push to deploy: `.github/workflows/deploy.yml` runs lint, typecheck and `npm test` on every push to `main`, then `wrangler deploy`s the tested `out/`. It needs the repo secret `CLOUDFLARE_API_TOKEN` (an "Edit Cloudflare Workers" token for the account below) and the repo variables `CLOUDFLARE_ACCOUNT_ID` plus the `NEXT_PUBLIC_*` values from `.env.local`. When the Worker moves accounts, replace the token and the account ID variable.
 - Deployment is an assets-only Cloudflare Worker (`wrangler.jsonc`) serving `out/` on the custom domain `focuship.app`; `workers_dev` and preview URLs are off so the PWA has a single origin. A separate redirect Worker (`workers/redirect/`) 301s the old and typo hostnames to it; the one-time cutover steps are in the README. Sounds are shipped as static assets (no R2).
+- The API deploys on its own (`.github/workflows/api.yml`, path-filtered to `api/**`): Pint, Larastan and Pest against MySQL, then SSH to the cPanel host (pull, composer, migrate, cache). Needs the secret `API_SSH_KEY` and the variables `API_SSH_HOST`, `API_SSH_USER`, `API_SSH_PORT`, `API_PATH`. The host's cron runs `php artisan schedule:run` every minute.
 - Accounts: the `focuship.app` zone and the `focuship` Worker live in Mahbub.rucse@gmail.com's Cloudflare account (`7fe8bdf125d434f9fa0b417083094a00`) for now, because a Worker's custom domain must be in its own account and the domain can't change accounts until 10 days after registration (registered 2026-10-21). Deploy with `CLOUDFLARE_ACCOUNT_ID=7fe8bdf125d434f9fa0b417083094a00 npm run deploy`, logged in to wrangler as aminur.arnob@gmail.com. From about 2026-10-31, move the domain to Aminur.arnob@gmail.com's account (Registrations → Settings → Move to another Cloudflare account, run by a super-admin), redeploy there and delete the Worker from Mahbub's account. The old `let-me-focus` Worker (dev.aiarnob@gmail.com's account) was deleted, so `focus.aminurislam.me` no longer serves the site.
 
 ## Conventions
 
 - Visual language (the "Focuship redesign" canvas): tokens in `src/app/globals.css` — ground `#0a0a0a`, surfaces `#121212`/`#141414`/`#1c1c1c`, hairlines `#1f1f1f`/`#262626`/`#333`, warm-tinted text `--fg #e8e6e3` → `--faint #8c8983` (all ≥ 4.5:1), a soft-white `--accent #d9d6d0` with dark ink on top, and an orange ember glow only behind the player card. Geist (UI) + Geist Mono (times, counts, Hz) via `next/font`; sentence-case labels; radii 12 controls · 14 inputs/buttons · 18 tiles · 24–28 cards · full pills; touch targets ≥ 44px; slow, gentle motion that stops under reduced motion. Lucide line icons at stroke 1.6–1.75. The mark is an open timer ring around an ember dot (`#f08a4b`): `Mark`/`Logo` in `src/components/Logo.tsx`, the app icons in `scripts/generate-icons.mjs`, and the Open Graph card in `src/lib/social-image.tsx`. No emoji/3D icon assets.
 - Reuse the primitives in `src/components/ui.tsx`: `Slider` (custom pointer/keyboard slider — not a native range input), `SwapText` (animated text changes), `Sheet`, `IconButton`, `Switch`, `Kbd`, `Eq`, `Waveform` (the level bars), `EmberBackdrop` (glow + letter field behind the player), `PresetArt`.
-- Do not name or credit any reference/inspiration websites in code, comments, docs or commit messages. Credits are limited to Moodist (sound recordings, MIT; sounds under Pixabay License/CC0) and superset.sh (visual style); the About page's "Credits & stack" card may also name the infrastructure (Cloudflare hosting, Supabase accounts) and link the source.
+- Do not name or credit any reference/inspiration websites in code, comments, docs or commit messages. Credits are limited to Moodist (sound recordings, MIT; sounds under Pixabay License/CC0) and superset.sh (visual style); the About page's "Credits & stack" card may also name the infrastructure (Cloudflare hosting, the Focuship API for accounts) and link the source.
 - The owner commits and pushes directly to `main`.
 
 ## Working with the owner
