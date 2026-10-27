@@ -18,7 +18,10 @@ return new class extends Migration
             $table->string('code_hash');
             $table->unsignedTinyInteger('attempts')->default(0);
             $table->timestamp('consumed_at')->nullable();
-            $table->timestamp('expires_at')->index();
+            // An explicit default: MariaDB without explicit_defaults_for_timestamp
+            // rejects a NOT NULL timestamp that has none. A code saved without an
+            // expiry is already dead.
+            $table->timestamp('expires_at')->useCurrent()->index();
             $table->timestamps();
         });
     }

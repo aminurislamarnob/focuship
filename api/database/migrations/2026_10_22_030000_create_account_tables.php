@@ -40,7 +40,9 @@ return new class extends Migration
             $table->foreignId('user_id')->primary()->constrained()->cascadeOnDelete();
             $table->text('timer');
             $table->float('volume');
-            $table->timestamp('updated_at', 3);
+            // An explicit default, or MariaDB (explicit_defaults_for_timestamp off) gives
+            // the table's first timestamp ON UPDATE CURRENT_TIMESTAMP behind our back.
+            $table->timestamp('updated_at', 3)->useCurrent();
         });
     }
 
