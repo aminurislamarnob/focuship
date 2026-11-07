@@ -1,0 +1,45 @@
+<svg viewBox="0 0 960 410" role="img" aria-label="Sequence Diagram: AI Assistant to Browser Web Audio Handoff. The MCP server builds verified mix URLs but cannot trigger audio; playback only begins synchronously when the listener clicks the link in a browser." xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="sh" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="d-m" d="M0 0L8 4L0 8z"/></marker>
+    <marker id="sa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="d-ma" d="M0 0L8 4L0 8z"/></marker>
+  </defs>
+
+  <!-- Lifelines -->
+  <line class="d-life" x1="100" y1="56" x2="100" y2="390"/>
+  <line class="d-life" x1="360" y1="56" x2="360" y2="390"/>
+  <line class="d-life" x1="620" y1="56" x2="620" y2="390"/>
+  <line class="d-life" x1="860" y1="56" x2="860" y2="390"/>
+
+  <!-- Actor boxes -->
+  <rect class="d-box" x="25" y="20" width="150" height="36" rx="6"/><text class="d-t" x="100" y="43" text-anchor="middle">AI Assistant</text>
+  <rect class="d-box" x="275" y="20" width="170" height="36" rx="6"/><text class="d-t" x="360" y="43" text-anchor="middle">Focuship MCP (/mcp)</text>
+  <rect class="d-box" x="535" y="20" width="170" height="36" rx="6"/><text class="d-t" x="620" y="43" text-anchor="middle">Listener's Browser</text>
+  <rect class="d-box" x="775" y="20" width="170" height="36" rx="6"/><text class="d-t" x="860" y="43" text-anchor="middle">Web Audio Engine</text>
+
+  <!-- Message 1 -->
+  <line class="d-l" x1="100" y1="94" x2="356" y2="94" marker-end="url(#sh)"/>
+  <text class="d-t" x="230" y="86" text-anchor="middle">tools/call build-mix {rain: 0.6, cafe: 0.3}</text>
+
+  <!-- Internal validate -->
+  <line class="d-l" x1="360" y1="126" x2="410" y2="126"/>
+  <line class="d-l" x1="410" y1="126" x2="410" y2="146"/>
+  <line class="d-l" x1="410" y1="146" x2="364" y2="146" marker-end="url(#sh)"/>
+  <text class="d-s" x="420" y="140">Validate &amp; clamp in Library</text>
+
+  <!-- Reply 1 -->
+  <line class="d-l d-dash" x1="360" y1="184" x2="104" y2="184" marker-end="url(#sh)"/>
+  <text class="d-t" x="230" y="176" text-anchor="middle">focuship.app/?mix=rain-on-window:60,cafe:30</text>
+
+  <!-- Accent flow: User Tap Hand-off -->
+  <line class="d-a" x1="100" y1="230" x2="614" y2="230" marker-end="url(#aa)"/>
+  <text class="d-at" x="350" y="220" text-anchor="middle">Listener clicks link · Trusted user gesture</text>
+
+  <!-- Browser -> Engine synchronous call -->
+  <line class="d-l" x1="620" y1="274" x2="854" y2="274" marker-end="url(#sh)"/>
+  <text class="d-t" x="740" y="266" text-anchor="middle">actions.visit(intent) → sync(layers)</text>
+
+  <!-- Audio playback & guarantee box -->
+  <rect class="d-check" x="520" y="310" width="410" height="52" rx="6"/>
+  <text class="d-at" x="725" y="332" text-anchor="middle">Dual-deck crossfading begins gapless loop</text>
+  <text class="d-s" x="725" y="350" text-anchor="middle">Safari audio session claimed · MediaSession controls active</text>
+</svg>

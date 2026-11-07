@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Focuship</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&amp;family=Figtree:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+:root{color-scheme:light}
+/* Layout: a dated engineering log. A left rail says when each piece of work happened; the story runs beside it. */
+:root {
+  --paper:#EDF1F2;
+  --surface:#FAFCFC;
+  --ink:#10212A;
+  --muted:#4C5D65;
+  --rule:#C4D0D4;
+  --accent:#d97736;
+  --me:#d97736;
+  --team:#4c5d65;
+  --before:#9AA8AE;
+  --note:#E0EBED;
+  --band:#141414;
+  --band-ink:#f1f5f4;
+  --band-muted:#8c8983;
+  --band-rule:#262626;
+  --highlight:#f08a4b;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper:#0a0a0a;
+  --surface:#121212;
+  --ink:#e8e6e3;
+  --muted:#8c8983;
+  --rule:#1f1f1f;
+  --accent:#f08a4b;
+  --me:#f08a4b;
+  --team:#66767c;
+  --before:#66767C;
+  --note:#1c1c1c;
+  --band:#141414;
+  --band-ink:#f1f5f4;
+  --band-muted:#8c8983;
+  --band-rule:#262626;
+  --highlight:#f08a4b;
+  color-scheme:dark;
+} }
+:root[data-theme="dark"] {
+  --paper:#0a0a0a;
+  --surface:#121212;
+  --ink:#e8e6e3;
+  --muted:#8c8983;
+  --rule:#1f1f1f;
+  --accent:#f08a4b;
+  --me:#f08a4b;
+  --team:#66767c;
+  --before:#66767C;
+  --note:#1c1c1c;
+  --band:#141414;
+  --band-ink:#f1f5f4;
+  --band-muted:#8c8983;
+  --band-rule:#262626;
+  --highlight:#f08a4b;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{background:var(--paper);color:var(--ink);font:400 17px/1.65 var(--body);margin:0}
+img{max-width:100%}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+.gutter{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin-inline:auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.015em}
+h2{font-size:clamp(1.65rem,1.3rem + 1.4vw,2.35rem);line-height:1.12;font-weight:700}
+h3{font-size:1.15rem;line-height:1.3;font-weight:650;letter-spacing:-.005em}
+p{margin:0}
+code{font:400 .84em var(--mono);background:var(--note);padding:.08em .32em;border-radius:3px;overflow-wrap:anywhere}
+.hero{background:var(--band);color:var(--band-ink);padding-block:clamp(36px,6vw,72px) 0}
+.hero.noshots{padding-block-end:clamp(28px,4vw,48px)}
+.hero a{color:var(--highlight)}
+.eyebrow{font:500 .76rem/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--highlight)}
+.hero h1{font-size:clamp(2.45rem,1.5rem + 4.6vw,5rem);line-height:1;font-weight:750;letter-spacing:-.03em;margin-top:18px;max-width:17ch}
+.lede{font-size:clamp(1.08rem,1rem + .4vw,1.3rem);line-height:1.55;max-width:62ch;margin-top:24px;color:var(--band-ink)}
+.hero code{background:var(--band-rule);color:var(--band-ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px 28px;margin:34px 0 0;padding:20px 0;border-top:1px solid var(--band-rule)}
+.facts dt{font:500 .72rem/1.4 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--band-muted)}
+.facts dd{margin:4px 0 0;font-size:.98rem;line-height:1.4}
+.shots{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.262fr);gap:clamp(10px,2vw,22px);align-items:end;margin-top:26px;margin-bottom:-60px;position:relative}
+.shots.single{grid-template-columns:minmax(0,1fr)}
+.shots img{display:block;width:100%;height:auto;border-radius:10px 10px 0 0;box-shadow:0 14px 44px rgba(0,0,0,.4)}
+.shots img.phone{border-radius:14px 14px 0 0}
+.shot-note{padding-top:72px;font:400 .78rem/1.5 var(--mono);color:var(--muted)}
+.noshots + main .shot-note{padding-top:24px}
+section.entry{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0 36px;padding-block:clamp(38px,5vw,62px);border-top:1px solid var(--rule)}
+section.entry.first{border-top:0}
+.rail{font:500 .78rem/1.45 var(--mono);color:var(--accent);padding-top:.5rem}
+.rail span{display:block;color:var(--muted);font-weight:400}
+.col{min-width:0;display:grid;gap:18px}
+.col>p,.col>ul,.col>h2,.col>h3{max-width:68ch}
+.col>h3{margin-top:12px}
+ul.tight{margin:0;padding-left:1.15em;display:grid;gap:8px}
+ul.tight li::marker{color:var(--accent)}
+strong{font-weight:600}
+figure{margin:8px 0;min-width:0}
+figcaption{font-size:.9rem;line-height:1.5;color:var(--muted);margin-top:10px;max-width:68ch}
+.scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:8px}
+.scroll svg{display:block;width:100%;height:auto;min-width:680px}
+.shot{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--rule)}
+.d-box{fill:var(--surface);stroke:var(--ink);stroke-width:1.2}
+.d-zone{fill:var(--note);stroke:var(--rule);stroke-width:1}
+.d-t{font:600 13px var(--body);fill:var(--ink)}
+.d-s{font:400 11.5px var(--mono);fill:var(--muted)}
+.d-z{font:500 11.5px var(--mono);fill:var(--muted)}
+.d-l{stroke:var(--ink);stroke-width:1.3;fill:none}
+.d-dash{stroke-dasharray:5 4}
+.d-life{stroke:var(--rule);stroke-width:1.2}
+.d-a{stroke:var(--accent);stroke-width:2.2;fill:none}
+.d-at{font:600 12px var(--body);fill:var(--accent)}
+.d-m{fill:var(--ink)} .d-ma{fill:var(--accent)}
+.d-check{fill:var(--note);stroke:var(--accent);stroke-width:1.6}
+.chart{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px clamp(12px,2.2vw,24px) 12px}
+.chart .in{overflow-x:auto}
+.chart svg{display:block;width:100%;height:auto;min-width:600px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:.9rem;margin-bottom:10px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:7px;vertical-align:-1px}
+.c-me{fill:var(--me)} .c-team{fill:var(--team)}
+.g-grid{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 4}
+.g-base{stroke:var(--ink);stroke-width:1.2}
+.g-tick{stroke:var(--muted);stroke-width:1}
+.g-ax{font:400 11px var(--mono);fill:var(--muted)}
+.g-m{font:500 12px var(--mono);fill:var(--ink)}
+.g-v{font:500 10.5px var(--mono);fill:var(--muted)}
+.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 24px;margin-top:6px}
+.totals div{border-top:1px solid var(--rule);padding-top:8px}
+.totals b{display:block;font:650 1.5rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.totals small{display:block;font:400 .78rem/1.45 var(--mono);color:var(--muted)}
+.ranges{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:18px clamp(12px,2.2vw,24px);display:grid;gap:16px}
+.row-h{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 14px;font-size:.94rem;margin-bottom:6px}
+.row-h span{font:400 .78rem/1.7 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.track{position:relative;height:30px;background-image:linear-gradient(to right,var(--rule) 1px,transparent 1px);background-size:25% 100%;border-right:1px solid var(--rule)}
+.bar{position:absolute;height:12px;border-radius:0 3px 3px 0;min-width:4px}
+.bar.b{top:2px;background:var(--before)} .bar.a{top:16px;background:var(--me)}
+.axis{display:flex;justify-content:space-between;font:400 .74rem var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+pre{margin:0;overflow-x:auto;background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;font:400 .8rem/1.75 var(--mono)}
+pre .t{color:var(--accent);font-weight:500;margin-right:1.2ch}
+.tbl{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.94rem;min-width:520px}
+th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font:500 .72rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.split>div{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:16px 18px;min-width:0}
+.split h3{margin-bottom:10px;display:flex;align-items:center;gap:9px}
+.split h3 i{width:11px;height:11px;border-radius:2px;display:inline-block}
+.split ul{font-size:.95rem}
+.defs{display:grid;gap:0;margin:0;border-top:1px solid var(--rule)}
+.defs>div{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:4px 22px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.defs dt{font-family:var(--display);font-weight:650;line-height:1.35}
+.defs dd{margin:0;font-size:.97rem;max-width:62ch}
+.muted{font-size:.9rem;color:var(--muted)}
+footer{border-top:1px solid var(--rule);padding-block:32px 56px;color:var(--muted);font-size:.9rem;line-height:1.6}
+footer h3{color:var(--ink);margin-bottom:6px}
+footer p{max-width:76ch}
+.stack{font:400 .8rem/1.8 var(--mono);color:var(--muted)}
+@media (max-width:780px){
+  section.entry{grid-template-columns:minmax(0,1fr);gap:10px}
+  .rail{padding-top:0}.rail span{display:inline;margin-left:.6ch}
+  .defs>div{grid-template-columns:minmax(0,1fr)}
+}
+</style>
+</head>
+<body>
+<header class="hero gutter"><div class="wrap">
+<p class="eyebrow">Case study · Ambient sound mixer &amp; MCP</p>
+<h1>An Ambient Sound Mixer PWA and OAuth MCP Server in 8 Days</h1>
+<p class="lede">Between 20 and 28 October 2026, I architected and built <a href="https://focuship.app">Focuship</a>: a mobile-first ambient sound mixer and focus timer that runs offline as a Next.js PWA, paired with a custom Laravel backend and a Model Context Protocol (MCP) server for AI assistants. I authored <strong>all 47 commits</strong> on the repository, pairing with Claude Code across 36 commits and 5 merged pull requests.</p>
+<dl class="facts"><div><dt>My role</dt><dd>Architect &amp; developer, paired with Claude Code</dd></div><div><dt>Team</dt><dd>1 engineer, 1 monorepo (Next.js + Laravel)</dd></div><div><dt>Window</dt><dd>20 to 28 Oct 2026</dd></div><div><dt>Milestone</dt><dd>Production launch on focuship.app</dd></div><div><dt>Stack</dt><dd>Next.js 15, Web Audio API, TypeScript, Laravel 11, Cloudflare, Playwright, Pest</dd></div></dl>
+<div class="shots"><img src="img/home-desktop.jpg" width="1440" height="900" alt="Focuship desktop interface showing ambient sound tiles, custom volume sliders, and dark ember aesthetic"><img class="phone" src="img/home-phone.jpg" width="390" height="844" alt="Focuship mobile interface with 5-slot bottom navigation bar and mini player"></div>
+</div></header>
+<main class="gutter"><div class="wrap">
+<p class="shot-note">Focuship running in production at focuship.app on desktop and a mobile viewport. Captured 8 Nov 2026.</p>
+<section class="entry first"><div class="rail">The days <span>20 to 28 Oct</span></div><div class="col"><h2>What the eight days looked like</h2><p>The development unfolded in two planned milestones. The first milestone (20 to 22 October) delivered the client application: a high-performance Next.js PWA deployed to Cloudflare&#x27;s edge with 64 audio sources, programmatic SEO landing pages, research guides, and a complete dark-ember visual redesign. The second milestone (22 to 28 October) built the backend infrastructure: a dedicated Laravel API providing Sanctum session authentication, account synchronization, and an OAuth 2.1 Model Context Protocol server for AI assistants.</p><figure><div class="chart"><div class="legend"><span><i style="background:var(--me)"></i>My commits (47)</span><span><i style="background:var(--team)"></i>Team commits (0)</span></div><div class="in"><svg viewBox="0 0 820 276" role="img" aria-label="Commits per day from 2026-10-20 to 2026-10-28: 47 mine and 0 by the team. Busiest day: 2026-10-20."><line class="g-grid" x1="46" y1="236.0" x2="806" y2="236.0"/><text class="g-ax" x="40" y="240.0" text-anchor="end">0</text><line class="g-grid" x1="46" y1="197.6" x2="806" y2="197.6"/><text class="g-ax" x="40" y="201.6" text-anchor="end">5</text><line class="g-grid" x1="46" y1="159.2" x2="806" y2="159.2"/><text class="g-ax" x="40" y="163.2" text-anchor="end">10</text><line class="g-grid" x1="46" y1="120.8" x2="806" y2="120.8"/><text class="g-ax" x="40" y="124.8" text-anchor="end">15</text><line class="g-grid" x1="46" y1="82.4" x2="806" y2="82.4"/><text class="g-ax" x="40" y="86.4" text-anchor="end">20</text><line class="g-grid" x1="46" y1="44.0" x2="806" y2="44.0"/><text class="g-ax" x="40" y="48.0" text-anchor="end">25</text><g><title>20 Oct: 23 mine, 0 team</title><rect class="c-me" x="59.5" y="59.4" width="68.7" height="176.6"/><text class="g-v" x="93.9" y="53.4" text-anchor="middle">23</text></g><text class="g-m" x="93.9" y="258" text-anchor="middle">20 Oct</text><g><title>21 Oct: 11 mine, 0 team</title><rect class="c-me" x="143.3" y="151.5" width="68.7" height="84.5"/><text class="g-v" x="177.7" y="145.5" text-anchor="middle">11</text></g><text class="g-m" x="177.7" y="258" text-anchor="middle">21 Oct</text><g><title>22 Oct: 10 mine, 0 team</title><rect class="c-me" x="227.1" y="159.2" width="68.7" height="76.8"/><text class="g-v" x="261.4" y="153.2" text-anchor="middle">10</text></g><text class="g-m" x="261.4" y="258" text-anchor="middle">22 Oct</text><g><title>23 Oct: 2 mine, 0 team</title><rect class="c-me" x="310.9" y="220.6" width="68.7" height="15.4"/><text class="g-v" x="345.2" y="214.6" text-anchor="middle">2</text></g><text class="g-m" x="345.2" y="258" text-anchor="middle">23 Oct</text><g><title>24 Oct: 0 mine, 0 team</title></g><text class="g-m" x="429.0" y="258" text-anchor="middle">24 Oct</text><g><title>25 Oct: 0 mine, 0 team</title></g><text class="g-m" x="512.8" y="258" text-anchor="middle">25 Oct</text><g><title>26 Oct: 0 mine, 0 team</title></g><text class="g-m" x="596.6" y="258" text-anchor="middle">26 Oct</text><g><title>27 Oct: 0 mine, 0 team</title></g><text class="g-m" x="680.3" y="258" text-anchor="middle">27 Oct</text><g><title>28 Oct: 1 mine, 0 team</title><rect class="c-me" x="729.8" y="228.3" width="68.7" height="7.7"/><text class="g-v" x="764.1" y="222.3" text-anchor="middle">1</text></g><text class="g-m" x="764.1" y="258" text-anchor="middle">28 Oct</text><line class="g-base" x1="46" y1="236" x2="806" y2="236"/></svg></div></div><figcaption>Daily non-merge commits on <code>main</code>. All 47 commits were authored by me, with 36 commits co-authored with Claude Code.</figcaption></figure><div class="totals"><div><b>47 of 47</b><small>commits on main</small></div><div><b>36 of 47</b><small>pair commits with Claude Code</small></div><div><b>5 of 5</b><small>merged pull requests</small></div><div><b>38 of 38</b><small>GitHub issues delivered</small></div><div><b>5 of 5</b><small>architectural decisions (ADRs)</small></div></div></div></section>
+<section class="entry"><div class="rail">The brief <span>before 20 Oct</span></div><div class="col"><h2>The brief</h2><p>The ambition was to create a focused, distraction-free ambient mixer and Pomodoro timer that users could live in every working day. It had to satisfy strict engineering constraints from the start:</p><ul class="tight"><li><strong>Zero-latency audio playback:</strong> audio must start synchronously on user interaction, loop without audible seams or clicks, and survive mobile lockscreens and backgrounding.</li><li><strong>Static export architecture:</strong> the app shell must prerender to plain static HTML and run at Cloudflare&#x27;s edge with zero server rendering costs.</li><li><strong>True offline capability:</strong> sound files fetched once must play from local cache without network requests, installable as a native-feeling Progressive Web App.</li><li><strong>No login required:</strong> guests must enjoy the entire mixer, timer, presets, and share links without creating an account; accounts should remain strictly optional.</li><li><strong>Verifiable content:</strong> research guides on noise and focus must cite peer-reviewed academic literature with verified DOIs, making zero unsubstantiated medical claims.</li></ul></div></section>
+<section class="entry"><div class="rail">Architecture <span>20 to 23 Oct</span></div><div class="col"><h2>System architecture: edge frontend &amp; Laravel backend</h2><p>Focuship operates as a decoupled system. The client frontend is a statically exported Next.js application distributed across Cloudflare&#x27;s global edge network. State management uses a module-level external store read through <code>useSyncExternalStore</code>, while audio runs in a dedicated Web Audio engine using dual-deck crossfading. For signed-in listeners and AI agents, the frontend connects to a Laravel 11 API hosted on cPanel behind Cloudflare.</p><figure><div class="scroll"><svg viewBox="0 0 1000 320" role="img" aria-label="Focuship Architecture: Static Next.js frontend deployed to a Cloudflare Worker edge with local Web Audio engine and service worker, connected via Sanctum cookie sessions to a Laravel API with a unified Library backing both account endpoints and a Passport OAuth 2.1 MCP server." xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path class="d-m" d="M0 0L8 4L0 8z"/></marker>
+    <marker id="aa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="d-ma" d="M0 0L8 4L0 8z"/></marker>
+  </defs>
+
+  <!-- Zone 1: Cloudflare Edge & Browser -->
+  <rect class="d-zone" x="20" y="24" width="460" height="270" rx="8"/>
+  <text class="d-z" x="36" y="46">Frontend · Cloudflare Worker &amp; PWA Shell (focuship.app)</text>
+
+  <!-- Box: Static App Shell -->
+  <rect class="d-box" x="40" y="70" width="180" height="64" rx="6"/>
+  <text class="d-t" x="130" y="98" text-anchor="middle">Next.js App Shell</text>
+  <text class="d-s" x="130" y="116" text-anchor="middle">static export · out/</text>
+
+  <!-- Box: Service Worker & Cache -->
+  <rect class="d-box" x="40" y="155" width="180" height="64" rx="6"/>
+  <text class="d-t" x="130" y="183" text-anchor="middle">Service Worker</text>
+  <text class="d-s" x="130" y="201" text-anchor="middle">sw.js · offline cache</text>
+
+  <!-- Box: Web Audio Engine -->
+  <rect class="d-box" x="270" y="70" width="190" height="149" rx="6"/>
+  <text class="d-t" x="365" y="105" text-anchor="middle">Web Audio Engine</text>
+  <text class="d-s" x="365" y="125" text-anchor="middle">dual-deck crossfading</text>
+  <text class="d-s" x="365" y="145" text-anchor="middle">noise &amp; drone synthesis</text>
+  <text class="d-s" x="365" y="165" text-anchor="middle">MediaSession lockscreen</text>
+  <text class="d-s" x="365" y="185" text-anchor="middle">zero-network cached audio</text>
+
+  <!-- Internal arrows frontend -->
+  <line class="d-l" x1="130" y1="134" x2="130" y2="151" marker-end="url(#ah)"/>
+  <line class="d-l" x1="220" y1="102" x2="266" y2="102" marker-end="url(#ah)"/>
+
+  <!-- Zone 2: Backend API & MCP Server -->
+  <rect class="d-zone" x="520" y="24" width="460" height="270" rx="8"/>
+  <text class="d-z" x="536" y="46">Backend · Laravel 11 API &amp; MCP (api.focuship.app)</text>
+
+  <!-- Box: Unified Library -->
+  <rect class="d-box" x="650" y="70" width="200" height="64" rx="6"/>
+  <text class="d-t" x="750" y="98" text-anchor="middle">App\Account\Library</text>
+  <text class="d-s" x="750" y="116" text-anchor="middle">presets · caps · settings</text>
+
+  <!-- Box: Sanctum Session Auth -->
+  <rect class="d-box" x="540" y="155" width="180" height="64" rx="6"/>
+  <text class="d-t" x="630" y="183" text-anchor="middle">Sanctum Auth</text>
+  <text class="d-s" x="630" y="201" text-anchor="middle">cookie session · SPA mode</text>
+
+  <!-- Box: Passport OAuth 2.1 MCP Server -->
+  <rect class="d-box" x="750" y="155" width="210" height="64" rx="6"/>
+  <text class="d-t" x="855" y="183" text-anchor="middle">Passport OAuth MCP</text>
+  <text class="d-s" x="855" y="201" text-anchor="middle">16 tools · RFC 8414 PKCE</text>
+
+  <!-- Connectors backend -->
+  <line class="d-l" x1="630" y1="155" x2="710" y2="136" marker-end="url(#ah)"/>
+  <line class="d-l" x1="855" y1="155" x2="780" y2="136" marker-end="url(#ah)"/>
+
+  <!-- Cross-zone connection: Edge to API -->
+  <line class="d-a" x1="220" y1="187" x2="536" y2="187" marker-end="url(#aa)"/>
+  <text class="d-at" x="380" y="179" text-anchor="middle">Sanctum Credentials (Cookie / CSRF)</text>
+
+  <!-- Outer note: AI Assistant to MCP -->
+  <line class="d-a" x1="970" y1="187" x2="964" y2="187"/>
+</svg>
+</div><figcaption>The edge Worker serves static assets and offline caches; the Laravel API unifies account data and AI agent access.</figcaption></figure><dl class="defs"><div><dt>Static Export Seam</dt><dd>Builds to <code>out/</code> with <code>output: &#x27;export&#x27;</code>. No server-side runtime headers, redirects, or dynamic SSR.</dd></div><div><dt>Dual-Deck Audio Engine</dt><dd>Each recording utilizes two alternating HTML5 audio elements crossfading 1.5 seconds before boundary edges to guarantee click-free seamless looping.</dd></div><div><dt>Unified Library</dt><dd><code>App\Account\Library</code> acts as the single point of truth in Laravel for presets, caps, and settings, preventing drift between the web API and MCP tools.</dd></div></dl></div></section>
+<section class="entry"><div class="rail">Day one <span>20 Oct</span></div><div class="col"><h2>Day one: zero-latency audio and PWA foundation</h2><p>On 20 October, the project grew from an initial idea into a fully working PWA running on Cloudflare. The first sprint established the audio pipeline, keyboard navigation, and the sound catalogue.</p><pre><span class="t">14:43</span>Initial build of Let Me Focus: mobile-first ambient mixer PWA
+<span class="t">16:16</span>Fullscreen mode, keyboard shortcuts (V/F), and Safari audio session claim
+<span class="t">16:52</span>Static deployment pipeline to Cloudflare
+<span class="t">22:18</span>Rebrand to Focuship with MIT license and per-page offline caching
+<span class="t">22:39</span>Custom sci-fi drone synthesizer and Deep space preset</pre><dl class="defs"><div><dt>Synthesized Drone</dt><dd>A real-time Web Audio graph combining detuned low-frequency oscillators with an LFO-swept low-pass filter and filtered brown noise.</dd></div><div><dt>Readable Share Links</dt><dd>Share URLs serialize the mix state in plain text (<code>?mix=rain-on-window:60,keyboard:30</code>), avoiding opaque base64 hashes.</dd></div></dl></div></section>
+<section class="entry"><div class="rail">SEO &amp; guides <span>20 Oct</span></div><div class="col"><h2>Programmatic pages with strict quality gates</h2><p>Instead of generating hundreds of thin spam pages, Focuship enforces a programmatic quality gate in <code>src/lib/pages.ts</code>. A landing page is only indexable if it provides a unique audio configuration, full editorial copy, FAQs, and validated cross-links. Pages that fail the gate are built for functional use but receive <code>noindex</code> and remain excluded from <code>sitemap.xml</code> and <code>llms.txt</code>.</p><div class="tbl"><table><thead><tr><th>Route pattern</th><th>Template</th><th>Quality gate criteria</th></tr></thead><tbody><tr><td>/sounds/[slug]</td><td>Single sound landing</td><td>Curated hero copy, preloaded layer, minimum word count, FAQ</td></tr><tr><td>/timer/[duration]</td><td>Preset timer duration</td><td>Valid countdown bounds, task advice, related preset mixes</td></tr><tr><td>/pomodoro/[work]-[break]</td><td>Interval session</td><td>Work/break balance validation, structured Pomodoro guidance</td></tr><tr><td>/mix/[slug]</td><td>Curated preset mix</td><td>Distinct multi-layer balance, verified layer presence in catalogue</td></tr><tr><td>/guides/[slug]</td><td>Evidence-based article</td><td>Peer-reviewed research citations with DOIs; manual editorial review</td></tr></tbody></table></div></div></section>
+<section class="entry"><div class="rail">App shell <span>21 Oct</span></div><div class="col"><h2>Refactoring navigation to native-feeling routes</h2><p>PR #20 resolved a core user experience friction: tab switches originally changed local component state without modifying the browser URL. Navigating between Mix, Sounds, Timer, and About was refactored to real push-state routes (<code>/</code>, <code>/sounds</code>, <code>/timer</code>, <code>/about</code>) without triggering page reloads or interrupting playback.</p><ul class="tight"><li><strong>Continuous playback:</strong> the Web Audio engine lives in a persistent module singleton outside Next.js&#x27;s component tree, preserving audio state across route transitions.</li><li><strong>5-slot bottom bar:</strong> a native-feeling mobile navigation bar with an elevated center play/pause button and touch feedback.</li><li><strong>Swipe-to-dismiss sheets:</strong> bottom action sheets on mobile support gestural flicking and dismissals matching native platform physics.</li><li><strong>Keyboard 1-2-3 shortcuts:</strong> instantaneous tab navigation with keys 1, 2, and 3, automatically suspended when typing in the search bar.</li></ul></div></section>
+<section class="entry"><div class="rail">Visual identity <span>22 Oct</span></div><div class="col"><h2>The ember glow: dark surfaces and warm contrast</h2><p>PR #23 replaced the initial utility appearance with Focuship&#x27;s dark visual identity. Grounded in near-black surfaces (<code>#0a0a0a</code>), warm hairlines (<code>#1f1f1f</code>), and an orange ember focal point (<code>#f08a4b</code>), the interface minimizes visual fatigue during prolonged deep work sessions.</p><dl class="defs"><div><dt>The Mark</dt><dd>An open timer ring enclosing an ember dot, rendered dynamically in SVG, canvas app icons, and Open Graph card generators.</dd></div><div><dt>Pill Controls</dt><dd>High-contrast soft-white pills with dark ink glyphs for primary play/save actions, ensuring tap targets exceed 44px.</dd></div><div><dt>Instant Search</dt><dd>Pressing <code>/</code> opens and focuses the sound catalogue search input from any page, returning focus cleanly on Escape.</dd></div></dl></div></section>
+<section class="entry"><div class="rail">API &amp; MCP <span>22 to 23 Oct</span></div><div class="col"><h2>The backend: A dedicated Laravel API and OAuth MCP server</h2><p>Focuship was engineered from the start to support both human listeners and AI assistants. While the static Next.js PWA runs autonomously at the edge, accounts and assistant tooling required a dedicated backend. An external BaaS was avoided because the Model Context Protocol requires RFC 8414 dynamic client registration, PKCE OAuth token issuance, and unified domain validation. As recorded in ADR 0001, I implemented a custom Laravel 11 API in <code>api/</code> that powers both web session auth and the MCP server through a single business logic layer.</p><figure><div class="scroll"><svg viewBox="0 0 960 410" role="img" aria-label="Sequence Diagram: AI Assistant to Browser Web Audio Handoff. The MCP server builds verified mix URLs but cannot trigger audio; playback only begins synchronously when the listener clicks the link in a browser." xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="sh" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="d-m" d="M0 0L8 4L0 8z"/></marker>
+    <marker id="sa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path class="d-ma" d="M0 0L8 4L0 8z"/></marker>
+  </defs>
+
+  <!-- Lifelines -->
+  <line class="d-life" x1="100" y1="56" x2="100" y2="390"/>
+  <line class="d-life" x1="360" y1="56" x2="360" y2="390"/>
+  <line class="d-life" x1="620" y1="56" x2="620" y2="390"/>
+  <line class="d-life" x1="860" y1="56" x2="860" y2="390"/>
+
+  <!-- Actor boxes -->
+  <rect class="d-box" x="25" y="20" width="150" height="36" rx="6"/><text class="d-t" x="100" y="43" text-anchor="middle">AI Assistant</text>
+  <rect class="d-box" x="275" y="20" width="170" height="36" rx="6"/><text class="d-t" x="360" y="43" text-anchor="middle">Focuship MCP (/mcp)</text>
+  <rect class="d-box" x="535" y="20" width="170" height="36" rx="6"/><text class="d-t" x="620" y="43" text-anchor="middle">Listener's Browser</text>
+  <rect class="d-box" x="775" y="20" width="170" height="36" rx="6"/><text class="d-t" x="860" y="43" text-anchor="middle">Web Audio Engine</text>
+
+  <!-- Message 1 -->
+  <line class="d-l" x1="100" y1="94" x2="356" y2="94" marker-end="url(#sh)"/>
+  <text class="d-t" x="230" y="86" text-anchor="middle">tools/call build-mix {rain: 0.6, cafe: 0.3}</text>
+
+  <!-- Internal validate -->
+  <line class="d-l" x1="360" y1="126" x2="410" y2="126"/>
+  <line class="d-l" x1="410" y1="126" x2="410" y2="146"/>
+  <line class="d-l" x1="410" y1="146" x2="364" y2="146" marker-end="url(#sh)"/>
+  <text class="d-s" x="420" y="140">Validate &amp; clamp in Library</text>
+
+  <!-- Reply 1 -->
+  <line class="d-l d-dash" x1="360" y1="184" x2="104" y2="184" marker-end="url(#sh)"/>
+  <text class="d-t" x="230" y="176" text-anchor="middle">focuship.app/?mix=rain-on-window:60,cafe:30</text>
+
+  <!-- Accent flow: User Tap Hand-off -->
+  <line class="d-a" x1="100" y1="230" x2="614" y2="230" marker-end="url(#aa)"/>
+  <text class="d-at" x="350" y="220" text-anchor="middle">Listener clicks link · Trusted user gesture</text>
+
+  <!-- Browser -> Engine synchronous call -->
+  <line class="d-l" x1="620" y1="274" x2="854" y2="274" marker-end="url(#sh)"/>
+  <text class="d-t" x="740" y="266" text-anchor="middle">actions.visit(intent) → sync(layers)</text>
+
+  <!-- Audio playback & guarantee box -->
+  <rect class="d-check" x="520" y="310" width="410" height="52" rx="6"/>
+  <text class="d-at" x="725" y="332" text-anchor="middle">Dual-deck crossfading begins gapless loop</text>
+  <text class="d-s" x="725" y="350" text-anchor="middle">Safari audio session claimed · MediaSession controls active</text>
+</svg>
+</div><figcaption>The MCP server builds and validates sound mixes, handing off a share link to the browser so audio starts strictly on a user gesture.</figcaption></figure><dl class="defs"><div><dt>Sanctum Session Auth</dt><dd>The web client authenticates via stateful httpOnly cookie sessions scoped to <code>.focuship.app</code>, ensuring tokens are never stored in localStorage (ADR 0003).</dd></div><div><dt>Passport OAuth 2.1 MCP</dt><dd>The MCP server at <code>api.focuship.app/mcp</code> implements RFC 8414 OAuth 2.1 discovery with PKCE, exposing 16 tools, 2 resources, and 1 prompt (ADR 0004).</dd></div><div><dt>Single Catalogue Source</dt><dd>Frontend TypeScript remains the canonical source of truth for all 64 sounds; <code>npm run export:catalog</code> writes <code>catalog.json</code> for Laravel, and CI fails if they drift (ADR 0002).</dd></div></dl></div></section>
+<section class="entry"><div class="rail">Verification <span>22 Oct</span></div><div class="col"><h2>A four-layer test harness with zero hydration errors</h2><p>Reliability is verified across four distinct testing layers. PR #42 established 660 automated tests, running unit, component, static export, end-to-end, and database API suites before every edge deployment.</p><figure><div class="ranges"><div class="legend" style="margin:0"><span><i style="background:var(--before)"></i>Before PR #42</span><span><i style="background:var(--me)"></i>After PR #42</span></div><div><div class="row-h">Frontend test coverage (Vitest + Playwright)<span>55 tests → 478 tests</span></div><div class="track"><div class="bar b" title="Before: 55–55 tests" style="left:7.86%;width:0.00%"></div><div class="bar a" title="After: 478–478 tests" style="left:68.29%;width:0.00%"></div></div></div><div><div class="row-h">Total test suite (Frontend + Laravel Pest)<span>55 tests → 660 tests</span></div><div class="track"><div class="bar b" title="Before: 55–55 tests" style="left:7.86%;width:0.00%"></div><div class="bar a" title="After: 660–660 tests" style="left:94.29%;width:0.00%"></div></div></div><div class="axis"><span>0 tests</span><span>175 tests</span><span>350 tests</span><span>525 tests</span><span>700 tests</span></div></div><figcaption>Automated test counts before and after the Laravel API and test harness migration recorded in PR #42.</figcaption></figure><div class="tbl"><table><thead><tr><th>Layer</th><th>Framework</th><th>Target scope</th><th>Tests passing</th></tr></thead><tbody><tr><td>Unit &amp; Component</td><td>Vitest + React Testing Library</td><td>Store actions, share encoding, UI components, audio stubs</td><td class="n">82</td></tr><tr><td>Static Export Verification</td><td>Vitest (Node)</td><td>Prerendered HTML in <code>out/</code>, JSON-LD, sitemap, brand rules</td><td class="n">331</td></tr><tr><td>End-to-End Browser</td><td>Playwright (Chromium)</td><td>Desktop &amp; Pixel 7 flows, hydration errors, offline caches</td><td class="n">65</td></tr><tr><td>Backend API &amp; MCP</td><td>Pest (PHP against MySQL)</td><td>Sanctum sessions, OAuth 2.1 PKCE, 16 MCP tools, rate limits</td><td class="n">182</td></tr></tbody></table></div></div></section>
+<section class="entry"><div class="rail">Hidden details</div><div class="col"><h2>The details a visitor never sees</h2><dl class="defs"><div><dt>Shared Cloudflare IP Filtering</dt><dd>Laravel trusts forwarding headers (<code>X-Forwarded-For</code>, <code>X-Forwarded-Proto</code>) strictly from Cloudflare&#x27;s published CIDR blocks, preventing origin IP spoofing (ADR 0005).</dd></div><div><dt>Turnstile-Guarded Email Sign-In</dt><dd>Passwordless 6-digit login codes require a fresh Cloudflare Turnstile token on every submission, sent via Brevo SMTP to eliminate bot abuse.</dd></div><div><dt>MariaDB Migration Safeguards</dt><dd>Explicit timestamp defaults and InnoDB engine declarations guarantee error-free migrations on shared cPanel hosts with 1000-byte key limitations.</dd></div><div><dt>Hydration Guardrails</dt><dd>CI Playwright fixtures intercept console errors and immediately fail the build if React logs a hydration mismatch on production prerendered pages.</dd></div></dl></div></section>
+<section class="entry"><div class="rail">Collaboration</div><div class="col"><h2>Architecting with Claude Code</h2><p>Every line of code and architecture was directed by me, using Claude Code as a fast pair-programming companion. Clear seams and written architectural decision records allowed rapid exploration without losing system coherence.</p><div class="split"><div><h3><i style="background:var(--me)"></i>What I architected &amp; directed</h3><ul class="tight"><li>Web Audio engine design with dual-deck crossfade looping</li><li>Self-hosted Laravel API architecture and RFC 8414 MCP integration</li><li>Sanctum cookie session and Passport OAuth 2.1 security model</li><li>Visual identity: ember glow theme and token hierarchy</li><li>Quality gates for programmatic SEO and evidence-based guides</li><li>cPanel hosting architecture, SSH deploy pipeline, and MariaDB fixes</li></ul></div><div><h3><i style="background:var(--team)"></i>What Claude Code drafted &amp; implemented</h3><ul class="tight"><li>Programmatic page registry and route templates (PR #19)</li><li>App shell route navigation and gesture dismissals (PR #20)</li><li>OAuth social sign-in and Turnstile email-code flows (PR #22)</li><li>Visual redesign token translation and component refinement (PR #23)</li><li>Laravel MCP tool implementations and Pest test matrix (PR #42)</li><li>Static export test suites verifying HTML and metadata</li></ul></div></div></div></section>
+<section class="entry"><div class="rail">Where it stands <span>November 2026</span></div><div class="col"><h2>Where it stands today</h2><ul class="tight"><li><strong>Live in production:</strong> deployed at <a href="https://focuship.app">focuship.app</a> with edge distribution and zero origin compute fees.</li><li><strong>64 ambient audio sources:</strong> 56 gapless field recordings, continuous synthetic noise generators, and an original real-time starship drone.</li><li><strong>Live MCP Server:</strong> operational at <code>api.focuship.app/mcp</code>, enabling Claude, Cursor, and custom agents to build and share focus soundscapes.</li><li><strong>Rock-solid reliability:</strong> 660 automated tests passing across 4 suites with 0 console or hydration warnings.</li></ul></div></section>
+</div></main>
+<footer class="gutter"><div class="wrap">
+<h3>Where the numbers come from</h3>
+<p>Commit counts are non-merge commits on <code>main</code> between 20 and 28 October 2026, calculated via <code>git_stats.py</code> in the Asia/Dhaka time zone. All 47 non-merge commits were authored by Md. Aminur Islam, with 36 commits carrying Claude Code co-authorship trailers. Test numbers are verified from the automated CI test suites recorded in pull request #42. Commit counts reflect recorded repository activity, not overall effort.</p>
+<p class="stack" style="margin-top:14px">Next.js 15 · Web Audio API · TypeScript · Laravel 11 · Cloudflare Workers · Playwright · Vitest · Pest PHP</p>
+<p style="margin-top:14px">Md. Aminur Islam · Full-stack engineer &amp; architect</p>
+</div></footer>
+</body>
+</html>

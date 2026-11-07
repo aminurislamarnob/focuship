@@ -1,0 +1,104 @@
+{
+  "generated": "2026-11-08",
+  "authors": [
+    "aminurislam",
+    "Aminur"
+  ],
+  "repos": [
+    {
+      "name": "focuship",
+      "path": "/Users/aiarnob/orca/focuship",
+      "ref": "main",
+      "commits": 47,
+      "mine": 47,
+      "team": 0,
+      "first_commit": "2026-10-20 14:43",
+      "my_first_commit": "2026-10-20 14:43",
+      "my_last_commit": "2026-10-28 02:41",
+      "team_authors": [],
+      "mine_coauthored": 36,
+      "decisions": {
+        "total": 5,
+        "mine": 5,
+        "files": {
+          "docs/adr/0001-laravel-replaces-supabase.md": "Md Aminur Islam <eng.aminurislam@gmail.com>",
+          "docs/adr/0002-monorepo-api-and-shared-catalog.md": "Md Aminur Islam <eng.aminurislam@gmail.com>",
+          "docs/adr/0003-sanctum-cookie-sessions.md": "Md Aminur Islam <eng.aminurislam@gmail.com>",
+          "docs/adr/0004-mcp-oauth-only.md": "Md Aminur Islam <eng.aminurislam@gmail.com>",
+          "docs/adr/0005-cpanel-hosting-ssh-deploy.md": "Md Aminur Islam <eng.aminurislam@gmail.com>"
+        }
+      },
+      "github": {
+        "slug": "aminurislamarnob/focuship",
+        "merged_prs": 5,
+        "my_merged_prs": 5,
+        "issues": 38,
+        "my_issues": 38
+      }
+    }
+  ],
+  "totals": {
+    "commits": 47,
+    "mine": 47,
+    "team": 0,
+    "mine_coauthored": 36,
+    "merged_prs": 5,
+    "my_merged_prs": 5,
+    "issues": 38,
+    "my_issues": 38,
+    "decisions": 5,
+    "my_decisions": 5
+  },
+  "series": {
+    "granularity": "day",
+    "first": "2026-10-20",
+    "last": "2026-10-28",
+    "rows": [
+      {
+        "start": "2026-10-20",
+        "me": 23,
+        "team": 0
+      },
+      {
+        "start": "2026-10-21",
+        "me": 11,
+        "team": 0
+      },
+      {
+        "start": "2026-10-22",
+        "me": 10,
+        "team": 0
+      },
+      {
+        "start": "2026-10-23",
+        "me": 2,
+        "team": 0
+      },
+      {
+        "start": "2026-10-24",
+        "me": 0,
+        "team": 0
+      },
+      {
+        "start": "2026-10-25",
+        "me": 0,
+        "team": 0
+      },
+      {
+        "start": "2026-10-26",
+        "me": 0,
+        "team": 0
+      },
+      {
+        "start": "2026-10-27",
+        "me": 0,
+        "team": 0
+      },
+      {
+        "start": "2026-10-28",
+        "me": 1,
+        "team": 0
+      }
+    ]
+  }
+}
